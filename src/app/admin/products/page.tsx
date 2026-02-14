@@ -1,0 +1,129 @@
+"use client"
+
+import * as React from "react"
+import { api } from "@/trpc/react"
+import {
+    Package,
+    Plus,
+    ExternalLink,
+    MoreHorizontal,
+    ArrowLeft,
+    Search,
+    Filter
+} from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+
+export default function AdminProductsPage() {
+    const { data: products, isLoading } = api.admin.getProducts.useQuery({})
+
+    return (
+        <div className="flex min-h-screen bg-black text-white">
+            <aside className="w-64 border-r-4 border-black bg-charcoal hidden lg:flex flex-col">
+                <div className="p-8 border-b-4 border-black">
+                    <span className="text-2xl font-black uppercase italic tracking-tighter">
+                        ADM <span className="text-neon-green">/ HUB</span>
+                    </span>
+                </div>
+                <nav className="p-4 space-y-2">
+                    <Link href="/admin">
+                        <Button variant="ghost" className="w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2 border-transparent text-muted-foreground hover:text-white">
+                            DASHBOARD
+                        </Button>
+                    </Link>
+                    <Link href="/admin/products">
+                        <Button variant="ghost" className="w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2 border-neon-green bg-black text-white">
+                            PRODUCTS
+                        </Button>
+                    </Link>
+                    <Link href="/admin/orders">
+                        <Button variant="ghost" className="w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2 border-transparent text-muted-foreground hover:text-white">
+                            ORDERS
+                        </Button>
+                    </Link>
+                </nav>
+            </aside>
+
+            <main className="flex-grow p-8 space-y-12">
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b-4 border-white/5 pb-8">
+                    <div className="space-y-4">
+                        <Link href="/admin" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">
+                            <ArrowLeft className="w-3 h-3" />
+                            Back to Command Center
+                        </Link>
+                        <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none">
+                            PRODUCT <span className="text-neon-green">/ LOGS</span>
+                        </h1>
+                    </div>
+                    <Button className="bg-neon-green text-black font-black uppercase rounded-none h-16 px-12 shadow-[8px_8px_0px_#fff] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+                        <Plus className="w-6 h-6 mr-2" /> INITIALIZE GEAR
+                    </Button>
+                </header>
+
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="relative flex-grow">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <Input
+                            placeholder="FILTER BY GEAR DESIGNATION..."
+                            className="bg-charcoal border-2 border-black focus:border-neon-green rounded-none h-14 pl-12 font-bold uppercase italic tracking-widest"
+                        />
+                    </div>
+                    <Button variant="outline" className="border-2 border-white rounded-none h-14 gap-2 font-black uppercase tracking-widest">
+                        <Filter className="w-5 h-5" /> SYNC FILTERS
+                    </Button>
+                </div>
+
+                <div className="border-4 border-black bg-charcoal overflow-hidden overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                            <tr className="bg-black text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground border-b-2 border-black">
+                                <th className="p-6">GEAR NAME</th>
+                                <th className="p-6">CATEGORY</th>
+                                <th className="p-6">PRICE</th>
+                                <th className="p-6">QUANTITY</th>
+                                <th className="p-6">STATUS</th>
+                                <th className="p-6">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {isLoading ? (
+                                <tr><td colSpan={6} className="p-24 text-center font-black uppercase italic animate-pulse">Scanning Neural Database...</td></tr>
+                            ) : products?.map((product: any) => (
+                                <tr key={product.id} className="border-b-2 border-black/20 hover:bg-black/20 transition-colors group">
+                                    <td className="p-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-12 h-12 bg-black border border-white/10 flex-shrink-0" />
+                                            <span className="font-black uppercase italic tracking-tight group-hover:text-neon-green transition-colors">{product.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="p-6 font-bold text-xs uppercase text-muted-foreground">{product.category?.name || "UNCLASSIFIED"}</td>
+                                    <td className="p-6 font-black tabular-nums">${product.price.toFixed(2)}</td>
+                                    <td className="p-6 font-black tabular-nums">
+                                        <span className={cn(
+                                            product.quantity <= 5 ? "text-electric-pink" : "text-white"
+                                        )}>
+                                            {product.quantity} units
+                                        </span>
+                                    </td>
+                                    <td className="p-6">
+                                        <div className="px-3 py-1 bg-neon-green/10 text-neon-green text-[8px] font-black uppercase tracking-widest w-fit">
+                                            {product.status}
+                                        </div>
+                                    </td>
+                                    <td className="p-6">
+                                        <div className="flex gap-2">
+                                            <Button variant="ghost" size="icon" className="hover:text-neon-green"><ExternalLink className="w-4 h-4" /></Button>
+                                            <Button variant="ghost" size="icon" className="hover:text-electric-pink"><MoreHorizontal className="w-4 h-4" /></Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    )
+}
