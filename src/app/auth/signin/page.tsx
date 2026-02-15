@@ -65,14 +65,6 @@ export default function SignInPage() {
                             <Chrome className="w-5 h-5 group-hover:scale-110 transition-transform" />
                             Continue with Google
                         </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() => signIn("discord", { callbackUrl: "/account" })}
-                            className="w-full h-16 rounded-none border-2 border-charcoal bg-white/5 hover:bg-white/10 hover:border-cyber-blue text-white font-black uppercase tracking-widest gap-4 transition-all group"
-                        >
-                            <span className="text-cyber-blue">●</span>
-                            Continue with Discord
-                        </Button>
                     </div>
 
                     <div className="relative">

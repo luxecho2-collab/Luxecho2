@@ -1,6 +1,9 @@
 import { initTRPC } from "@trpc/server"
 import superjson from "superjson"
 import { z } from "zod"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/server/auth"
+import { TRPCError } from "@trpc/server"
 
 import { db } from "@/lib/db"
 
@@ -12,8 +15,11 @@ import { db } from "@/lib/db"
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
+    const session = await getServerSession(authOptions)
+
     return {
         db,
+        session,
         headers: opts.headers,
     }
 }
@@ -52,3 +58,27 @@ export const createTRPCRouter = t.router
  * are logged in.
  */
 export const publicProcedure = t.procedure
+
+/**
+ * Protected procedure (authenticated)
+ */
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+    if (!ctx.session?.user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" })
+    }
+    return next({
+        ctx: {
+            session: { ...ctx.session, user: ctx.session.user },
+        },
+    })
+})
+
+/**
+ * Admin procedure (authenticated + admin role)
+ */
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+    if (ctx.session.user.role !== "ADMIN") {
+        throw new TRPCError({ code: "FORBIDDEN" })
+    }
+    return next()
+})

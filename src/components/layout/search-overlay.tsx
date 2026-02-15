@@ -68,7 +68,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                         <div className="relative group">
                             <Input
                                 autoFocus
-                                placeholder="INITIALIZE SCAN..."
+                                placeholder="SEARCH PRODUCTS..."
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 className="h-24 bg-transparent border-b-4 border-charcoal focus:border-neon-green rounded-none text-4xl md:text-6xl font-black uppercase italic tracking-tighter placeholder:text-charcoal transition-all text-white outline-none ring-0 focus-visible:ring-0"
@@ -84,8 +84,8 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
                         <div className="space-y-4">
                             {debouncedQuery.length > 2 && !isLoading && data?.items.length === 0 && (
-                                <p className="text-muted-foreground font-black uppercase text-center py-12">
-                                    NULL RESULTS IN THIS SECTOR
+                                <p className="text-muted-foreground font-bold uppercase text-center py-12">
+                                    No results found
                                 </p>
                             )}
 
@@ -133,11 +133,11 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     </div>
 
                     <div className="mt-auto pb-12 flex gap-8 items-center justify-center opacity-20 text-[10px] font-black uppercase tracking-[0.5em] text-white">
-                        <span>DEVICES</span>
+                        <span>QUALITY</span>
                         <div className="w-2 h-2 rounded-full bg-neon-green" />
-                        <span>TACTICAL</span>
+                        <span>ESSENTIAL</span>
                         <div className="w-2 h-2 rounded-full bg-neon-green" />
-                        <span>NEURAL</span>
+                        <span>PREMIUM</span>
                     </div>
                 </motion.div>
             )}

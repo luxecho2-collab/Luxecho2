@@ -147,7 +147,7 @@ export default function CheckoutPage() {
                 amount: resp.amount,
                 currency: resp.currency,
                 name: "FunkyStore",
-                description: "Secure Cyber-Transaction",
+                description: "Secure Checkout",
                 order_id: resp.id,
                 handler: async (response: any) => {
                     const verifyResp = await verifyPayment.mutateAsync({
@@ -196,7 +196,7 @@ export default function CheckoutPage() {
 
                         {step === 1 && (
                             <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h2 className="text-3xl font-black uppercase italic tracking-tighter">CONTACT <span className="text-neon-green">INFO</span></h2>
+                                <h2 className="text-3xl font-bold uppercase tracking-tight">CONTACT <span className="text-neon-green">INFO</span></h2>
                                 <div className="grid grid-cols-1 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="email" className="text-[10px] uppercase font-black tracking-widest">Email Address</Label>
@@ -211,7 +211,7 @@ export default function CheckoutPage() {
                                     </div>
                                 </div>
 
-                                <h2 className="text-3xl font-black uppercase italic tracking-tighter pt-8">SHIPPING <span className="text-neon-green">ADDRESS</span></h2>
+                                <h2 className="text-3xl font-bold uppercase tracking-tight pt-8">SHIPPING <span className="text-neon-green">ADDRESS</span></h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="firstName" className="text-[10px] uppercase font-black tracking-widest">First Name</Label>
@@ -276,7 +276,7 @@ export default function CheckoutPage() {
 
                         {step === 2 && (
                             <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h2 className="text-3xl font-black uppercase italic tracking-tighter">SHIPPING <span className="text-neon-green">METHOD</span></h2>
+                                <h2 className="text-3xl font-bold uppercase tracking-tight">SHIPPING <span className="text-neon-green">METHOD</span></h2>
                                 <div className="space-y-4">
                                     <div
                                         className={cn("p-6 border-2 flex justify-between items-center cursor-pointer transition-all", shippingMethod === "standard" ? "border-neon-green bg-charcoal" : "border-charcoal bg-deep-black")}
@@ -285,8 +285,8 @@ export default function CheckoutPage() {
                                         <div className="flex items-center gap-4">
                                             <Truck className={cn("w-6 h-6", shippingMethod === "standard" ? "text-neon-green" : "text-white")} />
                                             <div>
-                                                <p className="font-black uppercase text-xs">Standard Urban Drop</p>
-                                                <p className="text-[10px] text-muted-foreground uppercase font-bold">3-5 Business Days</p>
+                                                <p className="font-bold uppercase text-xs">Standard Shipping</p>
+                                                <p className="text-[10px] text-muted-foreground uppercase font-medium">3-5 Business Days</p>
                                             </div>
                                         </div>
                                         <span className="font-black">FREE</span>
@@ -298,8 +298,8 @@ export default function CheckoutPage() {
                                         <div className="flex items-center gap-4">
                                             <Truck className={cn("w-6 h-6", shippingMethod === "express" ? "text-neon-green" : "text-white")} />
                                             <div>
-                                                <p className="font-black uppercase text-xs">Express Cyber-Dash</p>
-                                                <p className="text-[10px] text-muted-foreground uppercase font-bold">24-48 Hours</p>
+                                                <p className="font-bold uppercase text-xs">Express Shipping</p>
+                                                <p className="text-[10px] text-muted-foreground uppercase font-medium">24-48 Hours</p>
                                             </div>
                                         </div>
                                         <span className="font-black">$25.00</span>
@@ -319,13 +319,13 @@ export default function CheckoutPage() {
 
                         {step === 3 && (
                             <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h2 className="text-3xl font-black uppercase italic tracking-tighter">SECURE <span className="text-neon-green">PAYMENT</span></h2>
+                                <h2 className="text-3xl font-bold uppercase tracking-tight">SECURE <span className="text-neon-green">PAYMENT</span></h2>
                                 <div className="p-8 border-2 border-charcoal bg-charcoal/30 text-center space-y-6">
                                     <div className="relative w-16 h-16 mx-auto bg-neon-green flex items-center justify-center -rotate-12">
                                         <Lock className="w-8 h-8 text-black rotate-12" />
                                     </div>
-                                    <p className="text-sm text-muted-foreground italic max-w-xs mx-auto">
-                                        Clicking the button below will initialize the secure Razorpay payment gateway using your verified information.
+                                    <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                                        You will be redirected to the secure Razorpay payment gateway to complete your purchase.
                                     </p>
                                 </div>
                                 <div className="flex gap-4">

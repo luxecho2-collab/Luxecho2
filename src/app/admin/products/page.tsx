@@ -57,9 +57,11 @@ export default function AdminProductsPage() {
                             PRODUCT <span className="text-neon-green">/ LOGS</span>
                         </h1>
                     </div>
-                    <Button className="bg-neon-green text-black font-black uppercase rounded-none h-16 px-12 shadow-[8px_8px_0px_#fff] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-                        <Plus className="w-6 h-6 mr-2" /> INITIALIZE GEAR
-                    </Button>
+                    <Link href="/admin/products/new">
+                        <Button className="bg-neon-green text-black font-black uppercase rounded-none h-16 px-12 shadow-[8px_8px_0px_#fff] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+                            <Plus className="w-6 h-6 mr-2" /> INITIALIZE GEAR
+                        </Button>
+                    </Link>
                 </header>
 
                 <div className="flex flex-col md:flex-row gap-4">
@@ -98,7 +100,7 @@ export default function AdminProductsPage() {
                                             <span className="font-black uppercase italic tracking-tight group-hover:text-neon-green transition-colors">{product.name}</span>
                                         </div>
                                     </td>
-                                    <td className="p-6 font-bold text-xs uppercase text-muted-foreground">{product.category?.name || "UNCLASSIFIED"}</td>
+                                    <td className="p-6 font-bold text-xs uppercase text-muted-foreground">{product.categories?.[0]?.name || "UNCLASSIFIED"}</td>
                                     <td className="p-6 font-black tabular-nums">${product.price.toFixed(2)}</td>
                                     <td className="p-6 font-black tabular-nums">
                                         <span className={cn(

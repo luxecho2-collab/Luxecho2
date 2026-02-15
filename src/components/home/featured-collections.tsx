@@ -65,8 +65,8 @@ export function FeaturedCollections() {
                             <div className="absolute inset-0 bg-gradient-to-t from-deep-black via-transparent to-transparent opacity-80" />
 
                             <div className="absolute bottom-0 left-0 p-8 w-full translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                <span className={cn("inline-block px-3 py-1 text-[10px] font-black uppercase tracking-widest text-black mb-4 -skew-x-12", collection.color)}>
-                                    COLLECTION {idx + 1}
+                                <span className={cn("inline-block px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-black mb-4 -skew-x-12", collection.color)}>
+                                    GEAR / {idx + 1}
                                 </span>
                                 <h3 className="text-3xl font-black uppercase tracking-tight text-white mb-6">
                                     {collection.title}

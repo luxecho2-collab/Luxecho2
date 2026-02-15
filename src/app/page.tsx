@@ -7,7 +7,7 @@ import { motion } from "framer-motion"
 
 export default function Home() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen bg-black">
       <Hero />
       <FeaturedCollections />
       <FeaturedProducts />
@@ -17,11 +17,11 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
             <div className="lg:w-1/2">
-              <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-black leading-none mb-6 italic">
-                JOIN THE <br /> UNDERGROUND
+              <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-tight text-black leading-none mb-6">
+                JOIN THE <br /> COMMUNITY
               </h2>
-              <p className="text-black/80 text-xl font-bold uppercase tracking-widest">
-                Be the first to know about new experiments, drops, and digital events.
+              <p className="text-black/70 text-lg font-medium uppercase tracking-wider">
+                Get early access to exclusive drops and digital events.
               </p>
             </div>
             <div className="lg:w-1/2 w-full">

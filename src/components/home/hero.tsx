@@ -22,12 +22,12 @@ export function Hero() {
                         <span className="inline-block px-4 py-1 bg-neon-green text-black font-bold uppercase tracking-[0.3em] text-xs mb-6 -skew-x-12">
                             New Collection 2026
                         </span>
-                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-[0.85] mb-8 italic">
-                            UNLEASH THE <br />
-                            <span className="text-neon-green glow-text">NEON</span> <span className="stroke-text">STORM</span>
+                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.85] mb-8">
+                            ELEVATE YOUR <br />
+                            <span className="text-neon-green glow-text">DAILY</span> <span className="stroke-text">STYLE</span>
                         </h1>
-                        <p className="text-xl md:text-2xl text-muted-foreground uppercase tracking-widest mb-12 max-w-2xl font-semibold">
-                            Neo-Brutalist fashion for the digital edge. High-performance streetwear designed in the future.
+                        <p className="text-xl md:text-2xl text-muted-foreground uppercase tracking-wider mb-12 max-w-2xl font-medium">
+                            Premium streetwear and essentials for the modern lifestyle. Quality craftsmanship meets contemporary design.
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-6">

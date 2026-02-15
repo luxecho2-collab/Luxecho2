@@ -10,12 +10,12 @@ export const productRouter = createTRPCRouter({
             },
             take: 8,
             include: {
+                categories: true,
                 images: {
                     orderBy: {
                         position: "asc",
                     },
                 },
-                category: true,
             },
         })
     }),
@@ -30,7 +30,7 @@ export const productRouter = createTRPCRouter({
                             position: "asc",
                         },
                     },
-                    category: true,
+                    categories: true,
                     options: {
                         include: {
                             values: true,
@@ -56,7 +56,11 @@ export const productRouter = createTRPCRouter({
         .query(({ ctx, input }) => {
             return ctx.db.product.findMany({
                 where: {
-                    categoryId: input.categoryId,
+                    categories: {
+                        some: {
+                            id: input.categoryId
+                        }
+                    },
                     NOT: {
                         slug: input.slug,
                     },
@@ -69,7 +73,7 @@ export const productRouter = createTRPCRouter({
                             position: "asc",
                         },
                     },
-                    category: true,
+                    categories: true,
                 },
             })
         }),
@@ -92,7 +96,11 @@ export const productRouter = createTRPCRouter({
             }
 
             if (categoryId) {
-                where.categoryId = categoryId
+                where.categories = {
+                    some: {
+                        id: categoryId
+                    }
+                }
             }
 
             if (minPrice !== undefined || maxPrice !== undefined) {
@@ -127,7 +135,7 @@ export const productRouter = createTRPCRouter({
                         images: {
                             orderBy: { position: "asc" },
                         },
-                        category: true,
+                        categories: true,
                         options: { include: { values: true } },
                     },
                 }),

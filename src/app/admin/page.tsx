@@ -19,12 +19,13 @@ import { cn } from "@/lib/utils"
 
 export default function AdminDashboard() {
     const { data: stats, isLoading } = api.admin.getStats.useQuery(undefined)
+    const { data: orders, isLoading: ordersLoading } = api.admin.getOrders.useQuery({ take: 5 })
 
     const cards = [
-        { name: "TOTAL REVENUE", value: `$${stats?.totalRevenue.toFixed(2) ?? "0.00"}`, icon: TrendingUp, color: "text-neon-green" },
-        { name: "DEPLOYMENTS", value: stats?.totalOrders ?? 0, icon: ShoppingBag, color: "text-cyber-blue" },
-        { name: "OPERATIVES", value: stats?.totalUsers ?? 0, icon: Users, color: "text-electric-pink" },
-        { name: "LOW STOCK", value: stats?.lowStockProducts ?? 0, icon: AlertTriangle, color: "text-yellow-400" },
+        { name: "TOTAL REVENUE", value: `₹${stats?.totalRevenue.toLocaleString('en-IN') ?? "0.00"}`, icon: TrendingUp, color: "text-neon-green" },
+        { name: "TOTAL ORDERS", value: stats?.totalOrders ?? 0, icon: ShoppingBag, color: "text-cyber-blue" },
+        { name: "TOTAL CUSTOMERS", value: stats?.totalUsers ?? 0, icon: Users, color: "text-electric-pink" },
+        { name: "LOW STOCK", value: stats?.lowStockCount ?? 0, icon: AlertTriangle, color: "text-yellow-400" },
     ]
 
     return (
@@ -64,10 +65,10 @@ export default function AdminDashboard() {
                 <header className="flex justify-between items-end border-b-4 border-white/5 pb-8">
                     <div className="space-y-2">
                         <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none">
-                            COMMAND <span className="text-neon-green">/ CENTER</span>
+                            ADMIN <span className="text-neon-green">DASHBOARD</span>
                         </h1>
                         <p className="text-muted-foreground font-black uppercase tracking-widest text-xs">
-                            OVERWATCH PROTOCOL ACTIVE
+                            OVERVIEW & MANAGEMENT
                         </p>
                     </div>
                     <div className="flex gap-4">
@@ -103,46 +104,61 @@ export default function AdminDashboard() {
                     {/* Recent Deployment Activity */}
                     <div className="lg:col-span-2 bg-charcoal border-2 border-charcoal p-8 space-y-8">
                         <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                            <h2 className="text-2xl font-black uppercase italic">RECENT DEPLOYMENTS</h2>
+                            <h2 className="text-2xl font-black uppercase italic">RECENT ORDERS</h2>
                             <Link href="/admin/orders">
                                 <Button variant="link" className="text-neon-green font-black uppercase text-[10px] tracking-widest">VIEW ALL</Button>
                             </Link>
                         </div>
                         <div className="space-y-4">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="flex items-center justify-between p-4 bg-black/40 border-l-4 border-neon-green">
+                            {ordersLoading ? (
+                                <div className="py-12 text-center animate-pulse font-black uppercase italic text-muted-foreground">Syncing Order Streams...</div>
+                            ) : orders?.length === 0 ? (
+                                <div className="py-12 text-center font-black uppercase italic text-muted-foreground">No active deployments found.</div>
+                            ) : orders?.slice(0, 5).map((order) => (
+                                <div key={order.id} className="flex items-center justify-between p-4 bg-black/40 border-l-4 border-neon-green">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-charcoal flex items-center justify-center font-black text-xs">#{1024 + i}</div>
+                                        <div className="w-10 h-10 bg-charcoal flex items-center justify-center font-black text-xs">
+                                            #{order.orderNumber.slice(-4)}
+                                        </div>
                                         <div>
-                                            <p className="font-black uppercase text-sm tracking-tight">OPERATIVE_BETA_{i}</p>
-                                            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">SHIPPED 2HRS AGO</p>
+                                            <p className="font-black uppercase text-sm tracking-tight">{order.user?.name || "GUEST CUSTOMER"}</p>
+                                            <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
+                                                {order.status} • {new Date(order.createdAt).toLocaleDateString()}
+                                            </p>
                                         </div>
                                     </div>
-                                    <p className="font-black text-neon-green tabular-nums">$299.00</p>
+                                    <p className="font-black text-neon-green tabular-nums">₹{order.total.toLocaleString('en-IN')}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
 
                     {/* Inventory Alerts */}
-                    <div className="bg-black border-2 border-white/5 p-8 space-y-8">
-                        <h2 className="text-2xl font-black uppercase italic">CRITICAL STOCK</h2>
-                        <div className="space-y-2">
-                            {[1, 2].map((i) => (
-                                <div key={i} className="group cursor-pointer">
+                    <div className="bg-charcoal border-2 border-white/5 p-8 space-y-8">
+                        <h2 className="text-2xl font-black uppercase italic">STOCK ALERTS</h2>
+                        <div className="space-y-6">
+                            {isLoading ? (
+                                <div className="py-12 text-center animate-pulse font-black uppercase italic text-muted-foreground">Checking Inventory...</div>
+                            ) : stats?.lowStockProducts.length === 0 ? (
+                                <div className="py-12 text-center font-black uppercase italic text-muted-foreground text-[10px]">All inventory levels are stable.</div>
+                            ) : stats?.lowStockProducts.map((product) => (
+                                <div key={product.id} className="group cursor-pointer">
                                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-1">
-                                        <span>GEAR_X_{i}</span>
-                                        <span className="text-electric-pink">LOW</span>
+                                        <span>{product.name}</span>
+                                        <span className="text-electric-pink">{product.quantity} LEFT</span>
                                     </div>
-                                    <div className="h-1.5 w-full bg-charcoal">
-                                        <div className="h-full bg-electric-pink w-1/4 group-hover:w-1/3 transition-all" />
+                                    <div className="h-1.5 w-full bg-black">
+                                        <div
+                                            className="h-full bg-electric-pink transition-all"
+                                            style={{ width: `${Math.max((product.quantity / 5) * 100, 5)}%` }}
+                                        />
                                     </div>
                                 </div>
                             ))}
                         </div>
                         <Link href="/admin/products">
-                            <Button className="w-full bg-white text-black font-black uppercase rounded-none h-14 mt-4 shadow-[4px_4px_0px_#FF006B]">
-                                REPLENISH PROTOCOL
+                            <Button className="w-full bg-neon-green text-black font-black uppercase rounded-none h-14 mt-4 shadow-[4px_4px_0px_#fff] hover:shadow-none transition-all">
+                                UPDATE STOCK
                             </Button>
                         </Link>
                     </div>

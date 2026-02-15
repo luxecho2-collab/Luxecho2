@@ -39,10 +39,10 @@ export function Footer() {
                     {/* Logo & Info */}
                     <div className="col-span-2">
                         <Link href="/" className="inline-flex items-center gap-2 mb-6 group">
-                            <div className="w-10 h-10 bg-neon-green flex items-center justify-center -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">
-                                <span className="text-black text-xl font-bold -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">F</span>
+                            <div className="w-8 h-8 bg-neon-green flex items-center justify-center -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">
+                                <span className="text-black text-lg font-bold -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">F</span>
                             </div>
-                            <span className="text-2xl font-bold tracking-tighter uppercase italic glow-text">
+                            <span className="text-xl font-bold tracking-tight uppercase italic glow-text">
                                 Funky<span className="text-neon-green">Store</span>
                             </span>
                         </Link>

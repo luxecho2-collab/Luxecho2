@@ -54,10 +54,10 @@ export function Navbar() {
             <nav className="container h-full mx-auto px-4 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 bg-neon-green flex items-center justify-center -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">
-                        <span className="text-black font-bold -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">F</span>
+                    <div className="w-7 h-7 bg-neon-green flex items-center justify-center -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">
+                        <span className="text-black text-sm font-bold -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">F</span>
                     </div>
-                    <span className="text-xl font-bold tracking-tighter uppercase italic glow-text">
+                    <span className="text-lg font-bold tracking-tight uppercase italic glow-text">
                         Funky<span className="text-neon-green">Store</span>
                     </span>
                 </Link>
@@ -134,9 +134,9 @@ export function Navbar() {
                         <SheetContent side="left" className="bg-deep-black border-r border-neon-green/30 text-white w-[300px]">
                             <SheetHeader className="mb-8">
                                 <SheetTitle className="text-left">
-                                    <span className="text-2xl font-bold tracking-tighter uppercase italic text-white flex gap-2 items-center">
-                                        <div className="w-8 h-8 bg-neon-green flex items-center justify-center -skew-x-12">
-                                            <span className="text-black font-bold">F</span>
+                                    <span className="text-xl font-bold tracking-tight uppercase italic text-white flex gap-2 items-center">
+                                        <div className="w-7 h-7 bg-neon-green flex items-center justify-center -skew-x-12">
+                                            <span className="text-black text-xs font-bold">F</span>
                                         </div>
                                         Funky<span className="text-neon-green">Store</span>
                                     </span>

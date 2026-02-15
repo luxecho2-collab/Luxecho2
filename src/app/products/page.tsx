@@ -75,15 +75,15 @@ export default function ProductsPage() {
                     <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none">
                         GEAR <span className="text-neon-green">/ COLLECT</span>
                     </h1>
-                    <p className="text-muted-foreground font-black uppercase tracking-widest text-xs">
-                        {data?.total ?? 0} ITEMS DEPLOYED IN NEON CITY
+                    <p className="text-muted-foreground font-bold uppercase tracking-widest text-xs">
+                        {data?.total ?? 0} ITEMS IN COLLECTIONS
                     </p>
                 </div>
 
                 <div className="flex items-center gap-4">
                     <div className="relative group flex-grow md:flex-grow-0">
                         <Input
-                            placeholder="SEARCH PROTOCOL..."
+                            placeholder="SEARCH PRODUCTS..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full md:w-64 bg-charcoal border-2 border-charcoal focus:border-neon-green rounded-none h-12 text-white font-black uppercase text-xs pl-12 transition-all"
@@ -144,7 +144,7 @@ export default function ProductsPage() {
                                         categoryId === undefined ? "bg-neon-green text-black" : "border-charcoal text-white hover:border-white"
                                     )}
                                 >
-                                    All Gear
+                                    All Products
                                 </Button>
                                 {categories?.map((cat: any) => (
                                     <Button
@@ -194,12 +194,12 @@ export default function ProductsPage() {
 
                     {/* Promo Banner */}
                     <div className="bg-neon-green p-6 mt-12 rotate-2 shadow-[8px_8px_0px_#000]">
-                        <h4 className="text-black font-black uppercase italic leading-tight text-xl mb-2">Join the Resistance</h4>
+                        <h4 className="text-black font-black uppercase tracking-tight text-xl mb-2">JOIN THE CLUB</h4>
                         <p className="text-black font-bold text-[10px] uppercase leading-relaxed">
-                            Sign up for our neural feed and get 15% off your first drop.
+                            Sign up for our newsletter and get 15% off your first order.
                         </p>
                         <Button className="mt-4 bg-black text-white rounded-none font-black uppercase text-[10px] w-full h-10">
-                            Plug in now
+                            Join Now
                         </Button>
                     </div>
                 </aside>
@@ -210,7 +210,7 @@ export default function ProductsPage() {
                         <SheetTrigger asChild>
                             <Button variant="outline" className="w-full border-2 border-black rounded-none h-14 font-black uppercase flex items-center gap-2">
                                 <SlidersHorizontal className="w-5 h-5" />
-                                Filter gear
+                                Filter Products
                                 {activeFiltersCount > 0 && (
                                     <span className="bg-neon-green text-black w-5 h-5 flex items-center justify-center text-[10px] rounded-full ml-2">
                                         {activeFiltersCount}
@@ -221,7 +221,7 @@ export default function ProductsPage() {
                         <SheetContent side="bottom" className="bg-charcoal border-t-4 border-neon-green rounded-t-[2rem] p-8 h-[80vh]">
                             <SheetHeader className="mb-8">
                                 <div className="flex justify-between items-center">
-                                    <SheetTitle className="text-2xl font-black uppercase italic tracking-tighter text-white">FILTER GEAR</SheetTitle>
+                                    <SheetTitle className="text-2xl font-black uppercase tracking-tight text-white">FILTER PRODUCTS</SheetTitle>
                                     <Button variant="ghost" onClick={resetFilters} className="text-[10px] font-black uppercase tracking-widest h-auto p-0 text-neon-green">Reset All</Button>
                                 </div>
                             </SheetHeader>
@@ -266,12 +266,12 @@ export default function ProductsPage() {
                     ) : (
                         <div className="flex flex-col items-center justify-center py-24 border-4 border-dashed border-charcoal">
                             <ShoppingBag className="w-16 h-16 text-charcoal mb-4" />
-                            <h2 className="text-2xl font-black uppercase italic mb-2 text-muted-foreground">Null results detected</h2>
+                            <h2 className="text-2xl font-bold uppercase mb-2 text-muted-foreground">No products found</h2>
                             <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest max-w-xs text-center">
-                                The specified parameters did not yield any gear. Try broadening your scan.
+                                No items found matching your filters. Try resetting to see more.
                             </p>
                             <Button variant="outline" onClick={resetFilters} className="mt-8 border-2 border-white rounded-none uppercase font-black italic">
-                                Reset scan protocol
+                                Reset Filters
                             </Button>
                         </div>
                     )}
