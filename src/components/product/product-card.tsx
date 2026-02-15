@@ -95,8 +95,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
                     <Button
                         size="icon"
                         className={cn(
-                            "bg-white text-black hover:bg-neon-green rounded-none transition-colors",
-                            isInWishlist && "bg-neon-green text-black"
+                            "bg-white text-black rounded-none transition-all duration-300",
+                            isInWishlist
+                                ? "bg-neon-green text-black hover:bg-electric-pink hover:text-white hover:scale-110"
+                                : "hover:bg-neon-green hover:scale-110"
                         )}
                         onClick={(e) => {
                             e.preventDefault()
@@ -104,7 +106,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
                         }}
                         disabled={isToggling}
                     >
-                        <Heart className={cn("w-5 h-5", isInWishlist && "fill-black")} />
+                        <Heart className={cn(
+                            "w-5 h-5 transition-transform duration-300 group-active:scale-90",
+                            isInWishlist && "fill-current"
+                        )} />
                     </Button>
                     <Button size="icon" className="bg-white text-black hover:bg-neon-green rounded-none">
                         <ShoppingBag className="w-5 h-5" />

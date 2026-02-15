@@ -5,6 +5,8 @@ import Link from "next/link"
 import { Search, ShoppingBag, User, Heart, Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { api } from "@/trpc/react"
+import { useSession } from "next-auth/react"
 import {
     Sheet,
     SheetContent,
@@ -33,6 +35,13 @@ export function Navbar() {
     const [isScrolled, setIsScrolled] = React.useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
     const [isSearchOpen, setIsSearchOpen] = React.useState(false)
+
+    const { data: session } = useSession()
+    const { data: wishlist } = api.account.getWishlist.useQuery(undefined, {
+        enabled: !!session?.user,
+    })
+
+    const wishlistCount = wishlist?.length || 0
 
     React.useEffect(() => {
         const handleScroll = () => {
@@ -87,9 +96,14 @@ export function Navbar() {
                     >
                         <Search className="w-5 h-5" />
                     </Button>
-                    <Link href="/wishlist">
-                        <Button variant="ghost" size="icon" className="hover:text-neon-green hover:bg-transparent">
-                            <Heart className="w-5 h-5" />
+                    <Link href="/account/wishlist">
+                        <Button variant="ghost" size="icon" className="hover:text-neon-green hover:bg-transparent relative group">
+                            <Heart className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            {wishlistCount > 0 && (
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-electric-pink text-white text-[10px] font-black flex items-center justify-center rounded-none -skew-x-12">
+                                    {wishlistCount}
+                                </span>
+                            )}
                         </Button>
                     </Link>
                     <DropdownMenu>
@@ -166,9 +180,16 @@ export function Navbar() {
                                 <Link
                                     href="/account/wishlist"
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest hover:text-neon-green"
+                                    className="flex items-center justify-between text-sm font-bold uppercase tracking-widest hover:text-neon-green"
                                 >
-                                    <Heart className="w-5 h-5" /> Wishlist
+                                    <div className="flex items-center gap-3">
+                                        <Heart className="w-5 h-5" /> Wishlist
+                                    </div>
+                                    {wishlistCount > 0 && (
+                                        <span className="bg-electric-pink text-white px-2 py-0.5 text-[10px] font-black -skew-x-12">
+                                            {wishlistCount}
+                                        </span>
+                                    )}
                                 </Link>
                             </div>
                         </SheetContent>

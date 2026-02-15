@@ -31,13 +31,13 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Navbar />
             <AuthProvider>
+              <Navbar />
               <main className="grow pt-20">
                 {children}
               </main>
+              <Footer />
             </AuthProvider>
-            <Footer />
           </ThemeProvider>
         </TRPCReactProvider>
       </body>

@@ -279,11 +279,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                     onClick={handleToggleWishlist}
                                     disabled={isToggling}
                                     className={cn(
-                                        "h-16 flex-1 rounded-none border-2 border-white/10 font-black uppercase tracking-widest text-xs hover:border-white transition-all flex items-center justify-center gap-2",
-                                        isInWishlist ? "bg-neon-green text-black border-neon-green" : "hover:bg-white/5"
+                                        "h-16 flex-1 rounded-none border-2 transition-all duration-300 flex items-center justify-center gap-2 font-black uppercase tracking-widest text-xs",
+                                        isInWishlist
+                                            ? "bg-neon-green border-neon-green text-black hover:bg-electric-pink hover:border-electric-pink hover:text-white"
+                                            : "border-white/10 hover:border-white hover:bg-white/5"
                                     )}
                                 >
-                                    <Heart className={cn("w-5 h-5", isInWishlist && "fill-black")} />
+                                    <Heart className={cn(
+                                        "w-5 h-5 transition-transform duration-300",
+                                        isInWishlist && "fill-current"
+                                    )} />
                                     {isInWishlist ? "In Archive" : "Wishlist"}
                                 </Button>
                             </div>
