@@ -31,6 +31,7 @@
     --deep-black: #0A0A0A;
     --charcoal: #1A1A1A;
     --warm-gray: #F5F5F5;
+    --animation-disabled: 0;
   }
 
   .dark {
@@ -85,4 +86,20 @@
 
 .glow-text {
   text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+}
+
+/* Reduce motion when animations disabled */
+[style*="--animation-disabled: 1"] * {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+}
+
+[style*="--animation-disabled: 1"] *::before {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+}
+
+[style*="--animation-disabled: 1"] *::after {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
 }

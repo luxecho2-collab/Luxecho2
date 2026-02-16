@@ -15,6 +15,8 @@ export const metadata: Metadata = {
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { AuthProvider } from "@/components/auth-provider";
+import FloatingSettings from "@/components/ui/floating-settings";
+import { SettingsProvider } from "@/contexts/settings-context";
 
 export default function RootLayout({
   children,
@@ -25,20 +27,23 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={cn("min-h-screen bg-background font-sans antialiased flex flex-col", inter.variable)}>
         <TRPCReactProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <AuthProvider>
-              <Navbar />
-              <main className="grow pt-20">
-                {children}
-              </main>
-              <Footer />
-            </AuthProvider>
-          </ThemeProvider>
+          <SettingsProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <AuthProvider>
+                <Navbar />
+                <main className="grow pt-20">
+                  {children}
+                </main>
+                <FloatingSettings />
+                <Footer />
+              </AuthProvider>
+            </ThemeProvider>
+          </SettingsProvider>
         </TRPCReactProvider>
       </body>
     </html>

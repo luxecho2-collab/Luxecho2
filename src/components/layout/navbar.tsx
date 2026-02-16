@@ -123,6 +123,7 @@ export function Navbar() {
                                     Orders
                                 </Link>
                             </DropdownMenuItem>
+                            {/* Settings removed - floating settings button used instead */}
                         </DropdownMenuContent>
                     </DropdownMenu>
                     <CartDrawer />
