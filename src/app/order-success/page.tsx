@@ -57,7 +57,7 @@ function OrderSuccessContent() {
 
                 <div className="pt-8 flex items-center justify-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
                     <Package className="w-4 h-4" />
-                    Secure fulfillment guaranteed by FunkyStore
+                    Secure fulfillment guaranteed by Luxecho
                 </div>
             </motion.div>
         </div>

@@ -6,118 +6,195 @@ import {
     Package,
     Plus,
     ExternalLink,
-    MoreHorizontal,
+    MoreVertical,
     ArrowLeft,
     Search,
-    Filter
+    Filter,
+    Edit3,
+    Trash2,
+    LayoutDashboard,
+    ShoppingBag,
+    Users,
+    Eye,
+    FolderPlus,
+    Tag as TagIcon
 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { LuxechoLogo } from "@/components/layout/luxecho-logo"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useToast } from "@/hooks/use-toast"
 
 export default function AdminProductsPage() {
+    const { toast } = useToast()
+    const utils = api.useUtils()
     const { data: products, isLoading } = api.admin.getProducts.useQuery({})
 
+    const deleteProduct = api.admin.deleteProduct.useMutation({
+        onSuccess: () => {
+            toast({ title: "PRODUCT DELETED", description: "Entry has been removed from manifest." })
+            utils.admin.getProducts.invalidate()
+        }
+    })
+
     return (
-        <div className="flex min-h-screen bg-black text-white">
-            <aside className="w-64 border-r-4 border-black bg-charcoal hidden lg:flex flex-col">
-                <div className="p-8 border-b-4 border-black">
-                    <span className="text-2xl font-black uppercase italic tracking-tighter">
-                        ADM <span className="text-neon-green">/ HUB</span>
-                    </span>
+        <div className="flex min-h-screen bg-white text-black">
+            {/* Minimalist Sidebar */}
+            <aside className="w-72 border-r border-gray-100 bg-white hidden lg:flex flex-col sticky top-0 h-screen">
+                <div className="p-10 border-b border-gray-50 flex items-center gap-3">
+                    <LuxechoLogo size={28} />
+                    <span className="text-sm font-black uppercase tracking-[0.4em]">Admin</span>
                 </div>
-                <nav className="p-4 space-y-2">
-                    <Link href="/admin">
-                        <Button variant="ghost" className="w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2 border-transparent text-muted-foreground hover:text-white">
-                            DASHBOARD
-                        </Button>
-                    </Link>
-                    <Link href="/admin/products">
-                        <Button variant="ghost" className="w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2 border-neon-green bg-black text-white">
-                            PRODUCTS
-                        </Button>
-                    </Link>
-                    <Link href="/admin/orders">
-                        <Button variant="ghost" className="w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2 border-transparent text-muted-foreground hover:text-white">
-                            ORDERS
-                        </Button>
-                    </Link>
+                <nav className="p-6 flex-grow flex flex-col gap-1">
+                    {[
+                        { name: "Dashboard Overview", icon: LayoutDashboard, href: "/admin", active: false },
+                        { name: "Product Catalog", icon: Package, href: "/admin/products", active: true },
+                        { name: "Category Matrix", icon: FolderPlus, href: "/admin/categories", active: false },
+                        { name: "Filter Attributes", icon: TagIcon, href: "/admin/attributes", active: false },
+                        { name: "Orders & Fulfillment", icon: ShoppingBag, href: "/admin/orders", active: false },
+                        { name: "Customer Relations", icon: Users, href: "/admin/customers", active: false },
+                    ].map((item) => (
+                        <Link key={item.name} href={item.href}>
+                            <Button
+                                variant="ghost"
+                                className={cn(
+                                    "w-full justify-start rounded-none h-14 font-black uppercase tracking-widest gap-4 px-6 transition-all duration-300",
+                                    item.active
+                                        ? "bg-black text-white hover:bg-black hover:text-white"
+                                        : "text-gray-400 hover:text-black hover:bg-gray-50"
+                                )}
+                            >
+                                <item.icon className="w-4 h-4" />
+                                <span className="text-[10px]">{item.name}</span>
+                            </Button>
+                        </Link>
+                    ))}
                 </nav>
             </aside>
 
-            <main className="flex-grow p-8 space-y-12">
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b-4 border-white/5 pb-8">
+            <main className="flex-grow p-10 lg:p-16 space-y-16 max-w-7xl">
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
                     <div className="space-y-4">
-                        <Link href="/admin" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">
-                            <ArrowLeft className="w-3 h-3" />
-                            Back to Command Center
+                        <Link href="/admin" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-all group">
+                            <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+                            Back to Center
                         </Link>
-                        <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none">
-                            PRODUCT <span className="text-neon-green">/ LOGS</span>
+                        <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none text-black">
+                            PRODUCT <span className="text-gray-200">LEDGER</span>
                         </h1>
                     </div>
                     <Link href="/admin/products/new">
-                        <Button className="bg-neon-green text-black font-black uppercase rounded-none h-16 px-12 shadow-[8px_8px_0px_#fff] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-                            <Plus className="w-6 h-6 mr-2" /> INITIALIZE GEAR
+                        <Button className="bg-black text-white font-black uppercase rounded-none h-16 px-12 text-[11px] tracking-widest hover:translate-x-1 hover:-translate-y-1 transition-all shadow-[8px_8px_0px_#f3f4f6] hover:shadow-none">
+                            <Plus className="w-4 h-4 mr-3" /> Initial Entry
                         </Button>
                     </Link>
                 </header>
 
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col md:flex-row gap-6">
                     <div className="relative flex-grow">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                         <Input
-                            placeholder="FILTER BY GEAR DESIGNATION..."
-                            className="bg-charcoal border-2 border-black focus:border-neon-green rounded-none h-14 pl-12 font-bold uppercase italic tracking-widest"
+                            placeholder="SEARCH BY DESIGNATION..."
+                            className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 pl-14 text-[10px] font-black uppercase tracking-widest"
                         />
                     </div>
-                    <Button variant="outline" className="border-2 border-white rounded-none h-14 gap-2 font-black uppercase tracking-widest">
-                        <Filter className="w-5 h-5" /> SYNC FILTERS
+                    <Button variant="outline" className="border border-gray-100 rounded-none h-16 px-10 gap-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">
+                        <Filter className="w-4 h-4" /> Filter Stream
                     </Button>
                 </div>
 
-                <div className="border-4 border-black bg-charcoal overflow-hidden overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[800px]">
+                <div className="border border-gray-50">
+                    <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-black text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground border-b-2 border-black">
-                                <th className="p-6">GEAR NAME</th>
-                                <th className="p-6">CATEGORY</th>
-                                <th className="p-6">PRICE</th>
-                                <th className="p-6">QUANTITY</th>
-                                <th className="p-6">STATUS</th>
-                                <th className="p-6">ACTIONS</th>
+                            <tr className="bg-gray-50/50 text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 border-b border-gray-50">
+                                <th className="p-8">Designation</th>
+                                <th className="p-8">Class</th>
+                                <th className="p-8">Valuation</th>
+                                <th className="p-8">Reserve</th>
+                                <th className="p-8">Insights</th>
+                                <th className="p-8 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {isLoading ? (
-                                <tr><td colSpan={6} className="p-24 text-center font-black uppercase italic animate-pulse">Scanning Neural Database...</td></tr>
+                                <tr><td colSpan={5} className="p-32 text-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 animate-pulse">Syncing Neural Manifest...</td></tr>
                             ) : products?.map((product: any) => (
-                                <tr key={product.id} className="border-b-2 border-black/20 hover:bg-black/20 transition-colors group">
-                                    <td className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 bg-black border border-white/10 flex-shrink-0" />
-                                            <span className="font-black uppercase italic tracking-tight group-hover:text-neon-green transition-colors">{product.name}</span>
+                                <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/30 transition-all group">
+                                    <td className="p-8">
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-16 h-20 bg-gray-50 border border-gray-100 flex-shrink-0 relative overflow-hidden">
+                                                {product.images?.[0] && (
+                                                    <img src={product.images[0].url} className="w-full h-full object-cover" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="font-black uppercase text-xs tracking-tight group-hover:translate-x-1 transition-transform">{product.name}</p>
+                                                <p className="text-[8px] font-black text-gray-300 uppercase tracking-widest mt-1 italic">SKU: {product.sku}</p>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td className="p-6 font-bold text-xs uppercase text-muted-foreground">{product.categories?.[0]?.name || "UNCLASSIFIED"}</td>
-                                    <td className="p-6 font-black tabular-nums">${product.price.toFixed(2)}</td>
-                                    <td className="p-6 font-black tabular-nums">
-                                        <span className={cn(
-                                            product.quantity <= 5 ? "text-electric-pink" : "text-white"
-                                        )}>
-                                            {product.quantity} units
+                                    <td className="p-8">
+                                        <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-gray-100 text-gray-500">
+                                            {product.categories?.[0]?.name || "Unclassed"}
                                         </span>
                                     </td>
-                                    <td className="p-6">
-                                        <div className="px-3 py-1 bg-neon-green/10 text-neon-green text-[8px] font-black uppercase tracking-widest w-fit">
-                                            {product.status}
+                                    <td className="p-8 font-black tabular-nums tracking-tighter">₹{product.price.toLocaleString('en-IN')}</td>
+                                    <td className="p-8">
+                                        <div className="flex items-center gap-3">
+                                            <div className={cn(
+                                                "w-1.5 h-1.5 rounded-full",
+                                                product.quantity <= 5 ? "bg-red-500" : "bg-black"
+                                            )} />
+                                            <span className={cn(
+                                                "text-[10px] font-black tabular-nums",
+                                                product.quantity <= 5 ? "text-red-500" : "text-black"
+                                            )}>
+                                                {product.quantity} Units
+                                            </span>
                                         </div>
                                     </td>
-                                    <td className="p-6">
-                                        <div className="flex gap-2">
-                                            <Button variant="ghost" size="icon" className="hover:text-neon-green"><ExternalLink className="w-4 h-4" /></Button>
-                                            <Button variant="ghost" size="icon" className="hover:text-electric-pink"><MoreHorizontal className="w-4 h-4" /></Button>
+                                    <td className="p-8">
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2 text-[9px] font-black uppercase text-gray-300">
+                                                <Eye className="w-3 h-3" /> {product.viewCount} Views
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[9px] font-black uppercase text-black">
+                                                <ShoppingBag className="w-3 h-3" /> {product.salesCount} Sales
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="p-8 text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <Link href={`/admin/products/${product.id}`}>
+                                                <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-black hover:text-white transition-all rounded-none"><Edit3 className="w-4 h-4" /></Button>
+                                            </Link>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-gray-100 transition-all rounded-none"><MoreVertical className="w-4 h-4" /></Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="rounded-none border-gray-100 min-w-[160px]">
+                                                    <DropdownMenuItem className="p-3 text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-50">
+                                                        <ExternalLink className="w-3 h-3 mr-3" /> External View
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        onClick={() => {
+                                                            if (confirm("Permanently remove this entry from manifest?")) {
+                                                                deleteProduct.mutate({ id: product.id })
+                                                            }
+                                                        }}
+                                                        className="p-3 text-[9px] font-black uppercase tracking-widest text-red-500 cursor-pointer hover:bg-red-50 transition-colors"
+                                                    >
+                                                        <Trash2 className="w-3 h-3 mr-3" /> Wipe Entry
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
                                     </td>
                                 </tr>

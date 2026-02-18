@@ -7,42 +7,47 @@ import { motion } from "framer-motion"
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-black">
+    <div className="flex flex-col min-h-screen bg-white">
       <Hero />
       <FeaturedCollections />
       <FeaturedProducts />
 
-      {/* Newsletter Section */}
-      <section className="py-24 bg-neon-green border-y-[4px] border-black">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+      {/* Newsletter Section: Unified Funky Identity */}
+      <section className="py-32 bg-gray-50 border-y border-gray-100 mt-20">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
             <div className="lg:w-1/2">
-              <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-tight text-black leading-none mb-6">
-                JOIN THE <br /> COMMUNITY
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-2 h-2 bg-black animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Join the movement</span>
+              </div>
+              <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-8">
+                UNMASK THE <br /> FUTURE
               </h2>
-              <p className="text-black/70 text-lg font-medium uppercase tracking-wider">
-                Get early access to exclusive drops and digital events.
+              <p className="text-gray-400 text-lg font-bold uppercase tracking-widest leading-relaxed max-w-md">
+                Signup to get exclusive early access to limited edition drops.
               </p>
             </div>
             <div className="lg:w-1/2 w-full">
-              <form className="flex flex-col sm:flex-row gap-4">
-                <Input
-                  placeholder="EMAIL@FUTURE.COM"
-                  className="h-16 bg-white border-2 border-black rounded-none text-black font-bold placeholder:text-black/40 text-lg px-6 focus-visible:ring-black"
-                />
-                <Button className="h-16 px-10 bg-black text-neon-green font-black uppercase tracking-widest rounded-none text-lg hover:bg-black/90 hover:scale-105 transition-all">
-                  Subscribe
+              <form className="flex flex-col gap-6">
+                <div className="relative">
+                  <Input
+                    placeholder="ENTER YOUR EMAIL"
+                    className="h-20 bg-white border-2 border-gray-100 rounded-none text-black font-bold placeholder:text-gray-300 text-lg px-8 focus-visible:ring-black focus-visible:border-black transition-all"
+                  />
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 w-2 h-2 bg-black" />
+                </div>
+                <Button className="h-20 px-12 bg-black text-white font-black uppercase tracking-[0.3em] rounded-none text-sm hover:bg-black transition-colors duration-500">
+                  Join Community
                 </Button>
               </form>
-              <p className="text-[10px] text-black font-bold uppercase tracking-[0.2em] mt-6">
-                By subscribing, you agree to our terms of service and privacy policy. No spam, only heat.
+              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-8 text-center lg:text-left">
+                *By joining, you agree to our premium terms and conditions. No spam, just pure heat.
               </p>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Featured Products Component will go here next */}
     </div>
   )
 }

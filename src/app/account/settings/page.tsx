@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Settings, Shield, Bell, ArrowLeft, Loader2, Save } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import { AuthPortal } from "@/components/auth/auth-portal"
 
 export default function SettingsPage() {
     const { data: session, status, update } = useSession()
@@ -31,14 +32,7 @@ export default function SettingsPage() {
     }
 
     if (!session) {
-        return (
-            <div className="container mx-auto px-4 py-24 text-center">
-                <h1 className="text-4xl font-black uppercase italic mb-8 text-electric-pink">Access Forbidden</h1>
-                <Link href="/api/auth/signin">
-                    <Button className="bg-white text-black font-black uppercase tracking-widest rounded-none h-16 px-12">Login to Access</Button>
-                </Link>
-            </div>
-        )
+        return <AuthPortal isPopup />
     }
 
     return (

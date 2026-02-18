@@ -8,6 +8,7 @@ import { Plus, MapPin, Trash2, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import { AuthPortal } from "@/components/auth/auth-portal"
 
 export default function AddressesPage() {
     const { data: session, status } = useSession()
@@ -30,14 +31,7 @@ export default function AddressesPage() {
     }
 
     if (!session) {
-        return (
-            <div className="container mx-auto px-4 py-24 text-center">
-                <h1 className="text-4xl font-black uppercase italic mb-8 text-electric-pink">Location Restricted</h1>
-                <Link href="/api/auth/signin">
-                    <Button className="bg-white text-black font-black uppercase tracking-widest rounded-none h-16 px-12">Authenticate</Button>
-                </Link>
-            </div>
-        )
+        return <AuthPortal isPopup />
     }
 
     return (

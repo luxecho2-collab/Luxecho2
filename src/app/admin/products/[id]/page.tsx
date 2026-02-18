@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { api } from "@/trpc/react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import {
     ArrowLeft,
     Package,
@@ -19,7 +19,8 @@ import {
     Tag as TagIcon,
     FolderPlus,
     Loader2,
-    Search
+    Search,
+    Save
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -40,43 +41,66 @@ import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { LuxechoLogo } from "@/components/layout/luxecho-logo"
 
-export default function AdminNewProductPage() {
+export default function AdminEditProductPage() {
     const router = useRouter()
+    const { id } = useParams() as { id: string }
     const { toast } = useToast()
     const utils = api.useUtils()
 
-    // Multi-image state
-    const [imageUrls, setImageUrls] = React.useState<string[]>([])
-    const [activeImageIndex, setActiveImageIndex] = React.useState(0)
-    const [isUploading, setIsUploading] = React.useState(false)
-
-    // Category state
-    const [selectedCategoryIds, setSelectedCategoryIds] = React.useState<string[]>([])
-    const [newCategoryName, setNewCategoryName] = React.useState("")
-    const [isAddingCategory, setIsAddingCategory] = React.useState(false)
-
-    // SKU state
-    const [sku, setSku] = React.useState("")
-    const [description, setDescription] = React.useState("")
-    const [status, setStatus] = React.useState<"ACTIVE" | "DRAFT" | "ARCHIVED">("ACTIVE")
-    const [name, setName] = React.useState("")
-    const [metaTitle, setMetaTitle] = React.useState("")
-    const [metaDescription, setMetaDescription] = React.useState("")
-
+    const { data: product, isLoading: productLoading } = api.admin.getProductById.useQuery({ id })
     const { data: categories } = api.product.getCategories.useQuery()
 
-    const createProduct = api.admin.createProduct.useMutation({
+    // Form state
+    const [name, setName] = React.useState("")
+    const [description, setDescription] = React.useState("")
+    const [price, setPrice] = React.useState("")
+    const [compareAtPrice, setCompareAtPrice] = React.useState("")
+    const [sku, setSku] = React.useState("")
+    const [quantity, setQuantity] = React.useState("")
+    const [status, setStatus] = React.useState<"ACTIVE" | "DRAFT" | "ARCHIVED">("ACTIVE")
+    const [tags, setTags] = React.useState("")
+    const [metaTitle, setMetaTitle] = React.useState("")
+    const [metaDescription, setMetaDescription] = React.useState("")
+    const [imageUrls, setImageUrls] = React.useState<string[]>([])
+    const [selectedCategoryIds, setSelectedCategoryIds] = React.useState<string[]>([])
+
+    // Active image preview
+    const [activeImageIndex, setActiveImageIndex] = React.useState(0)
+    const [isUploading, setIsUploading] = React.useState(false)
+    const [isAddingCategory, setIsAddingCategory] = React.useState(false)
+    const [newCategoryName, setNewCategoryName] = React.useState("")
+
+    // Initialize state when product data arrives
+    React.useEffect(() => {
+        if (product) {
+            setName(product.name)
+            setDescription(product.description)
+            setPrice(product.price.toString())
+            setCompareAtPrice(product.compareAtPrice?.toString() || "")
+            setSku(product.sku)
+            setQuantity(product.quantity.toString())
+            setStatus(product.status as any)
+            setTags(product.tags?.map(t => t.name).join(", ") || "")
+            setMetaTitle(product.metaTitle || "")
+            setMetaDescription(product.metaDescription || "")
+            setImageUrls(product.images?.map(img => img.url) || [])
+            setSelectedCategoryIds(product.categories?.map(cat => cat.id) || [])
+        }
+    }, [product])
+
+    const updateProduct = api.admin.updateProduct.useMutation({
         onSuccess: () => {
             toast({
                 title: "MANIFEST UPDATED",
-                description: "New product record has been successfully deployed.",
+                description: "Product record has been successfully modified.",
             })
             utils.admin.getProducts.invalidate()
+            utils.admin.getProductById.invalidate({ id })
             router.push("/admin/products")
         },
         onError: (err: any) => {
             toast({
-                title: "DEPLOYMENT ERROR",
+                title: "UPDATE ERROR",
                 description: err.message,
                 variant: "destructive",
             })
@@ -166,24 +190,34 @@ export default function AdminNewProductPage() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-
         const finalImageUrls = imageUrls.filter(url => url.trim() !== "" && (url.startsWith("http") || url.startsWith("/uploads")))
 
-        createProduct.mutate({
-            name: name,
-            description: description,
-            price: Number(formData.get("price")),
-            compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
-            quantity: Number(formData.get("quantity")),
-            sku: sku,
+        updateProduct.mutate({
+            id,
+            name,
+            description,
+            price: Number(price),
+            compareAtPrice: compareAtPrice ? Number(compareAtPrice) : undefined,
+            quantity: Number(quantity),
+            sku,
             categoryIds: selectedCategoryIds,
             imageUrls: finalImageUrls,
-            status: status,
-            tags: formData.get("tags") as string,
-            metaTitle: metaTitle,
-            metaDescription: metaDescription,
+            status,
+            tags,
+            metaTitle,
+            metaDescription,
         })
+    }
+
+    if (productLoading) {
+        return (
+            <div className="flex h-screen items-center justify-center bg-white">
+                <div className="flex flex-col items-center gap-6">
+                    <LuxechoLogo size={48} className="animate-pulse" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-300 animate-pulse">Syncing Encrypted Record...</p>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -197,16 +231,16 @@ export default function AdminNewProductPage() {
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
                         <div className="space-y-4">
                             <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
-                                INITIAL <span className="text-gray-200">ENTRY</span>
+                                EDIT <span className="text-gray-200">ENTRY</span>
                             </h1>
                             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">
-                                Deploying New Asset to Storefront Manifest
+                                Modifying Asset Record: {product?.sku}
                             </p>
                         </div>
                         <div className="flex items-center gap-4 p-5 border border-gray-100 bg-white">
                             <LuxechoLogo size={24} />
                             <p className="text-[9px] font-black uppercase tracking-widest text-black">
-                                Entry Serial: LX-{Date.now().toString().slice(-6)}
+                                ID: {id.slice(0, 12)}...
                             </p>
                         </div>
                     </div>
@@ -231,7 +265,6 @@ export default function AdminNewProductPage() {
                                     <Label htmlFor="name" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Asset Designation</Label>
                                     <Input
                                         id="name"
-                                        name="name"
                                         required
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
@@ -265,7 +298,6 @@ export default function AdminNewProductPage() {
                                     </div>
                                     <Textarea
                                         id="description"
-                                        name="description"
                                         required
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
@@ -290,10 +322,11 @@ export default function AdminNewProductPage() {
                                             <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-black">₹</span>
                                             <Input
                                                 id="price"
-                                                name="price"
                                                 type="number"
                                                 step="0.01"
                                                 required
+                                                value={price}
+                                                onChange={(e) => setPrice(e.target.value)}
                                                 placeholder="0.00"
                                                 className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black pl-12 transition-all tabular-nums"
                                             />
@@ -306,9 +339,10 @@ export default function AdminNewProductPage() {
                                             <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-gray-200">₹</span>
                                             <Input
                                                 id="compareAtPrice"
-                                                name="compareAtPrice"
                                                 type="number"
                                                 step="0.01"
+                                                value={compareAtPrice}
+                                                onChange={(e) => setCompareAtPrice(e.target.value)}
                                                 placeholder="Original price"
                                                 className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black pl-12 transition-all opacity-70 tabular-nums placeholder:text-gray-200"
                                             />
@@ -336,7 +370,6 @@ export default function AdminNewProductPage() {
                                         </div>
                                         <Input
                                             id="sku"
-                                            name="sku"
                                             required
                                             value={sku}
                                             onChange={(e) => setSku(e.target.value.toUpperCase())}
@@ -349,9 +382,10 @@ export default function AdminNewProductPage() {
                                         <Label htmlFor="quantity" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Stock Reserve</Label>
                                         <Input
                                             id="quantity"
-                                            name="quantity"
                                             type="number"
                                             required
+                                            value={quantity}
+                                            onChange={(e) => setQuantity(e.target.value)}
                                             placeholder="0"
                                             className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black transition-all tabular-nums placeholder:text-gray-200"
                                         />
@@ -370,7 +404,6 @@ export default function AdminNewProductPage() {
                                 <h2 className="text-xl font-black uppercase tracking-tight">Visual Stream</h2>
                             </div>
 
-                            {/* main preview */}
                             <div className="aspect-[3/4] relative bg-gray-50 border border-gray-100 overflow-hidden group mb-6">
                                 <AnimatePresence mode="wait">
                                     {imageUrls[activeImageIndex] ? (
@@ -433,7 +466,6 @@ export default function AdminNewProductPage() {
                                 </div>
                             </div>
 
-                            {/* thumbnail track */}
                             <div className="flex gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
                                 {imageUrls.map((url, i) => (
                                     <div
@@ -574,7 +606,6 @@ export default function AdminNewProductPage() {
                                     </div>
                                 </div>
 
-                                {/* Quick Add Category */}
                                 <div className="pt-6 border-t border-gray-50 space-y-5">
                                     {!isAddingCategory ? (
                                         <Button
@@ -636,7 +667,8 @@ export default function AdminNewProductPage() {
                                     <Label htmlFor="tags" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Metadata Tags</Label>
                                     <Input
                                         id="tags"
-                                        name="tags"
+                                        value={tags}
+                                        onChange={(e) => setTags(e.target.value.toUpperCase())}
                                         placeholder="MINIMAL, PREMIUM, LUXURY"
                                         className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black uppercase placeholder:text-gray-200 transition-all text-[10px] tracking-widest"
                                     />
@@ -646,21 +678,21 @@ export default function AdminNewProductPage() {
 
                         <Button
                             type="submit"
-                            disabled={createProduct.isPending}
+                            disabled={updateProduct.isPending}
                             className="w-full bg-black text-white font-black uppercase text-2xl rounded-none h-24 shadow-[16px_16px_0px_#f3f4f6] hover:shadow-none hover:translate-x-1 hover:-translate-y-1 transition-all duration-500 disabled:opacity-50"
                         >
-                            {createProduct.isPending ? (
+                            {updateProduct.isPending ? (
                                 <div className="flex items-center gap-5">
                                     <Loader2 className="w-8 h-8 animate-spin" />
-                                    SYNCING MANIFEST...
+                                    SYNCING CHANGES...
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center gap-1">
                                     <div className="flex items-center gap-4">
-                                        <CheckCircle2 className="w-7 h-7" />
-                                        DEPLOY ASSET
+                                        <Save className="w-7 h-7" />
+                                        SAVE MODIFICATIONS
                                     </div>
-                                    <span className="text-[9px] tracking-[0.5em] mt-1 text-white/40">Authorize and Launch to Public Stream</span>
+                                    <span className="text-[10px] tracking-[0.5em] mt-1 text-white/40">Push Updated State to Production Manifest</span>
                                 </div>
                             )}
                         </Button>

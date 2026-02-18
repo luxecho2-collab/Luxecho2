@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion"
 import { CartDrawer } from "@/components/cart/cart-drawer"
 import { SearchOverlay } from "@/components/layout/search-overlay"
+import { LuxechoLogo } from "@/components/layout/luxecho-logo"
 
 const navItems = [
     { name: "Shop", href: "/products" },
@@ -54,150 +55,108 @@ export function Navbar() {
     return (
         <header
             className={cn(
-                "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out-expo border-b",
-                isScrolled
-                    ? "h-16 bg-background/80 backdrop-blur-md border-border shadow-lg"
-                    : "h-20 bg-transparent border-transparent"
+                "fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-gray-50 bg-white/80 backdrop-blur-md",
+                isScrolled ? "h-14 shadow-[0_2px_20px_-12px_rgba(139,92,246,0.1)]" : "h-20"
             )}
         >
-            <nav className="container h-full mx-auto px-4 flex items-center justify-between">
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-7 h-7 bg-neon-green flex items-center justify-center -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">
-                        <span className="text-black text-sm font-bold -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">F</span>
-                    </div>
-                    <span className="text-lg font-bold tracking-tight uppercase italic glow-text">
-                        Funky<span className="text-neon-green">Store</span>
+            <nav className="container h-full mx-auto px-6 lg:px-12 flex items-center justify-between">
+                {/* Desktop Left Menu */}
+                <div className="hidden md:flex items-center">
+                    <button
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="p-2 -ml-2 hover:opacity-70 transition-opacity"
+                    >
+                        <Menu className="w-6 h-6" strokeWidth={1.5} />
+                    </button>
+                </div>
+
+                {/* Mobile Menu Trigger (Left) */}
+                <div className="md:hidden flex items-center">
+                    <button
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="p-2 -ml-2"
+                    >
+                        <Menu className="w-6 h-6" strokeWidth={1.5} />
+                    </button>
+                </div>
+
+                {/* Centralized Logo */}
+                <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3 group">
+                    <LuxechoLogo size={36} className="group-hover:scale-110 transition-transform duration-500" />
+                    <span className="text-sm font-black tracking-[0.4em] uppercase group-hover:tracking-[0.5em] transition-all duration-700">
+                        Luxecho
                     </span>
                 </Link>
 
-                {/* Desktop Menu */}
-                <ul className="hidden md:flex items-center gap-8">
-                    {navItems.map((item) => (
-                        <li key={item.name}>
-                            <Link
-                                href={item.href}
-                                className="text-sm font-semibold uppercase tracking-widest hover:text-neon-green transition-colors relative group"
-                            >
-                                {item.name}
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-neon-green transition-all duration-300 group-hover:w-full" />
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-
-                {/* Desktop Actions */}
-                <div className="hidden md:flex items-center gap-4">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="hover:text-neon-green hover:bg-transparent"
-                        onClick={() => setIsSearchOpen(true)}
-                    >
-                        <Search className="w-5 h-5" />
-                    </Button>
-                    <Link href="/account/wishlist">
-                        <Button variant="ghost" size="icon" className="hover:text-neon-green hover:bg-transparent relative group">
-                            <Heart className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                {/* Right Actions */}
+                <div className="flex items-center gap-1 md:gap-4">
+                    <Link href="/account" className="hidden md:block">
+                        <Button variant="ghost" size="icon" className="hover:bg-transparent">
+                            <User className="w-5 h-5" strokeWidth={1.5} />
+                        </Button>
+                    </Link>
+                    <Link href="/account/wishlist" className="hidden md:block">
+                        <Button variant="ghost" size="icon" className="hover:bg-transparent relative">
+                            <Heart className="w-5 h-5" strokeWidth={1.5} />
                             {wishlistCount > 0 && (
-                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-electric-pink text-white text-[10px] font-black flex items-center justify-center rounded-none -skew-x-12">
-                                    {wishlistCount}
-                                </span>
+                                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-black rounded-full" />
                             )}
                         </Button>
                     </Link>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="hover:text-neon-green hover:bg-transparent">
-                                <User className="w-5 h-5" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-charcoal border-neon-green/30 text-white rounded-none">
-                            <DropdownMenuItem asChild>
-                                <Link href="/account" className="w-full flex hover:bg-neon-green hover:text-black cursor-pointer uppercase text-xs font-bold tracking-widest p-2">
-                                    Dashboard
-                                </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                                <Link href="/account/orders" className="w-full flex hover:bg-neon-green hover:text-black cursor-pointer uppercase text-xs font-bold tracking-widest p-2">
-                                    Orders
-                                </Link>
-                            </DropdownMenuItem>
-                            {/* Settings removed - floating settings button used instead */}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
                     <CartDrawer />
                 </div>
-
-                {/* Mobile Menu Trigger */}
-                <div className="md:hidden flex items-center gap-4">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="hover:text-neon-green hover:bg-transparent"
-                        onClick={() => setIsSearchOpen(true)}
-                    >
-                        <Search className="w-6 h-6" />
-                    </Button>
-                    <CartDrawer />
-                    <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                        <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon" className="hover:text-neon-green hover:bg-transparent">
-                                <Menu className="w-6 h-6" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="left" className="bg-deep-black border-r border-neon-green/30 text-white w-[300px]">
-                            <SheetHeader className="mb-8">
-                                <SheetTitle className="text-left">
-                                    <span className="text-xl font-bold tracking-tight uppercase italic text-white flex gap-2 items-center">
-                                        <div className="w-7 h-7 bg-neon-green flex items-center justify-center -skew-x-12">
-                                            <span className="text-black text-xs font-bold">F</span>
-                                        </div>
-                                        Funky<span className="text-neon-green">Store</span>
-                                    </span>
-                                </SheetTitle>
-                            </SheetHeader>
-                            <ul className="flex flex-col gap-6">
+                <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                    <SheetContent side="left" className="bg-white border-r border-gray-100 p-0 w-[300px]">
+                        <div className="flex flex-col h-full">
+                            <div className="p-6 border-b flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <LuxechoLogo size={28} />
+                                    <span className="text-sm font-black tracking-widest uppercase">Luxecho</span>
+                                </div>
+                                <button onClick={() => setIsMobileMenuOpen(false)}>
+                                    <X className="w-6 h-6" strokeWidth={1} />
+                                </button>
+                            </div>
+                            <ul className="flex flex-col py-4">
                                 {navItems.map((item) => (
                                     <li key={item.name}>
                                         <Link
                                             href={item.href}
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="text-lg font-bold uppercase tracking-widest hover:text-neon-green transition-colors"
+                                            className="block px-6 py-4 text-sm font-medium uppercase tracking-widest border-b border-gray-50 hover:bg-gray-50 transition-colors"
                                         >
                                             {item.name}
                                         </Link>
                                     </li>
                                 ))}
                             </ul>
-                            <div className="mt-12 pt-12 border-t border-neon-green/20 flex flex-col gap-4">
+                            <div className="mt-auto p-6 bg-gray-50 flex flex-col gap-4">
                                 <Link
                                     href="/account"
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center gap-3 text-sm font-bold uppercase tracking-widest hover:text-neon-green"
+                                    className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest"
                                 >
-                                    <User className="w-5 h-5" /> Account
+                                    <User className="w-4 h-4" /> Account
                                 </Link>
                                 <Link
                                     href="/account/wishlist"
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center justify-between text-sm font-bold uppercase tracking-widest hover:text-neon-green"
+                                    className="flex items-center justify-between text-xs font-bold uppercase tracking-widest"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <Heart className="w-5 h-5" /> Wishlist
+                                        <Heart className="w-4 h-4" /> Wishlist
                                     </div>
                                     {wishlistCount > 0 && (
-                                        <span className="bg-electric-pink text-white px-2 py-0.5 text-[10px] font-black -skew-x-12">
+                                        <span className="bg-black text-white px-2 py-0.5 text-[10px] rounded-full">
                                             {wishlistCount}
                                         </span>
                                     )}
                                 </Link>
                             </div>
-                        </SheetContent>
-                    </Sheet>
-                </div>
+                        </div>
+                    </SheetContent>
+                </Sheet>
             </nav>
-            <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
         </header>
     )
 }

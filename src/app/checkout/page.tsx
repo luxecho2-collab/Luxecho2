@@ -146,7 +146,7 @@ export default function CheckoutPage() {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "rzp_test_placeholder",
                 amount: resp.amount,
                 currency: resp.currency,
-                name: "FunkyStore",
+                name: "Luxecho",
                 description: "Secure Checkout",
                 order_id: resp.id,
                 handler: async (response: any) => {

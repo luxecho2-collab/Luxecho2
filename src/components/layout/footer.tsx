@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react"
+import { LuxechoLogo } from "@/components/layout/luxecho-logo"
 
 const footerLinks = [
     {
@@ -33,34 +34,27 @@ const footerLinks = [
 
 export function Footer() {
     return (
-        <footer className="bg-deep-black text-white border-t border-neon-green/20 pt-16 pb-8">
+        <footer className="bg-white text-black border-t border-gray-100 pt-20 pb-10">
             <div className="container mx-auto px-4">
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
-                    {/* Logo & Info */}
-                    <div className="col-span-2">
-                        <Link href="/" className="inline-flex items-center gap-2 mb-6 group">
-                            <div className="w-8 h-8 bg-neon-green flex items-center justify-center -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">
-                                <span className="text-black text-lg font-bold -skew-x-12 group-hover:skew-x-0 transition-transform duration-300">F</span>
-                            </div>
-                            <span className="text-xl font-bold tracking-tight uppercase italic glow-text">
-                                Funky<span className="text-neon-green">Store</span>
-                            </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-20">
+                    {/* Brand Info */}
+                    <div className="col-span-1 lg:col-span-2">
+                        <Link href="/" className="flex items-center gap-3 mb-6 group">
+                            <LuxechoLogo size={32} />
+                            <span className="text-xl font-black tracking-[0.2em] uppercase transition-all duration-500">Luxecho</span>
                         </Link>
-                        <p className="text-muted-foreground mb-8 max-w-sm">
-                            Pushing the boundaries of fashion and digital experience. Neo-brutalist aesthetics meet high-performance streetwear.
+                        <p className="text-sm text-gray-500 mb-8 max-w-xs leading-relaxed">
+                            Premium streetwear and lifestyle brand. Redefining luxury with minimalist aesthetics and exceptional quality.
                         </p>
-                        <div className="flex items-center gap-4">
-                            <a href="#" className="w-10 h-10 border border-neon-green/30 flex items-center justify-center hover:bg-neon-green hover:text-black transition-colors">
-                                <Instagram className="w-5 h-5" />
+                        <div className="flex items-center gap-6">
+                            <a href="#" className="text-gray-400 hover:text-black transition-colors">
+                                <Instagram className="w-5 h-5" strokeWidth={1.5} />
                             </a>
-                            <a href="#" className="w-10 h-10 border border-neon-green/30 flex items-center justify-center hover:bg-neon-green hover:text-black transition-colors">
-                                <Twitter className="w-5 h-5" />
+                            <a href="#" className="text-gray-400 hover:text-black transition-colors">
+                                <Twitter className="w-5 h-5" strokeWidth={1.5} />
                             </a>
-                            <a href="#" className="w-10 h-10 border border-neon-green/30 flex items-center justify-center hover:bg-neon-green hover:text-black transition-colors">
-                                <Facebook className="w-5 h-5" />
-                            </a>
-                            <a href="#" className="w-10 h-10 border border-neon-green/30 flex items-center justify-center hover:bg-neon-green hover:text-black transition-colors">
-                                <Youtube className="w-5 h-5" />
+                            <a href="#" className="text-gray-400 hover:text-black transition-colors">
+                                <Youtube className="w-5 h-5" strokeWidth={1.5} />
                             </a>
                         </div>
                     </div>
@@ -68,7 +62,7 @@ export function Footer() {
                     {/* Links */}
                     {footerLinks.map((section) => (
                         <div key={section.title}>
-                            <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-6 text-neon-green">
+                            <h3 className="text-xs font-black uppercase tracking-widest mb-8">
                                 {section.title}
                             </h3>
                             <ul className="flex flex-col gap-4">
@@ -76,7 +70,7 @@ export function Footer() {
                                     <li key={link.name}>
                                         <Link
                                             href={link.href}
-                                            className="text-sm text-muted-foreground hover:text-neon-green transition-colors uppercase tracking-widest"
+                                            className="text-sm text-gray-500 hover:text-black transition-colors"
                                         >
                                             {link.name}
                                         </Link>
@@ -87,17 +81,17 @@ export function Footer() {
                     ))}
                 </div>
 
-                {/* Newsletter / Bottom */}
-                <div className="pt-8 border-t border-neon-green/10 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-[0.2em]">
-                        &copy; {new Date().getFullYear()} FUNKY STORE. ALL RIGHTS RESERVED.
+                {/* Bottom Bar */}
+                <div className="pt-10 border-t border-gray-50 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest">
+                        &copy; {new Date().getFullYear()} Luxecho. ALL RIGHTS RESERVED.
                     </p>
-                    <div className="flex gap-8">
-                        <Link href="/privacy" className="text-[10px] text-muted-foreground hover:text-neon-green uppercase font-bold tracking-[0.2em]">
+                    <div className="flex gap-10">
+                        <Link href="/privacy" className="text-[10px] text-gray-400 hover:text-black uppercase tracking-widest font-bold">
                             Privacy Policy
                         </Link>
-                        <Link href="/terms" className="text-[10px] text-muted-foreground hover:text-neon-green uppercase font-bold tracking-[0.2em]">
-                            Terms of Service
+                        <Link href="/terms" className="text-[10px] text-gray-400 hover:text-black uppercase tracking-widest font-bold">
+                            Terms & Conditions
                         </Link>
                     </div>
                 </div>

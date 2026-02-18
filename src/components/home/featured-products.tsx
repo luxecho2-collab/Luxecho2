@@ -27,20 +27,24 @@ export function FeaturedProducts() {
     }
 
     return (
-        <section className="py-24 bg-background">
-            <div className="container mx-auto px-4">
-                <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-                    <div>
-                        <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-4 italic">
-                            LATEST <span className="text-neon-green">DROPS</span>
+        <section className="py-32 bg-white">
+            <div className="container mx-auto px-6 lg:px-12">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="h-[2px] w-12 bg-black" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-black">New Drops</span>
+                        </div>
+                        <h2 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none">
+                            LATEST <span className="text-gray-200">WAVES</span>
                         </h2>
-                        <p className="text-muted-foreground uppercase tracking-widest font-bold">
-                            High-performance gear for the digital frontier
-                        </p>
                     </div>
-                    <Link href="/products">
-                        <Button variant="link" className="text-neon-green uppercase font-black tracking-widest text-lg p-0">
-                            View All Arrivals +
+                    <Link href="/products" className="group">
+                        <Button variant="link" className="text-black uppercase font-black tracking-widest text-sm p-0 flex items-center gap-3 hover:no-underline">
+                            <span className="group-hover:text-black transition-colors">View All Collections</span>
+                            <div className="w-8 h-8 bg-black flex items-center justify-center rotate-45 group-hover:bg-black transition-all">
+                                <span className="text-white text-[10px] -rotate-45">+</span>
+                            </div>
                         </Button>
                     </Link>
                 </div>

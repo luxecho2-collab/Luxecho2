@@ -14,7 +14,7 @@ export default async function AdminLayout({
     }
 
     return (
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen bg-white">
             {children}
         </div>
     )

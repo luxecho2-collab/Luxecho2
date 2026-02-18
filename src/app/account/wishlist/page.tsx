@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/product/product-card"
 import { Button } from "@/components/ui/button"
 import { Heart, ShoppingBag, ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { AuthPortal } from "@/components/auth/auth-portal"
 
 export default function WishlistPage() {
     const { data: session, status } = useSession()
@@ -19,14 +20,7 @@ export default function WishlistPage() {
     }
 
     if (!session) {
-        return (
-            <div className="container mx-auto px-4 py-24 text-center">
-                <h1 className="text-4xl font-black uppercase italic mb-8 text-electric-pink">Access Forbidden</h1>
-                <Link href="/api/auth/signin">
-                    <Button className="bg-white text-black font-black uppercase tracking-widest rounded-none h-16 px-12">Login to Sync</Button>
-                </Link>
-            </div>
-        )
+        return <AuthPortal isPopup />
     }
 
     return (

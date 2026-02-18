@@ -17,6 +17,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
+import { AuthPortal } from "@/components/auth/auth-portal"
 
 export default function OrdersPage() {
     const { data: session, status } = useSession()
@@ -29,14 +30,7 @@ export default function OrdersPage() {
     }
 
     if (!session) {
-        return (
-            <div className="container mx-auto px-4 py-24 text-center">
-                <h1 className="text-4xl font-black uppercase italic mb-8 text-electric-pink">Unauthorized Scan</h1>
-                <Link href="/api/auth/signin">
-                    <Button className="bg-white text-black font-black uppercase tracking-widest rounded-none h-16 px-12">Identify Yourself</Button>
-                </Link>
-            </div>
-        )
+        return <AuthPortal isPopup />
     }
 
     const getStatusIcon = (status: string) => {

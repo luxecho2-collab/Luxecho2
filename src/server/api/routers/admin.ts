@@ -54,6 +54,22 @@ export const adminRouter = createTRPCRouter({
                 orderBy: { createdAt: "desc" },
                 include: {
                     categories: true,
+                    images: {
+                        take: 1,
+                        orderBy: { position: "asc" }
+                    }
+                }
+            })
+        }),
+    getProductById: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .query(async ({ ctx, input }) => {
+            return ctx.db.product.findUnique({
+                where: { id: input.id },
+                include: {
+                    images: { orderBy: { position: "asc" } },
+                    categories: true,
+                    tags: true,
                 }
             })
         }),
@@ -164,7 +180,7 @@ export const adminRouter = createTRPCRouter({
                 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
                 const prompt = `
-                    You are a professional copywriter for a premium e-commerce streetwear brand called "FunkyStore". 
+                    You are a professional copywriter for a premium e-commerce streetwear brand called "Luxecho". 
                     Enhance the following product description to be engaging, professional, and high-conversion.
                     
                     Product Name: ${name}
@@ -190,27 +206,33 @@ export const adminRouter = createTRPCRouter({
             }
         }),
 
+    deleteProduct: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.product.delete({
+                where: { id: input.id }
+            })
+        }),
     createProduct: adminProcedure
         .input(z.object({
             name: z.string().min(1),
             description: z.string().min(1),
             price: z.number().positive(),
             compareAtPrice: z.number().positive().optional(),
-            quantity: z.number().int().min(0).default(0),
-            sku: z.string().optional(),
+            quantity: z.number().int().min(0),
+            sku: z.string(),
             categoryIds: z.array(z.string()).optional(),
             imageUrls: z.array(z.string().url()).optional(),
-            status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).default("ACTIVE"),
+            status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).default("DRAFT"),
             tags: z.string().optional(),
+            metaTitle: z.string().optional(),
+            metaDescription: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
-            const { name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags } = input
+            const { name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription } = input
             const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
 
-            // Auto-generate SKU if not provided
-            const finalSku = sku || `FS-${Math.random().toString(36).substring(2, 9).toUpperCase()}`
-
-            return ctx.db.product.create({
+            const product = await ctx.db.product.create({
                 data: {
                     name,
                     slug,
@@ -218,24 +240,155 @@ export const adminRouter = createTRPCRouter({
                     price,
                     compareAtPrice,
                     quantity,
-                    sku: finalSku,
+                    sku,
                     status,
-                    images: imageUrls && imageUrls.length > 0 ? {
-                        create: imageUrls.map((url, index) => ({
+                    metaTitle,
+                    metaDescription,
+                    images: {
+                        create: imageUrls?.map((url, index) => ({
                             url,
                             position: index
                         }))
-                    } : undefined,
-                    categories: categoryIds && categoryIds.length > 0 ? {
-                        connect: categoryIds.map(id => ({ id }))
-                    } : undefined,
-                    tags: tags ? {
-                        connectOrCreate: tags.split(",").map(tag => ({
+                    },
+                    categories: {
+                        connect: categoryIds?.map(id => ({ id }))
+                    },
+                    tags: {
+                        connectOrCreate: tags?.split(",").map(tag => ({
                             where: { name: tag.trim() },
                             create: { name: tag.trim() }
-                        }))
-                    } : undefined
+                        })) || []
+                    }
                 }
+            })
+            return product
+        }),
+
+    updateProduct: adminProcedure
+        .input(z.object({
+            id: z.string(),
+            name: z.string().min(1).optional(),
+            description: z.string().min(1).optional(),
+            price: z.number().positive().optional(),
+            compareAtPrice: z.number().positive().optional(),
+            quantity: z.number().int().min(0).optional(),
+            sku: z.string().optional(),
+            categoryIds: z.array(z.string()).optional(),
+            imageUrls: z.array(z.string().url()).optional(),
+            status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
+            tags: z.string().optional(),
+            metaTitle: z.string().optional(),
+            metaDescription: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const { id, name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription } = input
+
+            const updateData: any = {
+                name,
+                description,
+                price,
+                compareAtPrice,
+                quantity,
+                sku,
+                status,
+                metaTitle,
+                metaDescription,
+            }
+
+            if (name) {
+                updateData.slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+            }
+
+            // Handle images
+            if (imageUrls) {
+                // Delete old images first (simplest approach for now)
+                await ctx.db.image.deleteMany({ where: { productId: id } })
+                updateData.images = {
+                    create: imageUrls.map((url, index) => ({
+                        url,
+                        position: index
+                    }))
+                }
+            }
+
+            // Handle categories
+            if (categoryIds) {
+                updateData.categories = {
+                    set: categoryIds.map(id => ({ id }))
+                }
+            }
+
+            // Handle tags
+            if (tags !== undefined) {
+                updateData.tags = {
+                    set: [], // Clear existing relations
+                    connectOrCreate: tags.split(",").map(tag => ({
+                        where: { name: tag.trim() },
+                        create: { name: tag.trim() }
+                    }))
+                }
+            }
+
+            return ctx.db.product.update({
+                where: { id },
+                data: updateData
+            })
+        }),
+
+    updateCategory: adminProcedure
+        .input(z.object({
+            id: z.string(),
+            name: z.string().min(1).optional(),
+            description: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const { id, name, description } = input
+            const data: any = { description }
+            if (name) {
+                data.name = name
+                data.slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+            }
+            return ctx.db.category.update({
+                where: { id },
+                data
+            })
+        }),
+
+    deleteCategory: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.category.delete({
+                where: { id: input.id }
+            })
+        }),
+
+    // Attribute Management for Advanced Filters
+    getAttributes: adminProcedure.query(async ({ ctx }) => {
+        return ctx.db.tag.findMany({ select: { id: true, name: true } })
+    }),
+
+    createTag: adminProcedure
+        .input(z.object({ name: z.string().min(1) }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.tag.create({
+                data: { name: input.name }
+            })
+        }),
+
+    updateTag: adminProcedure
+        .input(z.object({ id: z.string(), name: z.string().min(1) }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.tag.update({
+                where: { id: input.id },
+                data: { name: input.name }
+            })
+        }),
+
+    deleteTag: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.tag.delete({
+                where: { id: input.id }
             })
         }),
 })

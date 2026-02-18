@@ -52,18 +52,14 @@ const config = {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				neon: {
-					green: '#00FF41',
-					pink: '#FF006B',
-					cyan: '#00F0FF'
-				},
-				deep: {
-					black: '#0A0A0A'
-				},
-				charcoal: '#1A1A1A',
-				warm: {
-					gray: '#F5F5F5'
-				}
+				'funky-violet': '#8B5CF6',
+				'acid-green': '#d4ff00',
+				'acid-yellow': '#f0ff00',
+				'electric-pink': '#ff00ae',
+				'cyber-blue': '#00f0ff',
+				'charcoal': '#111111',
+				'neon-purple': '#9333ea',
+				'neon-cyan': '#06b6d4',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -109,12 +105,12 @@ const config = {
 			},
 			fontFamily: {
 				sans: [
-					'var(--font-sans)',
+					'var(--font-poppins)',
 					'Inter',
 					'sans-serif'
 				],
 				heading: [
-					'var(--font-heading)',
+					'var(--font-poppins)',
 					'Inter',
 					'sans-serif'
 				]
