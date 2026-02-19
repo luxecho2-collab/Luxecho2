@@ -600,7 +600,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                         { s: 'M', c: '44.0', l: '29.5', h: '21.5' },
                                         { s: 'L', c: '46.0', l: '30.5', h: '22.5' },
                                         { s: 'XL', c: '48.0', l: '31.5', h: '23.5' },
-                                        { s: 'XXL', c: '50.0', l: '32.5', h: '24.5' },
                                     ].map((row) => (
                                         <div key={row.s} className="group grid grid-cols-4 gap-4 py-3 hover:bg-gray-50/80 transition-all rounded px-2 -mx-2">
                                             <span className="text-sm font-black italic text-black group-hover:text-black transition-colors">{row.s}</span>

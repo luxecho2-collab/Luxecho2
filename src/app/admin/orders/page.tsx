@@ -32,41 +32,16 @@ export default function AdminOrdersPage() {
     }
 
     return (
-        <div className="flex min-h-screen bg-black text-white">
-            <aside className="w-64 border-r-4 border-black bg-charcoal hidden lg:flex flex-col">
-                <div className="p-8 border-b-4 border-black">
-                    <span className="text-2xl font-black uppercase italic tracking-tighter">
-                        ADMIN <span className="text-gray-400">DASHBOARD</span>
-                    </span>
-                </div>
-                <nav className="p-4 space-y-2">
-                    <Link href="/admin">
-                        <Button variant="ghost" className="w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2 border-transparent text-muted-foreground hover:text-white">
-                            DASHBOARD
-                        </Button>
-                    </Link>
-                    <Link href="/admin/products">
-                        <Button variant="ghost" className="w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2 border-transparent text-muted-foreground hover:text-white">
-                            PRODUCTS
-                        </Button>
-                    </Link>
-                    <Link href="/admin/orders">
-                        <Button variant="ghost" className="w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2 border-black bg-black text-white">
-                            ORDERS
-                        </Button>
-                    </Link>
-                </nav>
-            </aside>
-
-            <main className="flex-grow p-8 space-y-12">
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b-4 border-white/5 pb-8">
+        <div className="flex min-h-screen bg-white text-black">
+            <main className="flex-grow p-10 lg:p-16 space-y-16 max-w-7xl mx-auto">
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 border-b border-gray-100 pb-10">
                     <div className="space-y-4">
-                        <Link href="/admin" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">
-                            <ArrowLeft className="w-3 h-3" />
-                            Back to Dashboard
+                        <Link href="/admin" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-all group">
+                            <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+                            Back to Center
                         </Link>
-                        <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none">
-                            ORDER <span className="text-gray-400">HISTORY</span>
+                        <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none text-black">
+                            ORDER <span className="text-gray-200">HISTORY</span>
                         </h1>
                     </div>
                 </header>

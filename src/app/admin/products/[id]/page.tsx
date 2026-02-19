@@ -67,6 +67,7 @@ export default function AdminEditProductPage() {
     const [additionalInfo, setAdditionalInfo] = React.useState("")
     const [imageUrls, setImageUrls] = React.useState<string[]>([])
     const [selectedCategoryIds, setSelectedCategoryIds] = React.useState<string[]>([])
+    const [sizes, setSizes] = React.useState<string[]>([])
 
     // Active image preview
     const [activeImageIndex, setActiveImageIndex] = React.useState(0)
@@ -100,6 +101,7 @@ export default function AdminEditProductPage() {
             setAdditionalInfo(product.additionalInfo || "")
             setImageUrls(product.images?.map(img => img.url) || [])
             setSelectedCategoryIds(product.categories?.map(cat => cat.id) || [])
+            setSizes((product as any).sizes || [])
         }
     }, [product])
 
@@ -266,6 +268,7 @@ export default function AdminEditProductPage() {
             productInfo,
             shippingReturns,
             additionalInfo,
+            sizes,
         })
     }
 
@@ -497,6 +500,43 @@ export default function AdminEditProductPage() {
                                             className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black transition-all tabular-nums placeholder:text-gray-200"
                                         />
                                     </div>
+                                </div>
+                            </section>
+
+                            <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
+                                <div className="flex items-center gap-5">
+                                    <h2 className="text-xl font-black uppercase tracking-tight">Size Matrix</h2>
+                                </div>
+                                <div className="space-y-4">
+                                    <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1 block mb-2">Available Dimensions</Label>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {["S", "M", "L", "XL"].map((size) => {
+                                            const isSelected = sizes.includes(size);
+                                            return (
+                                                <button
+                                                    key={size}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setSizes(prev => prev.includes(size)
+                                                            ? prev.filter(s => s !== size)
+                                                            : [...prev, size]
+                                                        )
+                                                    }}
+                                                    className={cn(
+                                                        "h-14 border text-[10px] font-black uppercase tracking-widest transition-all",
+                                                        isSelected
+                                                            ? "bg-black text-white border-black"
+                                                            : "bg-gray-50 text-gray-400 border-gray-50 hover:border-gray-200"
+                                                    )}
+                                                >
+                                                    {size}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <p className="text-[8px] font-bold text-gray-300 uppercase tracking-widest mt-4">
+                                        Refined standard: S, M, L, XL configuration.
+                                    </p>
                                 </div>
                             </section>
                         </div>

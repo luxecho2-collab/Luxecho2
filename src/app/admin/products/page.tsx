@@ -92,40 +92,7 @@ export default function AdminProductsPage() {
 
     return (
         <div className="flex min-h-screen bg-white text-black">
-            {/* Minimalist Sidebar */}
-            <aside className="w-72 border-r border-gray-100 bg-white hidden lg:flex flex-col sticky top-0 h-screen">
-                <div className="p-10 border-b border-gray-50 flex items-center gap-3">
-                    <LuxechoLogo size={28} />
-                    <span className="text-sm font-black uppercase tracking-[0.4em]">Admin</span>
-                </div>
-                <nav className="p-6 flex-grow flex flex-col gap-1">
-                    {[
-                        { name: "Dashboard Overview", icon: LayoutDashboard, href: "/admin", active: false },
-                        { name: "Product Catalog", icon: Package, href: "/admin/products", active: true },
-                        { name: "Category Matrix", icon: FolderPlus, href: "/admin/categories", active: false },
-                        { name: "Filter Attributes", icon: TagIcon, href: "/admin/attributes", active: false },
-                        { name: "Orders & Fulfillment", icon: ShoppingBag, href: "/admin/orders", active: false },
-                        { name: "Customer Relations", icon: Users, href: "/admin/customers", active: false },
-                    ].map((item) => (
-                        <Link key={item.name} href={item.href}>
-                            <Button
-                                variant="ghost"
-                                className={cn(
-                                    "w-full justify-start rounded-none h-14 font-black uppercase tracking-widest gap-4 px-6 transition-all duration-300",
-                                    item.active
-                                        ? "bg-black text-white hover:bg-black hover:text-white"
-                                        : "text-gray-400 hover:text-black hover:bg-gray-50"
-                                )}
-                            >
-                                <item.icon className="w-4 h-4" />
-                                <span className="text-[10px]">{item.name}</span>
-                            </Button>
-                        </Link>
-                    ))}
-                </nav>
-            </aside>
-
-            <main className="flex-grow p-10 lg:p-16 space-y-16 max-w-7xl">
+            <main className="flex-grow p-10 lg:p-16 space-y-16 max-w-7xl mx-auto">
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
                     <div className="space-y-4">
                         <Link href="/admin" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-all group">

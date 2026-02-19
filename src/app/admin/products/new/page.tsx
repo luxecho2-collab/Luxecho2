@@ -57,6 +57,7 @@ interface ProductFormData {
     additionalInfo: string
     imageUrls: string[]
     selectedCategoryIds: string[]
+    sizes: string[]
 }
 
 const INITIAL_FORM_STATE: ProductFormData = {
@@ -74,7 +75,8 @@ const INITIAL_FORM_STATE: ProductFormData = {
     shippingReturns: "",
     additionalInfo: "",
     imageUrls: [],
-    selectedCategoryIds: []
+    selectedCategoryIds: [],
+    sizes: []
 }
 
 export default function AdminNewProductPage() {
@@ -434,6 +436,45 @@ export default function AdminNewProductPage() {
                                             className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black transition-all tabular-nums placeholder:text-gray-200"
                                         />
                                     </div>
+                                </div>
+                            </section>
+
+                            <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
+                                <div className="flex items-center gap-5">
+                                    <h2 className="text-xl font-black uppercase tracking-tight">Size Matrix</h2>
+                                </div>
+                                <div className="space-y-4">
+                                    <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1 block mb-2">Available Dimensions</Label>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {["S", "M", "L", "XL"].map((size) => {
+                                            const isSelected = formData.sizes.includes(size);
+                                            return (
+                                                <button
+                                                    key={size}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            sizes: prev.sizes.includes(size)
+                                                                ? prev.sizes.filter(s => s !== size)
+                                                                : [...prev.sizes, size]
+                                                        }))
+                                                    }}
+                                                    className={cn(
+                                                        "h-14 border text-[10px] font-black uppercase tracking-widest transition-all",
+                                                        isSelected
+                                                            ? "bg-black text-white border-black"
+                                                            : "bg-gray-50 text-gray-400 border-gray-50 hover:border-gray-200"
+                                                    )}
+                                                >
+                                                    {size}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <p className="text-[8px] font-bold text-gray-300 uppercase tracking-widest mt-4">
+                                        Refined standard: S, M, L, XL configuration.
+                                    </p>
                                 </div>
                             </section>
                         </div>

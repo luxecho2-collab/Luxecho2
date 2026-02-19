@@ -235,11 +235,11 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                         )}
 
                         {/* Aesthetic Footer Branding */}
-                        <div className="pt-6 md:pt-12 flex gap-4 sm:gap-8 md:gap-12 items-center justify-center opacity-10 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.8em] text-gray-700">
+                        <div className="pt-6 md:pt-12 flex gap-4 sm:gap-8 md:gap-12 items-center justify-center opacity-40 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] md:tracking-[0.8em] text-black">
                             <span>PRECISION</span>
-                            <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-gray-700 rounded-full" />
+                            <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-black rounded-full" />
                             <span>EDITORIAL</span>
-                            <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-gray-700 rounded-full" />
+                            <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-black rounded-full" />
                             <span>TECHNICAL</span>
                         </div>
                     </motion.div>
