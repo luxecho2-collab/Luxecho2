@@ -9,6 +9,7 @@ import {
     Sparkles,
     Image as ImageIcon,
     CheckCircle2,
+    Check,
     Plus,
     X,
     Eye,
@@ -636,14 +637,12 @@ export default function AdminNewProductPage() {
                                                     }}
                                                 >
                                                     <span className="text-[10px] font-black uppercase tracking-widest">{cat.name}</span>
-                                                    <Checkbox
-                                                        id={cat.id}
-                                                        checked={isSelected}
-                                                        className={cn(
-                                                            "rounded-none border-none pointer-events-none",
-                                                            isSelected ? "bg-white text-black" : "bg-white/20"
-                                                        )}
-                                                    />
+                                                    <div className={cn(
+                                                        "w-4 h-4 border flex items-center justify-center transition-all",
+                                                        isSelected ? "bg-white border-white" : "border-white/20"
+                                                    )}>
+                                                        {isSelected && <Check className="w-3 h-3 text-black" />}
+                                                    </div>
                                                 </div>
                                             );
                                         })}

@@ -9,6 +9,7 @@ import {
     Sparkles,
     Image as ImageIcon,
     CheckCircle2,
+    Check,
     Plus,
     X,
     Eye,
@@ -169,7 +170,7 @@ export default function AdminEditProductPage() {
                     setActiveImageIndex(prev.length)
                     return next
                 })
-                
+
                 toast({
                     title: "UPLOAD SUCCESS",
                     description: `${newUrls.length} assets successfully transmitted.`,
@@ -768,14 +769,12 @@ export default function AdminEditProductPage() {
                                                     }}
                                                 >
                                                     <span className="text-[10px] font-black uppercase tracking-widest">{cat.name}</span>
-                                                    <Checkbox
-                                                        id={cat.id}
-                                                        checked={isSelected}
-                                                        className={cn(
-                                                            "rounded-none border-none pointer-events-none",
-                                                            isSelected ? "bg-white text-black" : "bg-white/20"
-                                                        )}
-                                                    />
+                                                    <div className={cn(
+                                                        "w-4 h-4 border flex items-center justify-center transition-all",
+                                                        isSelected ? "bg-white border-white" : "border-white/20"
+                                                    )}>
+                                                        {isSelected && <Check className="w-3 h-3 text-black" />}
+                                                    </div>
                                                 </div>
                                             );
                                         })}
@@ -843,8 +842,8 @@ export default function AdminEditProductPage() {
                                                         ? option === "ACTIVE"
                                                             ? "border-black bg-black text-white"
                                                             : option === "DRAFT"
-                                                            ? "border-gray-400 bg-gray-400 text-white"
-                                                            : "border-red-500 bg-red-500 text-white"
+                                                                ? "border-gray-400 bg-gray-400 text-white"
+                                                                : "border-red-500 bg-red-500 text-white"
                                                         : "border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200"
                                                 )}
                                             >
