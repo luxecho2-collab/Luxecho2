@@ -342,6 +342,7 @@ export default function ProductsPage() {
                 {/* Products Grid - Responsive Spacing & Columns */}
                 <main className="flex-grow p-4 md:p-8 lg:p-12 overflow-hidden bg-gray-50/30">
 
+
                     <div className="mb-8 flex items-center justify-between lg:hidden">
                         <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-gray-400">
                             Showing <span className="text-black">{data?.items.length ?? 0}</span> Results

@@ -28,18 +28,40 @@ export async function POST(req: Request) {
         })
 
         if (order && order.paymentStatus !== "PAID") {
-            await db.$transaction([
-                db.order.update({
+            await db.$transaction(async (tx) => {
+                // Update order status
+                await tx.order.update({
                     where: { id: order.id },
                     data: {
                         status: "PROCESSING",
                         paymentStatus: "PAID",
                         paidAt: new Date(),
                     }
-                }),
-                // Inventory is usually handled in verifyPayment, 
-                // but this acts as a backup if client fails.
-            ])
+                })
+
+                // Backup Inventory Update
+                for (const item of order.items) {
+                    if (item.variantId) {
+                        await tx.productVariant.update({
+                            where: { id: item.variantId },
+                            data: { quantity: { decrement: item.quantity } },
+                        })
+                    } else {
+                        await tx.product.update({
+                            where: { id: item.productId },
+                            data: { quantity: { decrement: item.quantity } },
+                        })
+                    }
+                }
+
+                // Backup Coupon usage
+                if (order.couponCode) {
+                    await tx.coupon.update({
+                        where: { code: order.couponCode },
+                        data: { usageCount: { increment: 1 } }
+                    })
+                }
+            })
 
             await emailService.sendOrderConfirmation(order)
         }

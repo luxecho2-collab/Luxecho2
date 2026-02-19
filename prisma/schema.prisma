@@ -259,6 +259,7 @@ model Order {
   billingAddress    Json?
   paymentMethod     String?
   paymentId         String?
+  couponCode        String?
   notes             String?
   paidAt            DateTime?
   fulfilledAt       DateTime?

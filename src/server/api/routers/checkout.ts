@@ -81,6 +81,7 @@ export const checkoutRouter = createTRPCRouter({
                         discount: discountValue,
                         shippingAddress: input.shippingAddress as any,
                         paymentId: razorpayOrder.id,
+                        couponCode: input.couponCode?.toUpperCase(),
                         status: "PENDING",
                         paymentStatus: "PENDING",
                         items: {
@@ -182,6 +183,14 @@ export const checkoutRouter = createTRPCRouter({
                             paymentId: input.razorpay_payment_id,
                         }
                     })
+
+                    // Handle coupon usage increment if applicable
+                    if (updatedOrder.couponCode) {
+                        await tx.coupon.update({
+                            where: { code: updatedOrder.couponCode },
+                            data: { usageCount: { increment: 1 } }
+                        })
+                    }
 
                     return updatedOrder
                 })
