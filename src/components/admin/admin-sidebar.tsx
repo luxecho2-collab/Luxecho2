@@ -12,6 +12,8 @@ import {
     Tag as TagIcon,
     FileText,
     Layers,
+    Truck,
+    Percent,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -28,6 +30,8 @@ export function AdminSidebar() {
         { name: "Filter Attributes", icon: TagIcon, href: "/admin/attributes" },
         { name: "Orders & Fulfillment", icon: ShoppingBag, href: "/admin/orders" },
         { name: "Customer Relations (CRM)", icon: Users, href: "/admin/customers" },
+        { name: "Coupon Codes", icon: Percent, href: "/admin/coupons" },
+        { name: "Shipping Settings", icon: Truck, href: "/admin/shipping" },
         { name: "Blog Editorial", icon: FileText, href: "/admin/blog" },
     ]
 

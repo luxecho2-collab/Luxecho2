@@ -2,63 +2,104 @@
 
 import * as React from "react"
 import { useSearchParams } from "next/navigation"
-import { api } from "@/trpc/react"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, Package, ArrowRight, ShoppingBag } from "lucide-react"
+import { CheckCircle2, Package, ShoppingBag, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { useCart } from "@/store/use-cart"
 
 function OrderSuccessContent() {
     const searchParams = useSearchParams()
     const orderId = searchParams.get("id")
+    const { clearCart } = useCart()
+
+    React.useEffect(() => {
+        if (orderId) {
+            clearCart()
+        }
+    }, [orderId, clearCart])
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-16">
+
+            {/* Animated check mark */}
             <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="max-w-2xl w-full bg-charcoal border-4 border-white/10 p-8 md:p-16 text-center space-y-8 relative overflow-hidden"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 18, delay: 0.1 }}
+                className="w-24 h-24 bg-black flex items-center justify-center mb-10"
             >
-                {/* Decorative Elements */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 -rotate-45 translate-x-16 -translate-y-16" />
+                <CheckCircle2 className="w-12 h-12 text-white" strokeWidth={1.5} />
+            </motion.div>
 
-                <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-full bg-white/10 mb-4">
-                    <CheckCircle2 className="w-12 h-12 text-white" />
-                </div>
+            {/* Headline */}
+            <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.5 }}
+                className="text-center space-y-4 mb-10"
+            >
+                <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tight text-black leading-none">
+                    Payment<br />
+                    <span className="text-black/20">Confirmed</span>
+                </h1>
+                <p className="text-sm text-black/50 font-medium max-w-sm mx-auto leading-relaxed">
+                    Your transaction was successful. We are now prepping your order for delivery.
+                </p>
+            </motion.div>
 
-                <div className="space-y-4">
-                    <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter text-white">
-                        PAYMENT <span className="text-gray-400">CONFIRMED</span>
-                    </h1>
-                    <p className="text-muted-foreground font-medium max-w-md mx-auto">
-                        Your transaction was successful. We are now prepping your order for delivery.
+            {/* Order reference box */}
+            {orderId && (
+                <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4, duration: 0.45 }}
+                    className="border border-black/10 bg-gray-50 px-10 py-6 text-center mb-10 w-full max-w-sm"
+                >
+                    <p className="text-[10px] font-black uppercase tracking-[0.25em] text-black/40 mb-2">
+                        Order Reference
                     </p>
-                </div>
+                    <p className="text-2xl font-black text-black tracking-wider tabular-nums">
+                        #{orderId.slice(-8).toUpperCase()}
+                    </p>
+                </motion.div>
+            )}
 
-                {orderId && (
-                    <div className="bg-deep-black p-6 border-2 border-charcoal space-y-2">
-                        <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">Order Reference</p>
-                        <p className="text-xl font-black text-white tabular-nums">#{orderId.slice(-8).toUpperCase()}</p>
-                    </div>
-                )}
+            {/* CTA buttons */}
+            <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.55, duration: 0.45 }}
+                className="flex flex-col sm:flex-row gap-3 w-full max-w-sm mb-10"
+            >
+                <Link href="/products" className="flex-1">
+                    <Button
+                        variant="outline"
+                        className="w-full h-14 rounded-none border border-black/20 text-black font-black uppercase tracking-widest text-xs hover:bg-black/5 transition-all gap-2"
+                    >
+                        <ShoppingBag className="w-4 h-4" />
+                        Continue Shopping
+                    </Button>
+                </Link>
+                <Link href="/account/orders" className="flex-1">
+                    <Button
+                        className="w-full h-14 rounded-none bg-black text-white font-black uppercase tracking-widest text-xs hover:bg-black/90 transition-all gap-2"
+                    >
+                        View Order Status
+                        <ArrowRight className="w-4 h-4" />
+                    </Button>
+                </Link>
+            </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-8">
-                    <Link href="/products">
-                        <Button variant="outline" className="w-full h-16 rounded-none border-2 border-white text-white font-black uppercase italic tracking-widest hover:bg-white hover:text-black transition-all">
-                            Continue shopping
-                        </Button>
-                    </Link>
-                    <Link href="/account/orders">
-                        <Button className="w-full h-16 rounded-none bg-white text-black font-black uppercase italic tracking-widest shadow-[8px_8px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-                            View order status
-                        </Button>
-                    </Link>
-                </div>
-
-                <div className="pt-8 flex items-center justify-center gap-2 text-[10px] font-black uppercase text-muted-foreground">
-                    <Package className="w-4 h-4" />
-                    Secure fulfillment guaranteed.
-                </div>
+            {/* Trust badge */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7, duration: 0.4 }}
+                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black/30"
+            >
+                <Package className="w-3.5 h-3.5" />
+                Secure Fulfillment Guaranteed
             </motion.div>
         </div>
     )
@@ -66,7 +107,16 @@ function OrderSuccessContent() {
 
 export default function OrderSuccessPage() {
     return (
-        <React.Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center uppercase font-black italic">Processing Order...</div>}>
+        <React.Suspense
+            fallback={
+                <div className="min-h-screen bg-white flex items-center justify-center">
+                    <div className="text-center space-y-4">
+                        <div className="w-12 h-12 border-2 border-black/10 border-t-black rounded-full animate-spin mx-auto" />
+                        <p className="text-xs font-black uppercase tracking-widest text-black/40">Processing Order...</p>
+                    </div>
+                </div>
+            }
+        >
             <OrderSuccessContent />
         </React.Suspense>
     )

@@ -75,6 +75,7 @@ export const checkoutRouter = createTRPCRouter({
                 const order = await ctx.db.order.create({
                     data: {
                         orderNumber: `FUNK-${nanoid(6).toUpperCase()}`,
+                        userId: ctx.session?.user?.id,
                         email: input.customerInfo.email,
                         total: finalAmount,
                         subtotal: input.amount,
@@ -201,4 +202,16 @@ export const checkoutRouter = createTRPCRouter({
                 throw new Error("Failed to process order")
             }
         }),
+
+    getShippingSettings: publicProcedure.query(async ({ ctx }) => {
+        const settings = await ctx.db.siteSettings.findMany({
+            where: { key: { in: ["express_shipping_price", "express_shipping_label", "express_shipping_days"] } }
+        })
+        const map = Object.fromEntries(settings.map((s: { key: string; value: string }) => [s.key, s.value]))
+        return {
+            expressPrice: parseFloat(map["express_shipping_price"] ?? "2000"),
+            expressLabel: map["express_shipping_label"] ?? "Express Shipping",
+            expressDays: map["express_shipping_days"] ?? "1–2 Business Days",
+        }
+    }),
 })

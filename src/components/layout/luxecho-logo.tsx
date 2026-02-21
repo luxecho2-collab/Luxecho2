@@ -21,7 +21,7 @@ export function LuxechoLogo({ className, size = 32, animate = true }: LuxechoLog
             transition={{ duration: 0.8, ease: "easeOut" }}
         >
             <Image
-                src="/logo.png"
+                src="/Logo.png"
                 alt="Luxecho Logo"
                 fill
                 className="object-contain"

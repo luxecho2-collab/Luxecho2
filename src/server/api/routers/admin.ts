@@ -71,11 +71,67 @@ export const adminRouter = createTRPCRouter({
         }))
         .query(async ({ ctx, input }) => {
             return ctx.db.order.findMany({
+                where: { paymentStatus: "PAID" },
                 skip: input.skip,
                 take: input.take,
                 orderBy: { createdAt: "desc" },
                 include: {
-                    user: true,
+                    user: { select: { name: true, email: true } },
+                    items: {
+                        include: {
+                            product: { select: { id: true, name: true } }
+                        }
+                    }
+                }
+            })
+        }),
+
+    getOrderDetails: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .query(async ({ ctx, input }) => {
+            return ctx.db.order.findUnique({
+                where: { id: input.id },
+                include: {
+                    user: { select: { name: true, email: true } },
+                    items: {
+                        include: {
+                            product: { select: { name: true, images: true } },
+                            variant: { select: { name: true, optionValues: { select: { value: true, option: { select: { name: true } } } } } }
+                        }
+                    }
+                }
+            })
+        }),
+
+    updateOrderStatus: adminProcedure
+        .input(z.object({
+            id: z.string(),
+            status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]),
+            fulfillmentStatus: z.enum(["UNFULFILLED", "PARTIALLY_FULFILLED", "FULFILLED", "RESTOCKED"]).optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.order.update({
+                where: { id: input.id },
+                data: {
+                    status: input.status,
+                    fulfillmentStatus: input.fulfillmentStatus,
+                    fulfilledAt: input.status === "DELIVERED" ? new Date() : undefined
+                }
+            })
+        }),
+
+    updateOrderTracking: adminProcedure
+        .input(z.object({
+            id: z.string(),
+            trackingNumber: z.string().optional(),
+            trackingUrl: z.string().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.order.update({
+                where: { id: input.id },
+                data: {
+                    trackingNumber: input.trackingNumber || null,
+                    trackingUrl: input.trackingUrl || null,
                 }
             })
         }),
@@ -173,23 +229,7 @@ export const adminRouter = createTRPCRouter({
             })
         }),
 
-    updateOrderStatus: adminProcedure
-        .input(z.object({
-            orderId: z.string(),
-            status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]),
-            notes: z.string().optional(),
-            trackingNumber: z.string().optional(),
-        }))
-        .mutation(async ({ ctx, input }) => {
-            return ctx.db.order.update({
-                where: { id: input.orderId },
-                data: {
-                    status: input.status as any,
-                    notes: input.notes,
-                    paymentMethod: input.trackingNumber ? `TRACKING:${input.trackingNumber}` : undefined // Simple way to store tracking if field not added
-                }
-            })
-        }),
+
 
     updateProductQuantity: adminProcedure
         .input(z.object({
@@ -298,7 +338,7 @@ export const adminRouter = createTRPCRouter({
             discountValue: z.number().positive(),
             minOrderAmount: z.number().optional(),
             usageLimit: z.number().optional(),
-            endDate: z.date().optional(),
+            endDate: z.coerce.date().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
             return ctx.db.coupon.create({
@@ -441,6 +481,8 @@ export const adminRouter = createTRPCRouter({
             })
             return product
         }),
+
+
 
     updateProduct: adminProcedure
         .input(z.object({
@@ -667,5 +709,45 @@ export const adminRouter = createTRPCRouter({
         .input(z.object({ id: z.string() }))
         .mutation(async ({ ctx, input }) => {
             return ctx.db.announcement.delete({ where: { id: input.id } })
+        }),
+
+    // ── Shipping Settings ─────────────────────────────────────────────
+    getShippingSettings: adminProcedure.query(async ({ ctx }) => {
+        const settings = await ctx.db.siteSettings.findMany({
+            where: { key: { in: ["express_shipping_price", "express_shipping_label", "express_shipping_days"] } }
+        })
+        const map = Object.fromEntries(settings.map(s => [s.key, s.value]))
+        return {
+            expressPrice: parseFloat(map["express_shipping_price"] ?? "2000"),
+            expressLabel: map["express_shipping_label"] ?? "Express Shipping",
+            expressDays: map["express_shipping_days"] ?? "1–2 Business Days",
+        }
+    }),
+
+    updateShippingSettings: adminProcedure
+        .input(z.object({
+            expressPrice: z.number().min(0),
+            expressLabel: z.string().min(1),
+            expressDays: z.string().min(1),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            await ctx.db.$transaction([
+                ctx.db.siteSettings.upsert({
+                    where: { key: "express_shipping_price" },
+                    create: { key: "express_shipping_price", value: String(input.expressPrice) },
+                    update: { value: String(input.expressPrice) },
+                }),
+                ctx.db.siteSettings.upsert({
+                    where: { key: "express_shipping_label" },
+                    create: { key: "express_shipping_label", value: input.expressLabel },
+                    update: { value: input.expressLabel },
+                }),
+                ctx.db.siteSettings.upsert({
+                    where: { key: "express_shipping_days" },
+                    create: { key: "express_shipping_days", value: input.expressDays },
+                    update: { value: input.expressDays },
+                }),
+            ])
+            return { success: true }
         }),
 })

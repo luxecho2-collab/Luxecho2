@@ -37,6 +37,7 @@ import FloatingSettings from "@/components/ui/floating-settings";
 import { SettingsProvider } from "@/contexts/settings-context";
 import { NavSpacer } from "@/components/layout/nav-spacer"
 import { AnnouncementBar } from "@/components/home/announcement-bar"
+import { Toaster } from "@/components/ui/toaster"
 
 export default function RootLayout({
   children,
@@ -62,6 +63,7 @@ export default function RootLayout({
                 {children}
               </main>
               <Footer />
+              <Toaster />
             </AuthProvider>
           </ThemeProvider>
         </TRPCReactProvider>
