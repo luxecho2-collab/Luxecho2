@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss"
+import tailwindAnimate from "tailwindcss-animate"
 
 const config = {
 	darkMode: ["class"],
@@ -118,7 +119,7 @@ const config = {
 			'ease-out-quad': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [tailwindAnimate],
 } satisfies Config
 
 export default config

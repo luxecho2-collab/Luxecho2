@@ -1,8 +1,11 @@
 import { z } from "zod"
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc"
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc"
+import { TRPCError } from "@trpc/server"
 import Razorpay from "razorpay"
 import { nanoid } from "nanoid"
 import crypto from "crypto"
+
+import { sendEmail } from "@/lib/email"
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID ?? "rzp_test_placeholder",
@@ -16,6 +19,7 @@ export const checkoutRouter = createTRPCRouter({
             currency: z.string().default("INR"),
             customerInfo: z.object({
                 email: z.string().email(),
+                phone: z.string().min(10, "Phone number is required"),
                 firstName: z.string(),
                 lastName: z.string(),
             }),
@@ -77,10 +81,16 @@ export const checkoutRouter = createTRPCRouter({
                         orderNumber: `FUNK-${nanoid(6).toUpperCase()}`,
                         userId: ctx.session?.user?.id,
                         email: input.customerInfo.email,
+                        phone: input.customerInfo.phone,
                         total: finalAmount,
                         subtotal: input.amount,
                         discount: discountValue,
-                        shippingAddress: input.shippingAddress as any,
+                        shippingAddress: {
+                            ...input.shippingAddress,
+                            phone: input.customerInfo.phone,
+                            firstName: input.customerInfo.firstName,
+                            lastName: input.customerInfo.lastName,
+                        } as any,
                         paymentId: razorpayOrder.id,
                         couponCode: input.couponCode?.toUpperCase(),
                         status: "PENDING",
@@ -159,8 +169,14 @@ export const checkoutRouter = createTRPCRouter({
                     if (!order) throw new Error("Order not found")
                     if (order.paymentStatus === "PAID") return order
 
-                    // Update inventory
+                    // Update inventory and tracking
                     for (const item of order.items) {
+                        // Increment salesCount always
+                        await tx.product.update({
+                            where: { id: item.productId },
+                            data: { salesCount: { increment: item.quantity } },
+                        })
+
                         if (item.variantId) {
                             await tx.productVariant.update({
                                 where: { id: item.variantId },
@@ -193,6 +209,26 @@ export const checkoutRouter = createTRPCRouter({
                         })
                     }
 
+                    // Send Order Confirmation Email
+                    await sendEmail({
+                        to: updatedOrder.email,
+                        subject: `Order Confirmation - #${updatedOrder.orderNumber}`,
+                        html: `
+                            <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto;">
+                                <h1 style="color: #000; text-transform: uppercase; font-style: italic;">Order Confirmed!</h1>
+                                <p>Thank you for shopping with Luxecho. Your payment was successful.</p>
+                                <div style="background: #f9f9f9; padding: 20px; border: 1px solid #eee; margin-top: 20px;">
+                                    <p><strong>Order Number:</strong> ${updatedOrder.orderNumber}</p>
+                                    <p><strong>Status:</strong> Processing</p>
+                                    <p><strong>Total:</strong> ₹${updatedOrder.total.toLocaleString()}</p>
+                                </div>
+                                <p style="margin-top: 20px; font-size: 12px; color: #666;">
+                                    You will receive another email when your order ships.
+                                </p>
+                            </div>
+                        `
+                    })
+
                     return updatedOrder
                 })
 
@@ -214,4 +250,58 @@ export const checkoutRouter = createTRPCRouter({
             expressDays: map["express_shipping_days"] ?? "1–2 Business Days",
         }
     }),
+
+    requestCancellation: protectedProcedure
+        .input(z.object({ orderId: z.string(), reason: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const order = await ctx.db.order.findUnique({
+                where: { id: input.orderId }
+            })
+
+            if (!order || order.userId !== ctx.session.user.id) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" })
+            }
+
+            if (order.status !== "PENDING" && order.status !== "PROCESSING") {
+                throw new TRPCError({
+                    code: "PRECONDITION_FAILED",
+                    message: "Order cannot be cancelled in its current state"
+                })
+            }
+
+            return ctx.db.order.update({
+                where: { id: input.orderId },
+                data: {
+                    status: "CANCEL_REQUESTED",
+                    cancelReason: input.reason
+                }
+            })
+        }),
+
+    requestReturn: protectedProcedure
+        .input(z.object({ orderId: z.string(), reason: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const order = await ctx.db.order.findUnique({
+                where: { id: input.orderId }
+            })
+
+            if (!order || order.userId !== ctx.session.user.id) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" })
+            }
+
+            if (order.status !== "SHIPPED" && order.status !== "DELIVERED") {
+                throw new TRPCError({
+                    code: "PRECONDITION_FAILED",
+                    message: "Order is not eligible for return"
+                })
+            }
+
+            return ctx.db.order.update({
+                where: { id: input.orderId },
+                data: {
+                    status: "RETURN_REQUESTED",
+                    returnReason: input.reason
+                }
+            })
+        }),
 })

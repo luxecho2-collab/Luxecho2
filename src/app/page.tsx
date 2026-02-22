@@ -7,14 +7,13 @@ import NextImage from "next/image"
 import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import "./brand.css"
-import { FeaturedCollections } from "@/components/home/featured-collections"
 
 /* ─── Data ─────────────────────────────────────────────────────────── */
 const WAVES = [
   {
     id: "wave-01",
     num: "01",
-    label: "Collective — 001 / VARSITY",
+    label: "001 / VARSITY",
     title: "VARSITY",
     sub: "POOLSIDE",
     accent: "DROP.",
@@ -25,7 +24,7 @@ const WAVES = [
   {
     id: "wave-02",
     num: "02",
-    label: "Collection — 002 / URBAN",
+    label: "002 / URBAN",
     title: "URBAN",
     sub: "LUXURY",
     accent: "EVOLVED.",
@@ -36,7 +35,7 @@ const WAVES = [
   {
     id: "wave-03",
     num: "03",
-    label: "Collection — 003 / UTILITY",
+    label: "003 / UTILITY",
     title: "UTILITY",
     sub: "AESTHETIC",
     accent: "CORE.",
@@ -78,7 +77,7 @@ function GenderSplit() {
             src={cat.image}
             alt={cat.label}
             fill
-            className="object-cover object-top transition-transform duration-[2s] ease-out group-hover:scale-[1.04]"
+            className="object-cover object-top transition-transform duration-&lsqb;2s&rsqb; ease-out group-hover:scale-[1.04]"
             sizes="50vw"
             unoptimized
           />
@@ -100,7 +99,7 @@ function GenderSplit() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
           >
-            <span className="block text-white/40 text-[9px] font-black uppercase tracking-[0.5em] mb-3">SS 2026 Collection</span>
+            <span className="block text-white/40 text-[9px] font-black uppercase tracking-[0.5em] mb-3">SS 2026</span>
             <h2 className="font-barlow font-black uppercase leading-[0.85] tracking-[-0.02em]">
               <span className="block text-white text-[12vw] md:text-[7vw] lg:text-[6rem] xl:text-[7rem]">{cat.label}</span>
               <span className="block text-white/20 text-[8vw] md:text-[4vw] lg:text-[3.5rem] xl:text-[4rem] italic">{cat.sub}</span>
@@ -116,91 +115,6 @@ function GenderSplit() {
   )
 }
 
-/* ─── Collection Banner: compact 3-tile row ─────────────────────────── */
-function CollectionBanner() {
-  const tiles = [
-    {
-      num: "001",
-      name: "VARSITY",
-      tag: "Poolside Edition",
-      image: "/assets/images/brand/mens_emerald_varsity_poolside_1771586994342.png",
-      href: "/products",
-    },
-    {
-      num: "002",
-      name: "URBAN",
-      tag: "Rooftop Series",
-      image: "/assets/images/brand/womens_navy_varsity_rooftop_1771587018168.png",
-      href: "/products",
-    },
-    {
-      num: "003",
-      name: "UTILITY",
-      tag: "Street Aesthetic",
-      image: "/assets/images/brand/mens_beige_utility_urban_1771587038435.png",
-      href: "/products",
-    },
-  ]
-
-  return (
-    <section className="w-full bg-[#0a0a0a] py-4 border-t border-white/5">
-      {/* Section header */}
-      <div className="flex items-center justify-between px-8 lg:px-16 py-8">
-        <div className="flex items-center gap-4">
-          <div className="w-8 h-px bg-rose-600" />
-          <span className="text-[9px] font-black uppercase tracking-[0.6em] text-white/40">Collections — 001</span>
-        </div>
-        <Link
-          href="/products"
-          className="text-[9px] font-black uppercase tracking-[0.4em] text-white/40 hover:text-white transition-colors flex items-center gap-3 group"
-        >
-          View All
-          <span className="w-4 h-px bg-white/30 group-hover:w-8 group-hover:bg-white transition-all duration-500" />
-        </Link>
-      </div>
-
-      {/* Tiles */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/5">
-        {tiles.map((tile, idx) => (
-          <motion.div
-            key={tile.num}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: idx * 0.12, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
-            className="group relative aspect-[4/3] overflow-hidden bg-[#0a0a0a]"
-          >
-            <NextImage
-              src={tile.image}
-              alt={tile.name}
-              fill
-              className="object-cover object-top transition-transform duration-[2s] ease-out group-hover:scale-[1.06]"
-              sizes="33vw"
-              unoptimized
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-70" />
-
-            {/* Oversized watermark num */}
-            <div className="absolute top-6 right-6 text-[8rem] font-barlow font-black text-white/[0.05] leading-none pointer-events-none select-none">
-              {tile.num}
-            </div>
-
-            <div className="absolute bottom-0 left-0 p-8 z-10">
-              <span className="block text-rose-600 text-[8px] font-black uppercase tracking-[0.5em] mb-2">{tile.tag}</span>
-              <h3 className="font-barlow font-black uppercase text-white text-4xl lg:text-5xl leading-none tracking-tight">{tile.name}</h3>
-              <Link
-                href={tile.href}
-                className="inline-flex items-center gap-2 mt-4 text-[8px] font-black uppercase tracking-[0.4em] text-white/40 group-hover:text-white transition-colors duration-500"
-              >
-                Shop Drop <span className="w-4 h-px bg-current" />
-              </Link>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </section>
-  )
-}
 
 /* ─── Wave Section: 50/50 editorial split ───────────────────────────── */
 function WaveSection({ wave }: { wave: typeof WAVES[0] }) {
@@ -233,8 +147,7 @@ function WaveSection({ wave }: { wave: typeof WAVES[0] }) {
         {/* Bottom fade */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
 
-        {/* Large watermark number over image */}
-        <div className="absolute bottom-8 right-8 text-[18vw] font-barlow font-black text-white/[0.06] leading-none pointer-events-none select-none">
+        <div className="absolute bottom-8 right-8 text-[18vw] font-barlow font-black text-black/[0.04] leading-none pointer-events-none select-none">
           {wave.num}
         </div>
       </div>
@@ -303,54 +216,7 @@ function Marquee() {
   )
 }
 
-/* ─── Editorial Split ───────────────────────────────────────────────── */
-function EditorialSection() {
-  return (
-    <section className="w-full bg-[#0a0a0a] grid grid-cols-1 lg:grid-cols-2 min-h-[80vh]">
-      {/* Left: Image */}
-      <div className="relative min-h-[50vh] lg:min-h-auto overflow-hidden group">
-        <NextImage
-          src="/assets/images/brand/womens_high_fashion_luxury_car_1771587292091.png"
-          alt="Editorial 2026"
-          fill
-          className="object-cover object-top transition-transform duration-[4s] ease-out group-hover:scale-[1.04]"
-          sizes="50vw"
-          unoptimized
-        />
-        <div className="absolute inset-0 bg-black/20" />
-      </div>
 
-      {/* Right: Copy */}
-      <div className="flex flex-col justify-center px-12 lg:px-20 py-20 bg-white">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1] }}
-          className="space-y-8"
-        >
-          <span className="text-rose-600 text-[9px] font-black uppercase tracking-[0.6em]">Editorial — 2026 Vision</span>
-          <h2 className="font-barlow font-black uppercase leading-[0.85] tracking-tighter text-black">
-            <span className="block text-7xl lg:text-9xl">SILHOU</span>
-            <span className="block text-7xl lg:text-9xl">ETTE</span>
-            <span className="block text-7xl lg:text-9xl text-rose-600 italic">2026</span>
-          </h2>
-          <div className="w-10 h-px bg-black/20" />
-          <p className="text-black/50 text-sm font-medium uppercase tracking-widest leading-relaxed max-w-sm">
-            We don&apos;t design clothes. We design the space between the body and everything that tries to define it.
-          </p>
-          <Link
-            href="/lookbook"
-            className="inline-flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.4em] text-black group"
-          >
-            View Lookbook
-            <span className="w-8 h-px bg-black group-hover:w-16 transition-all duration-500" />
-          </Link>
-        </motion.div>
-      </div>
-    </section>
-  )
-}
 
 /* ─── Final CTA ─────────────────────────────────────────────────────── */
 function FinalCTA() {
@@ -440,33 +306,31 @@ export default function Home() {
 
       <GenderSplit />
 
-      {WAVES.map((wave) => (
-        <div key={wave.id} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
-          <WaveSection wave={wave} />
+      <FeaturedProducts limit={4} offset={0} hideHeader />
+
+      {WAVES[0] && (
+        <div onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+          <WaveSection wave={WAVES[0]} />
         </div>
-      ))}
+      )}
 
-      <CollectionBanner />
+      <FeaturedProducts limit={4} offset={4} hideHeader />
 
-      <EditorialSection />
-
-      {/* Products */}
-      <section className="bg-[#0a0a0a] py-32">
-        <div className="container mx-auto px-6 mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <span className="block text-rose-600 text-[9px] font-black uppercase tracking-[0.8em] mb-4">Latest Drops</span>
-            <h2 className="font-barlow font-black uppercase text-white text-7xl md:text-[10rem] tracking-tighter leading-[0.85]">
-              THE<br /><span className="text-white/10">WAVES</span>
-            </h2>
-          </motion.div>
+      {WAVES[1] && (
+        <div onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+          <WaveSection wave={WAVES[1]} />
         </div>
-        <FeaturedProducts />
-      </section>
+      )}
+
+
+
+      {WAVES[2] && (
+        <div onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+          <WaveSection wave={WAVES[2]} />
+        </div>
+      )}
+
+      <FeaturedProducts limit={4} offset={8} hideHeader />
 
       <div onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
         <FinalCTA />

@@ -80,9 +80,9 @@ export function Navbar() {
                     <div className="hidden md:flex items-center">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className={cn("p-2 -ml-2 transition-colors", isTransparent ? "text-white hover:text-white/80 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" : "hover:text-brand-copper")}
+                            className={cn("p-2 -ml-2 transition-all duration-300", isTransparent ? "text-white hover:scale-110 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" : "hover:text-brand-copper")}
                         >
-                            <Menu className={cn(isTransparent ? "w-8 h-8" : "w-7 h-7")} strokeWidth={isTransparent ? 2 : 1} />
+                            <Menu className={cn(isTransparent ? "w-8 h-8" : "w-7 h-7")} strokeWidth={isTransparent ? 2.5 : 1.5} />
                         </button>
                     </div>
 
@@ -90,44 +90,44 @@ export function Navbar() {
                     <div className="md:hidden flex items-center">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className={cn("p-2 -ml-2 transition-colors", isTransparent ? "text-white hover:text-white/80 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" : "hover:text-brand-copper")}
+                            className={cn("p-2 -ml-2 transition-all duration-300", isTransparent ? "text-white hover:scale-110 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" : "hover:text-brand-copper")}
                         >
-                            <Menu className={cn(isTransparent ? "w-8 h-8" : "w-7 h-7")} strokeWidth={isTransparent ? 2 : 1} />
+                            <Menu className={cn(isTransparent ? "w-8 h-8" : "w-7 h-7")} strokeWidth={isTransparent ? 2.5 : 1.5} />
                         </button>
                     </div>
 
                     {/* Centralized Logo */}
                     <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3 group">
                         <LuxechoLogo size={48} className="group-hover:scale-105 transition-transform duration-700" />
-                        <span className={cn("text-2xl font-serif tracking-tight group-hover:tracking-wider transition-all duration-700 font-bold", isTransparent ? "text-white" : "text-brand-charcoal")}>
+                        <span className={cn("text-2xl font-serif tracking-tight group-hover:tracking-wider transition-all duration-700 font-black", isTransparent ? "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]" : "text-brand-charcoal")}>
                             luxecho
                         </span>
                     </Link>
 
                     {/* Right Actions */}
-                    <div className={cn("flex items-center gap-0 md:gap-2", isTransparent ? "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" : "text-brand-charcoal")}>
+                    <div className={cn("flex items-center gap-0 md:gap-2", isTransparent ? "text-white" : "text-brand-charcoal")}>
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => setIsSearchOpen(true)}
-                            className="hover:bg-white/10 w-10 h-10"
+                            className={cn("w-10 h-10 transition-all duration-300", isTransparent ? "hover:bg-white/20 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" : "hover:bg-black/5")}
                         >
-                            <Search className={cn(isTransparent ? "w-7 h-7" : "w-6 h-6")} strokeWidth={isTransparent ? 2 : 1.2} />
+                            <Search className={cn(isTransparent ? "w-7 h-7" : "w-6 h-6")} strokeWidth={isTransparent ? 2.5 : 1.5} />
                         </Button>
                         <Link href="/account" className="hidden md:block">
-                            <Button variant="ghost" size="icon" className="hover:bg-white/10 w-10 h-10">
-                                <User className={cn(isTransparent ? "w-7 h-7" : "w-6 h-6")} strokeWidth={isTransparent ? 2 : 1.2} />
+                            <Button variant="ghost" size="icon" className={cn("w-10 h-10 transition-all duration-300", isTransparent ? "hover:bg-white/20 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" : "hover:bg-black/5")}>
+                                <User className={cn(isTransparent ? "w-7 h-7" : "w-6 h-6")} strokeWidth={isTransparent ? 2.5 : 1.5} />
                             </Button>
                         </Link>
                         <Link href="/account/wishlist" className="hidden md:block">
-                            <Button variant="ghost" size="icon" className="hover:bg-white/10 w-10 h-10 relative">
-                                <Heart className={cn(isTransparent ? "w-7 h-7" : "w-6 h-6")} strokeWidth={isTransparent ? 2 : 1.2} />
+                            <Button variant="ghost" size="icon" className={cn("w-10 h-10 transition-all duration-300 relative", isTransparent ? "hover:bg-white/20 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" : "hover:bg-black/5")}>
+                                <Heart className={cn(isTransparent ? "w-7 h-7" : "w-6 h-6")} strokeWidth={isTransparent ? 2.5 : 1.5} />
                                 {wishlistCount > 0 && (
                                     <span className={cn("absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full", isTransparent ? "bg-white" : "bg-black")} />
                                 )}
                             </Button>
                         </Link>
-                        <CartDrawer />
+                        <CartDrawer isTransparent={isTransparent} />
                     </div>
 
                     <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

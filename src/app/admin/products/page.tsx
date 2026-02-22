@@ -43,8 +43,10 @@ import {
 } from "@/components/ui/sheet"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useAdmin } from "@/contexts/admin-context"
 
 export default function AdminProductsPage() {
+    const { isSidebarCollapsed } = useAdmin()
     const { toast } = useToast()
     const utils = api.useUtils()
     const [searchQuery, setSearchQuery] = React.useState("")
@@ -72,6 +74,8 @@ export default function AdminProductsPage() {
         minPrice,
         maxPrice,
         lowStock: lowStockOnly
+    }, {
+        refetchInterval: 5000, // Poll every 5 seconds for "real-time" feel
     })
 
     const resetFilters = () => {
@@ -92,14 +96,20 @@ export default function AdminProductsPage() {
 
     return (
         <div className="flex min-h-screen bg-white text-black">
-            <main className="flex-grow p-10 lg:p-16 space-y-16 max-w-7xl mx-auto">
+            <main className={cn(
+                "flex-grow p-10 lg:p-16 space-y-16 mx-auto transition-all duration-500",
+                isSidebarCollapsed ? "max-w-[1600px]" : "max-w-7xl"
+            )}>
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
                     <div className="space-y-4">
                         <Link href="/admin" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-all group">
                             <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
                             Back to Center
                         </Link>
-                        <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none text-black">
+                        <h1 className={cn(
+                            "font-black uppercase tracking-tighter leading-none text-black transition-all duration-500",
+                            isSidebarCollapsed ? "text-6xl md:text-8xl" : "text-5xl md:text-7xl"
+                        )}>
                             PRODUCT <span className="text-gray-200">LEDGER</span>
                         </h1>
                     </div>
@@ -302,12 +312,24 @@ export default function AdminProductsPage() {
                                         </div>
                                     </td>
                                     <td className="p-8">
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center gap-2 text-[9px] font-black uppercase text-gray-300">
-                                                <Eye className="w-3 h-3" /> {product.viewCount} Views
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-blue-600 border-b-2 border-r-2 border-blue-800 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                                                <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-white">
+                                                    <Eye className="w-3 h-3" /> VIEWS
+                                                </div>
+                                                <span className="text-[11px] font-black tabular-nums text-white leading-none">{product.viewCount}</span>
                                             </div>
-                                            <div className="flex items-center gap-2 text-[9px] font-black uppercase text-black">
-                                                <ShoppingBag className="w-3 h-3" /> {product.salesCount} Sales
+                                            <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-amber-500 border-b-2 border-r-2 border-amber-700 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                                                <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-white">
+                                                    <ShoppingBag className="w-3 h-3" /> ADDED
+                                                </div>
+                                                <span className="text-[11px] font-black tabular-nums text-white leading-none">{product.addToCartCount}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-emerald-500 border-b-2 border-r-2 border-emerald-700 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                                                <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-white">
+                                                    <CheckIcon className="w-3 h-3" /> SOLD
+                                                </div>
+                                                <span className="text-[11px] font-black tabular-nums text-white leading-none">{product.salesCount}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -321,9 +343,11 @@ export default function AdminProductsPage() {
                                                     <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-gray-100 transition-all rounded-none"><MoreVertical className="w-4 h-4" /></Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="rounded-none border-gray-100 min-w-[160px]">
-                                                    <DropdownMenuItem className="p-3 text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-50">
-                                                        <ExternalLink className="w-3 h-3 mr-3" /> External View
-                                                    </DropdownMenuItem>
+                                                    <Link href={`/product/${product.slug}`} target="_blank">
+                                                        <DropdownMenuItem className="p-3 text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-50">
+                                                            <ExternalLink className="w-3 h-3 mr-3" /> External View
+                                                        </DropdownMenuItem>
+                                                    </Link>
                                                     <DropdownMenuItem
                                                         onClick={() => {
                                                             if (confirm("Permanently remove this entry from manifest?")) {

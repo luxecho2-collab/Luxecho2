@@ -173,7 +173,7 @@ export default function AdminCustomersPage() {
                                     </td>
                                     <td className="p-8">
                                         <div className="space-y-1">
-                                            <p className="font-black uppercase text-sm tracking-tighter">${user.totalSpent?.toFixed(2) || "0.00"}</p>
+                                            <p className="font-black uppercase text-sm tracking-tighter">₹{user.totalSpent?.toFixed(2) || "0.00"}</p>
                                             <p className="text-[8px] font-black text-black/20 uppercase tracking-[0.2em]">ACCUMULATED VALUE</p>
                                         </div>
                                     </td>

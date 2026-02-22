@@ -61,6 +61,7 @@ export function OrderDetailsDrawer({
 
     const [localTrackingNumber, setLocalTrackingNumber] = React.useState("")
     const [localTrackingUrl, setLocalTrackingUrl] = React.useState("")
+    const [customMessage, setCustomMessage] = React.useState("")
 
     React.useEffect(() => {
         if (order) {
@@ -139,7 +140,7 @@ export function OrderDetailsDrawer({
                                 <div className="border-2 border-black p-4">
                                     <h3 className="text-[10px] font-black uppercase tracking-widest text-black border-b border-black pb-2 mb-2">Ship To (Recipient)</h3>
                                     <p className="font-bold text-lg uppercase">
-                                        {(order.shippingAddress as any)?.firstName} {(order.shippingAddress as any)?.lastName}
+                                        {(order.shippingAddress as any)?.firstName || order.user?.name?.split(' ')[0] || "Customer"} {(order.shippingAddress as any)?.lastName || ""}
                                     </p>
                                     <div className="text-sm mt-1 space-y-0.5 font-medium">
                                         <p>{(order.shippingAddress as any)?.street}</p>
@@ -147,7 +148,7 @@ export function OrderDetailsDrawer({
                                         <p>{(order.shippingAddress as any)?.city}, {(order.shippingAddress as any)?.state} {(order.shippingAddress as any)?.pincode}</p>
                                         <p>{(order.shippingAddress as any)?.country}</p>
                                         <p className="mt-2 font-bold flex items-center gap-1">
-                                            <Phone className="w-3 h-3" /> {(order.shippingAddress as any)?.phone || "No phone provided"}
+                                            <Phone className="w-3 h-3" /> {(order.shippingAddress as any)?.phone || order.phone || "No phone provided"}
                                         </p>
                                     </div>
                                 </div>
@@ -186,9 +187,9 @@ export function OrderDetailsDrawer({
                                         {order.items.map((item: any, i: number) => (
                                             <tr key={item.id} className="border-b border-gray-200">
                                                 <td className="py-3 font-mono text-xs text-gray-500">
-                                                    {item.product.id.substring(0, 8).toUpperCase()}
+                                                    {item.product?.id ? item.product.id.substring(0, 8).toUpperCase() : (item.productId?.substring(0, 8).toUpperCase() || "DELETED")}
                                                 </td>
-                                                <td className="py-3 font-bold uppercase">{item.product.name}</td>
+                                                <td className="py-3 font-bold uppercase">{item.product?.name || "Deleted Product"}</td>
                                                 <td className="py-3 text-xs uppercase tracking-widest text-gray-500">
                                                     {item.variant ? item.variant.optionValues?.map((ov: any) => ov.value).join(", ") : "N/A"}
                                                 </td>
@@ -264,6 +265,33 @@ export function OrderDetailsDrawer({
                                         </Select>
                                     </div>
 
+                                    <div className="border-t border-gray-100 pt-6 space-y-4">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Customer Notification (Optional)</h3>
+                                        <div className="space-y-2">
+                                            <textarea
+                                                value={customMessage}
+                                                onChange={(e) => setCustomMessage(e.target.value)}
+                                                placeholder="Enter a custom note to send the customer (SMS & Email)..."
+                                                className="w-full h-24 p-4 text-sm font-medium rounded-none border border-gray-300 focus:outline-none focus:border-black resize-none"
+                                            />
+                                            <p className="text-[9px] text-gray-400 italic">E.g. "Order ready for takeaway" or "Arriving in 10 mins"</p>
+                                        </div>
+                                        <Button
+                                            onClick={() => {
+                                                updateStatus.mutate({
+                                                    id: order.id,
+                                                    status: order.status as any,
+                                                    customMessage: customMessage || undefined,
+                                                    notifyCustomer: true
+                                                })
+                                            }}
+                                            disabled={updateStatus.isPending}
+                                            className="w-full h-12 bg-black text-white hover:bg-black/90 rounded-none font-black uppercase tracking-widest text-[10px]"
+                                        >
+                                            {updateStatus.isPending ? "Sending..." : "Send Update & Notify"}
+                                        </Button>
+                                    </div>
+
                                     {order.status === "SHIPPED" && (
                                         <div className="border-t border-gray-100 pt-6 space-y-4">
                                             <h3 className="text-sm font-black uppercase tracking-widest text-black flex items-center gap-2">
@@ -290,7 +318,12 @@ export function OrderDetailsDrawer({
                                                 </div>
                                             </div>
                                             <Button
-                                                onClick={() => updateTracking.mutate({ id: order.id, trackingNumber: localTrackingNumber, trackingUrl: localTrackingUrl })}
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    e.stopPropagation()
+                                                    updateTracking.mutate({ id: order.id, trackingNumber: localTrackingNumber, trackingUrl: localTrackingUrl })
+                                                }}
                                                 disabled={updateTracking.isPending}
                                                 className="w-full h-10 rounded-none bg-black text-white hover:bg-gray-900 font-black uppercase tracking-widest text-[10px]"
                                             >
@@ -308,10 +341,10 @@ export function OrderDetailsDrawer({
                                         </h3>
                                         <div className="space-y-3 text-sm font-medium text-gray-600">
                                             <p className="font-bold text-black text-base uppercase">
-                                                {(order.shippingAddress as any)?.firstName} {(order.shippingAddress as any)?.lastName}
+                                                {(order.shippingAddress as any)?.firstName || order.user?.name?.split(' ')[0] || "Customer"} {(order.shippingAddress as any)?.lastName || ""}
                                             </p>
                                             <p className="flex gap-2"><Mail className="w-4 h-4 shrink-0 text-gray-400" /> {order.email}</p>
-                                            <p className="flex gap-2"><Phone className="w-4 h-4 shrink-0 text-gray-400" /> {(order.shippingAddress as any)?.phone || "No phone provided"}</p>
+                                            <p className="flex gap-2"><Phone className="w-4 h-4 shrink-0 text-gray-400" /> {(order.shippingAddress as any)?.phone || order.phone || "No phone provided"}</p>
 
                                             <div className="pt-2">
                                                 <p>{(order.shippingAddress as any)?.street}</p>

@@ -209,4 +209,20 @@ export const productRouter = createTRPCRouter({
             orderBy: { name: "asc" }
         })
     }),
+    incrementViewCount: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.product.update({
+                where: { id: input.id },
+                data: { viewCount: { increment: 1 } }
+            })
+        }),
+    incrementAddToCartCount: publicProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.product.update({
+                where: { id: input.id },
+                data: { addToCartCount: { increment: 1 } }
+            })
+        }),
 })

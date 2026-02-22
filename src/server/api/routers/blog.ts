@@ -102,7 +102,7 @@ export const blogRouter = createTRPCRouter({
         }))
         .mutation(async ({ ctx, input }) => {
             const { id, ...data } = input
-            const updateData: any = { ...data }
+            const updateData: Record<string, unknown> = { ...data }
 
             if (data.title) {
                 updateData.slug = `${data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${nanoid(4)}`

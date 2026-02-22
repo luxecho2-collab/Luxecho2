@@ -58,6 +58,7 @@ interface ProductFormData {
     imageUrls: string[]
     selectedCategoryIds: string[]
     sizes: string[]
+    attributes: { key: string; value: string }[]
 }
 
 const INITIAL_FORM_STATE: ProductFormData = {
@@ -76,7 +77,12 @@ const INITIAL_FORM_STATE: ProductFormData = {
     additionalInfo: "",
     imageUrls: [],
     selectedCategoryIds: [],
-    sizes: []
+    sizes: [],
+    attributes: [
+        { key: "Composition", value: "" },
+        { key: "Wash Care", value: "" },
+        { key: "Origin", value: "" }
+    ]
 }
 
 export default function AdminNewProductPage() {
@@ -204,6 +210,24 @@ export default function AdminNewProductPage() {
         setFormData(prev => ({ ...prev, sku: `LX-${random}` }))
     }
 
+    const addAttribute = () => setFormData(prev => ({
+        ...prev,
+        attributes: [...prev.attributes, { key: "", value: "" }]
+    }))
+
+    const removeAttribute = (index: number) => setFormData(prev => ({
+        ...prev,
+        attributes: prev.attributes.filter((_, i) => i !== index)
+    }))
+
+    const updateAttribute = (index: number, field: 'key' | 'value', value: string) => {
+        setFormData(prev => {
+            const newAttrs = [...prev.attributes]
+            newAttrs[index] = { ...newAttrs[index]!, [field]: value }
+            return { ...prev, attributes: newAttrs }
+        })
+    }
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const finalImageUrls = formData.imageUrls.filter(url =>
@@ -313,15 +337,49 @@ export default function AdminNewProductPage() {
                             </div>
 
                             <div className="space-y-10">
-                                <div className="space-y-3">
-                                    <Label htmlFor="productInfo" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Composition & Care</Label>
-                                    <Textarea
-                                        id="productInfo"
-                                        value={formData.productInfo}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, productInfo: e.target.value }))}
-                                        placeholder="Material specs, wash instructions, fabric weight..."
-                                        className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[150px] font-medium placeholder:text-gray-200 transition-all text-xs p-5"
-                                    />
+                                <div className="space-y-6">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Technical Specifications</Label>
+                                        <Button
+                                            type="button"
+                                            onClick={addAttribute}
+                                            variant="ghost"
+                                            className="text-[9px] font-black uppercase tracking-widest text-black flex items-center gap-2 hover:translate-x-1 transition-all"
+                                        >
+                                            <Plus className="w-3 h-3" /> Add Spec
+                                        </Button>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        {formData.attributes.map((attr, idx) => (
+                                            <div key={idx} className="flex gap-3 group">
+                                                <Input
+                                                    placeholder="KEY (E.G. COMPOSITION)"
+                                                    value={attr.key}
+                                                    onChange={(e) => updateAttribute(idx, 'key', e.target.value)}
+                                                    className="bg-gray-50 border-none rounded-none h-12 text-[10px] font-black uppercase tracking-widest flex-1"
+                                                />
+                                                <Input
+                                                    placeholder="VALUE (E.G. 100% COTTON)"
+                                                    value={attr.value}
+                                                    onChange={(e) => updateAttribute(idx, 'value', e.target.value)}
+                                                    className="bg-gray-50 border-none rounded-none h-12 text-[10px] font-bold text-gray-500 uppercase tracking-widest flex-[2]"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => removeAttribute(idx)}
+                                                    className="h-12 w-12 border border-gray-50 rounded-none hover:bg-red-50 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-[8px] font-bold text-gray-300 uppercase tracking-widest">
+                                        These values will appear in the "Product Information" section on the public page.
+                                    </p>
                                 </div>
 
                                 <div className="space-y-3">

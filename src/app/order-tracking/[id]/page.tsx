@@ -138,15 +138,35 @@ export default function OrderTrackingPage({ params }: { params: { id: string } }
 
                         <div className="bg-white p-8 border border-gray-100 shadow-sm space-y-6">
                             <h4 className="font-black uppercase italic tracking-widest text-[10px] border-b border-gray-50 pb-4 text-gray-400">Shipping Intel</h4>
-                            <div className="flex gap-4">
-                                <Package className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
-                                <div className="space-y-1">
-                                    <p className="font-black text-xs uppercase leading-tight">Delivery Status</p>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
-                                        Estimated arrival:<br />
-                                        {format(new Date(currentOrder.createdAt), "MMMM dd, yyyy")}
-                                    </p>
+                            <div className="space-y-6">
+                                <div className="flex gap-4">
+                                    <Package className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+                                    <div className="space-y-1">
+                                        <p className="font-black text-xs uppercase leading-tight">Delivery Status</p>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
+                                            Estimated arrival:<br />
+                                            {format(new Date(currentOrder.createdAt), "MMMM dd, yyyy")}
+                                        </p>
+                                    </div>
                                 </div>
+                                {(currentOrder.trackingNumber || currentOrder.trackingUrl) && (
+                                    <div className="flex gap-4 pt-4 border-t border-gray-50">
+                                        <Truck className="w-4 h-4 text-black mt-1 flex-shrink-0" />
+                                        <div className="space-y-2">
+                                            <p className="font-black text-xs uppercase leading-tight">Tracking ID</p>
+                                            <p className="text-[11px] font-bold text-black uppercase tracking-widest bg-gray-50 px-2 py-1 inline-block">
+                                                {currentOrder.trackingNumber || "N/A"}
+                                            </p>
+                                            {currentOrder.trackingUrl && (
+                                                <Link href={currentOrder.trackingUrl} target="_blank" rel="noopener noreferrer">
+                                                    <Button variant="link" className="p-0 h-auto text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-800">
+                                                        Track via Courier <ChevronRight className="w-3 h-3 ml-1" />
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

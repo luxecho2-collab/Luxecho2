@@ -18,6 +18,7 @@ import { useSession } from "next-auth/react"
 
 const checkoutSchema = z.object({
     email: z.string().email("Valid email required"),
+    phone: z.string().min(10, "Valid phone number required"),
     firstName: z.string().min(1, "First name required"),
     lastName: z.string().min(1, "Last name required"),
     address: z.string().min(5, "Full address required"),
@@ -50,7 +51,7 @@ export default function CheckoutPage() {
 
     const form = useForm<CheckoutFormData>({
         resolver: zodResolver(checkoutSchema),
-        defaultValues: { email: "", firstName: "", lastName: "", address: "", city: "", state: "", postalCode: "" }
+        defaultValues: { email: "", phone: "", firstName: "", lastName: "", address: "", city: "", state: "", postalCode: "" }
     })
 
     const { register, handleSubmit, formState: { errors }, trigger, setValue, getValues } = form
@@ -180,6 +181,7 @@ export default function CheckoutPage() {
                 amount: total,
                 customerInfo: {
                     email: data.email,
+                    phone: data.phone,
                     firstName: data.firstName,
                     lastName: data.lastName,
                 },
@@ -294,10 +296,17 @@ export default function CheckoutPage() {
                                     {/* Contact */}
                                     <div className="space-y-4">
                                         <h2 className="text-xl font-black uppercase tracking-tight border-b border-black/10 pb-3">Contact Information</h2>
-                                        <div className="space-y-1">
-                                            <Label htmlFor="email" className="text-[10px] uppercase font-black tracking-widest text-black/50">Email Address</Label>
-                                            <Input id="email" type="email" placeholder="customer@example.com" className={inputCls(!!errors.email)} {...register("email")} />
-                                            {errors.email && <p className="text-[10px] text-red-500 font-bold uppercase mt-1">{errors.email.message}</p>}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-1">
+                                                <Label htmlFor="email" className="text-[10px] uppercase font-black tracking-widest text-black/50">Email Address</Label>
+                                                <Input id="email" type="email" placeholder="customer@example.com" className={inputCls(!!errors.email)} {...register("email")} />
+                                                {errors.email && <p className="text-[10px] text-red-500 font-bold uppercase mt-1">{errors.email.message}</p>}
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label htmlFor="phone" className="text-[10px] uppercase font-black tracking-widest text-black/50">Phone Number</Label>
+                                                <Input id="phone" type="tel" placeholder="+91 99999 99999" className={inputCls(!!errors.phone)} {...register("phone")} />
+                                                {errors.phone && <p className="text-[10px] text-red-500 font-bold uppercase mt-1">{errors.phone.message}</p>}
+                                            </div>
                                         </div>
                                     </div>
 

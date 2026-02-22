@@ -43,7 +43,7 @@ export function SimilarProducts({ slug, categories }: SimilarProductsProps) {
     if (!products || products.length === 0) return null
 
     return (
-        <section className="mt-24 pt-16 border-t border-white/10">
+        <section className="mt-24 pt-16 border-t border-gray-100">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
                 <div>
                     <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter italic">
@@ -65,8 +65,8 @@ export function SimilarProducts({ slug, categories }: SimilarProductsProps) {
                                 className={cn(
                                     "rounded-none font-black uppercase text-[10px] tracking-widest transition-all",
                                     activeCategoryId === cat.id
-                                        ? "bg-white text-black border-white"
-                                        : "border-white/10 hover:border-white text-white"
+                                        ? "bg-black text-white border-black"
+                                        : "border-gray-200 hover:border-black text-black"
                                 )}
                             >
                                 {cat.name}

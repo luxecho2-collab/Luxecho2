@@ -1,6 +1,8 @@
 import { z } from "zod"
 import { createTRPCRouter, adminProcedure } from "@/server/api/trpc"
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { sendEmail } from "@/lib/email"
+import { sendSMS } from "@/lib/sms"
 
 export const adminRouter = createTRPCRouter({
     getStats: adminProcedure.query(async ({ ctx }) => {
@@ -23,7 +25,10 @@ export const adminRouter = createTRPCRouter({
             ctx.db.order.count(),
             ctx.db.order.aggregate({
                 _sum: { total: true },
-                where: { paymentStatus: "PAID" }
+                where: {
+                    paymentStatus: "PAID",
+                    status: { notIn: ["CANCELLED", "REFUNDED"] }
+                }
             }),
             ctx.db.user.count(),
             ctx.db.product.findMany({
@@ -35,11 +40,19 @@ export const adminRouter = createTRPCRouter({
             ctx.db.order.count({ where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } }),
             ctx.db.order.aggregate({
                 _sum: { total: true },
-                where: { paymentStatus: "PAID", createdAt: { gte: thirtyDaysAgo } }
+                where: {
+                    paymentStatus: "PAID",
+                    createdAt: { gte: thirtyDaysAgo },
+                    status: { notIn: ["CANCELLED", "REFUNDED"] }
+                }
             }),
             ctx.db.order.aggregate({
                 _sum: { total: true },
-                where: { paymentStatus: "PAID", createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } }
+                where: {
+                    paymentStatus: "PAID",
+                    createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
+                    status: { notIn: ["CANCELLED", "REFUNDED"] }
+                }
             }),
             ctx.db.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
             ctx.db.user.count({ where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } }),
@@ -68,10 +81,35 @@ export const adminRouter = createTRPCRouter({
         .input(z.object({
             skip: z.number().default(0),
             take: z.number().default(50),
+            search: z.string().optional(),
+            startDate: z.date().optional(),
+            endDate: z.date().optional(),
         }))
         .query(async ({ ctx, input }) => {
+            const searchFilter = input.search ? {
+                OR: [
+                    { orderNumber: { contains: input.search, mode: 'insensitive' as const } },
+                    { email: { contains: input.search, mode: 'insensitive' as const } },
+                    { phone: { contains: input.search, mode: 'insensitive' as const } },
+                    { trackingNumber: { contains: input.search, mode: 'insensitive' as const } },
+                    { user: { name: { contains: input.search, mode: 'insensitive' as const } } },
+                    { user: { email: { contains: input.search, mode: 'insensitive' as const } } },
+                ]
+            } : {}
+
+            const dateFilter = input.startDate || input.endDate ? {
+                createdAt: {
+                    ...(input.startDate ? { gte: input.startDate } : {}),
+                    ...(input.endDate ? { lte: input.endDate } : {}),
+                }
+            } : {}
+
             return ctx.db.order.findMany({
-                where: { paymentStatus: "PAID" },
+                where: {
+                    paymentStatus: "PAID",
+                    ...searchFilter,
+                    ...dateFilter
+                },
                 skip: input.skip,
                 take: input.take,
                 orderBy: { createdAt: "desc" },
@@ -95,7 +133,7 @@ export const adminRouter = createTRPCRouter({
                     user: { select: { name: true, email: true } },
                     items: {
                         include: {
-                            product: { select: { name: true, images: true } },
+                            product: { select: { id: true, name: true, images: true } },
                             variant: { select: { name: true, optionValues: { select: { value: true, option: { select: { name: true } } } } } }
                         }
                     }
@@ -106,18 +144,54 @@ export const adminRouter = createTRPCRouter({
     updateOrderStatus: adminProcedure
         .input(z.object({
             id: z.string(),
-            status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]),
+            status: z.enum(["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "CANCEL_REQUESTED", "RETURN_REQUESTED", "REFUNDED"]),
             fulfillmentStatus: z.enum(["UNFULFILLED", "PARTIALLY_FULFILLED", "FULFILLED", "RESTOCKED"]).optional(),
+            customMessage: z.string().optional(),
+            notifyCustomer: z.boolean().default(false),
         }))
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.order.update({
+            const order = await ctx.db.order.update({
                 where: { id: input.id },
                 data: {
                     status: input.status,
                     fulfillmentStatus: input.fulfillmentStatus,
-                    fulfilledAt: input.status === "DELIVERED" ? new Date() : undefined
+                    fulfilledAt: input.status === "DELIVERED" ? new Date() : undefined,
+                    notes: input.customMessage ? input.customMessage : undefined,
                 }
             })
+
+            if (input.notifyCustomer) {
+                // Send SMS if message provided and phone exists
+                if (input.customMessage && (order.phone || (order.shippingAddress as any)?.phone)) {
+                    const phone = order.phone || (order.shippingAddress as any)?.phone;
+                    await sendSMS(phone, input.customMessage);
+                }
+
+                await sendEmail({
+                    to: order.email,
+                    subject: `Order Update - #${order.orderNumber}`,
+                    html: `
+                        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                            <h1 style="color: #000; text-transform: uppercase; font-style: italic;">Order Update</h1>
+                            <p>Your order status has been updated to: <strong>${input.status}</strong></p>
+                            ${input.customMessage ? `
+                                <div style="background: #fff; border-left: 4px solid #000; padding: 15px; margin: 20px 0; font-style: italic;">
+                                    "${input.customMessage}"
+                                </div>
+                            ` : ''}
+                            <div style="background: #f9f9f9; padding: 20px; border: 1px solid #eee; margin-top: 20px;">
+                                <p><strong>Order Number:</strong> ${order.orderNumber}</p>
+                                <p><strong>Status:</strong> ${input.status}</p>
+                            </div>
+                            <p style="margin-top: 20px; font-size: 12px; color: #666;">
+                                You can track your order status in your account dashboard.
+                            </p>
+                        </div>
+                    `
+                })
+            }
+
+            return order
         }),
 
     updateOrderTracking: adminProcedure
@@ -127,13 +201,33 @@ export const adminRouter = createTRPCRouter({
             trackingUrl: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
-            return ctx.db.order.update({
+            const order = await ctx.db.order.update({
                 where: { id: input.id },
                 data: {
                     trackingNumber: input.trackingNumber || null,
                     trackingUrl: input.trackingUrl || null,
                 }
             })
+
+            if (input.trackingNumber || input.trackingUrl) {
+                await sendEmail({
+                    to: order.email,
+                    subject: `Shipping Details Added - #${order.orderNumber} `,
+                    html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #000; text-transform: uppercase; font-style: italic;">Shipping Update</h1>
+            <p>We've added tracking information for your order.</p>
+            <div style="background: #f9f9f9; padding: 20px; border: 1px solid #eee; margin-top: 20px;">
+                <p><strong>Order Number: </strong> ${order.orderNumber}</p>
+                ${input.trackingNumber ? `<p><strong>Tracking Number:</strong> ${input.trackingNumber}</p>` : ''}
+                ${input.trackingUrl ? `<p><strong>Tracking Link:</strong> <a href="${input.trackingUrl}">Click here to track</a></p>` : ''}
+            </div>
+        </div>
+        `
+                })
+            }
+
+            return order
         }),
 
     getProducts: adminProcedure
@@ -308,20 +402,104 @@ export const adminRouter = createTRPCRouter({
         }))
         .mutation(async ({ ctx, input }) => {
             const recipients = await ctx.db.user.findMany({
-                where: { email: { not: null } },
+                where: { email: { not: null } }, // Should also consider isSubscribed check if it exists in schema
                 select: { email: true, name: true }
             })
 
-            // Mocking the bulk send for now since emailService is basic
             let sentCount = 0
             for (const recipient of recipients) {
                 if (recipient.email) {
-                    console.log(`[MARKETING_BLAST] To: ${recipient.email} | Subject: ${input.subject}`)
+                    await sendEmail({
+                        to: recipient.email,
+                        subject: input.subject,
+                        html: `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
+        <h1 style="text-transform: uppercase; font-style: italic; border-bottom: 2px solid #000; padding-bottom: 10px;">LUXECHO</h1>
+        <div style="padding: 20px 0; line-height: 1.6;">
+            ${input.body.replace(/\n/g, '<br/>')}
+            <br/><br/>
+            offer of summer use cuopon code summer20
+        </div>
+        <footer style="border-top: 1px solid #eee; padding-top: 20px; font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px;">
+            &copy; ${new Date().getFullYear()} Luxecho. All rights reserved.
+        </footer>
+    </div>
+        `
+                    })
                     sentCount++
                 }
             }
 
             return { success: true, sentCount }
+        }),
+
+    exportOrders: adminProcedure
+        .input(z.object({
+            startDate: z.date().optional(),
+            endDate: z.date().optional(),
+        }))
+        .query(async ({ ctx, input }) => {
+            const dateFilter = input.startDate || input.endDate ? {
+                createdAt: {
+                    ...(input.startDate ? { gte: input.startDate } : {}),
+                    ...(input.endDate ? { lte: input.endDate } : {}),
+                }
+            } : {}
+
+            const orders = await ctx.db.order.findMany({
+                where: {
+                    paymentStatus: "PAID",
+                    ...dateFilter
+                },
+                orderBy: { createdAt: "desc" },
+                include: {
+                    user: { select: { name: true, email: true } },
+                    items: {
+                        include: {
+                            product: { select: { name: true } },
+                            variant: { select: { name: true } }
+                        }
+                    }
+                }
+            })
+
+            const csvHeader = [
+                "Order ID", "Customer Name", "Customer Email", "Phone",
+                "Order Status", "Payment Status", "Subtotal", "Tax",
+                "Shipping", "Discount", "Total", "Items",
+                "Shipping City", "Shipping Country", "Tracking Number", "Date"
+            ].join(",")
+
+            const csvRows = orders.map(order => {
+                const shippingObj = order.shippingAddress as any
+                const city = shippingObj?.city || ""
+                const country = shippingObj?.country || ""
+
+                const itemsStr = order.items.map(item =>
+                    `${item.product.name}${item.variant?.name ? ` (${item.variant.name})` : ''} x${item.quantity}`
+                ).join(" | ")
+
+                return [
+                    order.orderNumber,
+                    `"${order.user?.name || 'Guest'}"`,
+                    `"${order.email}"`,
+                    `"${order.phone || shippingObj?.phone || ''}"`,
+                    order.status,
+                    order.paymentStatus,
+                    order.subtotal.toFixed(2),
+                    order.tax.toFixed(2),
+                    order.shipping.toFixed(2),
+                    order.discount.toFixed(2),
+                    order.total.toFixed(2),
+                    `"${itemsStr}"`,
+                    `"${city}"`,
+                    `"${country}"`,
+                    `"${order.trackingNumber || ''}"`,
+                    order.createdAt.toISOString(),
+                ].join(",")
+            })
+
+            return [csvHeader, ...csvRows].join("\n")
         }),
 
     getCoupons: adminProcedure.query(async ({ ctx }) => {
@@ -382,7 +560,7 @@ export const adminRouter = createTRPCRouter({
             const { name, description } = input
 
             if (!process.env.GOOGLE_AI_API_KEY || process.env.GOOGLE_AI_API_KEY === "your-api-key-here") {
-                return { enhanced: `[FALLBACK] ${name.toUpperCase()}\n\n${description}\n\n(Configure GOOGLE_AI_API_KEY for real AI enhancement.)` }
+                return { enhanced: `[FALLBACK] ${name.toUpperCase()} \n\n${description} \n\n(Configure GOOGLE_AI_API_KEY for real AI enhancement.)` }
             }
 
             try {
@@ -390,19 +568,19 @@ export const adminRouter = createTRPCRouter({
                 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
                 const prompt = `
-                    You are a professional copywriter for a premium e-commerce streetwear brand called "Luxecho". 
-                    Enhance the following product description to be engaging, professional, and high-conversion.
+                    You are a professional copywriter for a premium e - commerce streetwear brand called "Luxecho". 
+                    Enhance the following product description to be engaging, professional, and high - conversion.
                     
                     Product Name: ${name}
                     Original Notes: ${description}
                     
                     Return a structured description that includes:
-                    1. A polished, bold opening statement about the lifestyle or aesthetic.
-                    2. A paragraph about the fit/material quality.
-                    3. A bulleted list of "Key Features" (use dashes -).
+1. A polished, bold opening statement about the lifestyle or aesthetic.
+                    2. A paragraph about the fit / material quality.
+                    3. A bulleted list of "Key Features"(use dashes -).
                     4. A short "Care Instructions" section.
                     
-                    Keep the tone premium, edgy, and trendy. Do not use Markdown headers like # or ##.
+                    Keep the tone premium, edgy, and trendy.Do not use Markdown headers like # or ##.
                 `
 
                 const result = await model.generateContent(prompt)
@@ -439,11 +617,12 @@ export const adminRouter = createTRPCRouter({
             metaTitle: z.string().optional(),
             metaDescription: z.string().optional(),
             productInfo: z.string().optional(),
+            attributes: z.any().optional(),
             shippingReturns: z.string().optional(),
             additionalInfo: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
-            const { name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, shippingReturns, additionalInfo } = input
+            const { name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, attributes, shippingReturns, additionalInfo } = input
             const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
 
             const product = await ctx.db.product.create({
@@ -460,6 +639,7 @@ export const adminRouter = createTRPCRouter({
                     metaTitle,
                     metaDescription,
                     productInfo,
+                    attributes: attributes || [],
                     shippingReturns,
                     additionalInfo,
                     images: {
@@ -479,6 +659,35 @@ export const adminRouter = createTRPCRouter({
                     }
                 }
             })
+
+            // Notification for Active Product
+            if (status === "ACTIVE") {
+                const subscribers = await ctx.db.user.findMany({
+                    where: { isSubscribed: true, email: { not: null } },
+                    select: { email: true }
+                })
+
+                for (const sub of subscribers) {
+                    if (sub.email) {
+                        await sendEmail({
+                            to: sub.email,
+                            subject: `New Arrival: ${name} `,
+                            html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
+            <h1 style="text-transform: uppercase; font-style: italic;">New Arrival</h1>
+            <p>Exclusively for our subscribers: <strong>${name}</strong> is now live.</p>
+            <div style="background: #f9f9f9; padding: 20px; border: 1px solid #eee; margin-top: 20px;">
+                <h3>${name}</h3>
+                <p>Price: ₹${price.toLocaleString()}</p>
+                <a href="${process.env.NEXTAUTH_URL}/products/${product.slug}" style="display: inline-block; background: #000; color: #fff; padding: 10px 20px; text-decoration: none; text-transform: uppercase; font-weight: bold; font-size: 12px;">Shop Now</a>
+            </div>
+        </div>
+                                    `
+                        })
+                    }
+                }
+            }
+
             return product
         }),
 
@@ -501,11 +710,12 @@ export const adminRouter = createTRPCRouter({
             metaTitle: z.string().optional(),
             metaDescription: z.string().optional(),
             productInfo: z.string().optional(),
+            attributes: z.any().optional(),
             shippingReturns: z.string().optional(),
             additionalInfo: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
-            const { id, name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, shippingReturns, additionalInfo } = input
+            const { id, name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, attributes, shippingReturns, additionalInfo } = input
 
             const updateData: any = {
                 name,
@@ -518,6 +728,7 @@ export const adminRouter = createTRPCRouter({
                 metaTitle,
                 metaDescription,
                 productInfo,
+                attributes: attributes !== undefined ? attributes : undefined,
                 shippingReturns,
                 additionalInfo,
             }
@@ -560,10 +771,38 @@ export const adminRouter = createTRPCRouter({
                 }
             }
 
-            return ctx.db.product.update({
+            const updated = await ctx.db.product.update({
                 where: { id },
                 data: updateData
             })
+
+            // Notification if product becomes ACTIVE
+            if (status === "ACTIVE") {
+                const subscribers = await ctx.db.user.findMany({
+                    where: { isSubscribed: true, email: { not: null } },
+                    select: { email: true }
+                })
+
+                for (const sub of subscribers) {
+                    if (sub.email) {
+                        await sendEmail({
+                            to: sub.email,
+                            subject: `Back in Stock / New Drop: ${updated.name} `,
+                            html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
+            <h1 style="text-transform: uppercase; font-style: italic;">New Drop</h1>
+            <p>Our classic / new item <strong>${updated.name}</strong> is now available.</p>
+            <div style="background: #f9f9f9; padding: 20px; border: 1px solid #eee; margin-top: 20px;">
+                <a href="${process.env.NEXTAUTH_URL}/products/${updated.slug}" style="display: inline-block; background: #000; color: #fff; padding: 10px 20px; text-decoration: none; text-transform: uppercase; font-weight: bold; font-size: 12px;">View Product</a>
+            </div>
+        </div>
+                            `
+                        })
+                    }
+                }
+            }
+
+            return updated
         }),
 
     updateCategory: adminProcedure
@@ -643,6 +882,10 @@ export const adminRouter = createTRPCRouter({
             image: z.string().min(1),
             order: z.number().default(0),
             isActive: z.boolean().default(true),
+            titleStyle: z.string().optional(),
+            slideStyle: z.string().optional(),
+            backgroundBlur: z.number().optional(),
+            backgroundOpacity: z.number().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
             return ctx.db.heroSlide.create({ data: input })
@@ -658,6 +901,10 @@ export const adminRouter = createTRPCRouter({
             image: z.string().optional(),
             order: z.number().optional(),
             isActive: z.boolean().optional(),
+            titleStyle: z.string().optional(),
+            slideStyle: z.string().optional(),
+            backgroundBlur: z.number().optional(),
+            backgroundOpacity: z.number().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
             const { id, ...data } = input

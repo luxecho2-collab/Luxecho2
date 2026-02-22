@@ -56,6 +56,15 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         },
     })
 
+    const { mutate: incrementView } = api.product.incrementViewCount.useMutation()
+    const { mutate: incrementAddToCart } = api.product.incrementAddToCartCount.useMutation()
+
+    React.useEffect(() => {
+        if (product?.id) {
+            incrementView({ id: product.id })
+        }
+    }, [product?.id, incrementView])
+
     const handleToggleWishlist = () => {
         if (!session) {
             router.push("/api/auth/signin")
@@ -97,6 +106,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             quantity: quantity,
             options: selectedOptions,
         })
+        incrementAddToCart({ id: product.id })
         toast({
             title: "Added to Bag",
             description: `${product.name} has been added to your bag.`,
@@ -113,7 +123,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             return
         }
         handleAddToCart()
-        router.push("/cart")
+        router.push("/checkout")
     }
 
     const handleShare = () => {
@@ -302,7 +312,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
                                 {/* Brand & Identity Tags */}
                                 <div className="absolute top-8 left-8 flex flex-col gap-2 z-30">
-                                    <span className="bg-[#d4ff00] text-black text-[8px] font-black px-2 py-1 uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Original / Identity</span>
+                                    <span className="bg-black text-white text-[8px] font-black px-2 py-1 uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">Original / Identity</span>
                                     <span className="text-[8px] font-black text-black/30 uppercase tracking-[0.3em] bg-white/50 backdrop-blur-sm px-2 py-0.5 w-fit font-mono">View_0{activeImageIndex + 1}</span>
                                 </div>
                             </div>
@@ -336,7 +346,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                             strokeWidth={1.5}
                                         />
                                     </button>
-                                    <div className="absolute -top-4 -right-4 w-16 h-16 bg-[#d4ff00] rotate-45 flex items-center justify-center -z-10 opacity-20 group-hover/title:opacity-100 transition-opacity duration-500">
+                                    <div className="absolute -top-4 -right-4 w-16 h-16 bg-gray-100 rotate-45 flex items-center justify-center -z-10 opacity-20 group-hover/title:opacity-100 transition-opacity duration-500">
                                         <span className="text-black text-[8px] font-black -rotate-45 tracking-widest leading-none">FS24 / {product.sku?.slice(-2) || "01"}</span>
                                     </div>
                                 </div>
@@ -402,7 +412,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                                     className={cn(
                                                         "min-w-9 h-9 flex items-center justify-center text-[9px] font-black uppercase tracking-widest transition-all duration-300",
                                                         selectedOptions[option.name] === val.value
-                                                            ? "bg-[#d4ff00] text-black rotate-6 scale-110 shadow-[0_0_20px_rgba(212,255,0,0.4)] border-none"
+                                                            ? "bg-black text-white rotate-6 scale-110 shadow-lg border-none"
                                                             : "bg-gray-50 text-gray-400 hover:bg-gray-100 border border-gray-100"
                                                     )}
                                                 >
@@ -447,20 +457,21 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                     <Button
                                         onClick={handleAddToCart}
                                         disabled={selectedVariant && selectedVariant.quantity === 0}
-                                        className="h-16 bg-white text-black border-2 border-black font-black uppercase tracking-[0.3em] text-[12px] rounded-none hover:bg-black hover:text-white group relative overflow-hidden active:scale-[0.98] transition-all"
+                                        className="h-16 bg-white text-black border-2 border-black font-black uppercase tracking-[0.3em] text-[12px] rounded-none group relative overflow-hidden active:scale-[0.98] transition-all duration-500"
                                     >
-                                        <span className="relative z-10 flex items-center justify-center gap-4">
-                                            <ShoppingBag className="w-5 h-5" strokeWidth={2} />
+                                        <span className="relative z-10 flex items-center justify-center gap-4 group-hover:text-white transition-colors duration-500">
+                                            <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110 duration-500" strokeWidth={2} />
                                             Add to Bag
                                         </span>
+                                        <div className="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out-expo" />
                                     </Button>
 
                                     <Button
                                         onClick={handleBuyNow}
-                                        className="h-16 bg-[#d4ff00] text-black font-black uppercase tracking-[0.3em] text-[12px] rounded-none hover:bg-black hover:text-[#d4ff00] border-2 border-[#d4ff00] group relative overflow-hidden active:scale-[0.98] transition-all duration-500 shadow-[0_0_30px_rgba(212,255,0,0.2)]"
+                                        className="h-16 bg-black text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-none border-2 border-black group relative overflow-hidden active:scale-[0.98] transition-all duration-500 shadow-xl"
                                     >
-                                        <span className="relative z-10">Buy It Now</span>
-                                        <div className="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out-expo" />
+                                        <span className="relative z-10 group-hover:text-black transition-colors duration-500">Buy It Now</span>
+                                        <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out-expo" />
                                     </Button>
                                 </div>
 
@@ -481,7 +492,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                             <span className="text-[11px] font-black uppercase tracking-[0.3em] text-black">Product Information</span>
                                         </AccordionTrigger>
                                         <AccordionContent className="pb-8">
-                                            {product.productInfo ? (
+                                            {(product as any).attributes && Array.isArray((product as any).attributes) && (product as any).attributes.length > 0 ? (
+                                                <div className="space-y-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest leading-loose">
+                                                    {(product as any).attributes.filter((attr: any) => attr.key && attr.value).map((attr: any, idx: number) => (
+                                                        <div key={idx} className="flex justify-between border-b border-gray-50 pb-2">
+                                                            <span>{attr.key}</span>
+                                                            <span className="text-black text-right">{attr.value}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : product.productInfo ? (
                                                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed whitespace-pre-wrap">
                                                     {product.productInfo}
                                                 </div>

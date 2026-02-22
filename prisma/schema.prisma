@@ -1,6 +1,5 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -108,11 +107,13 @@ model Product {
   metaTitle       String?
   metaDescription String?
   viewCount       Int                 @default(0)
+  addToCartCount  Int                 @default(0)
   salesCount      Int                 @default(0)
   publishedAt     DateTime?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
   productInfo     String?             @db.Text
+  attributes      Json?               @default("[]")
   shippingReturns String?             @db.Text
   additionalInfo  String?             @db.Text
   cartItems       CartItem[]
@@ -249,6 +250,7 @@ model Order {
   orderNumber       String            @unique
   userId            String?
   email             String
+  phone             String?
   status            OrderStatus       @default(PENDING)
   fulfillmentStatus FulfillmentStatus @default(UNFULFILLED)
   paymentStatus     PaymentStatus     @default(PENDING)
@@ -266,6 +268,8 @@ model Order {
   paidAt            DateTime?
   trackingNumber    String?
   trackingUrl       String?
+  cancelReason      String?           @db.Text
+  returnReason      String?           @db.Text
   fulfilledAt       DateTime?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
@@ -383,6 +387,8 @@ enum OrderStatus {
   PROCESSING
   SHIPPED
   DELIVERED
+  CANCEL_REQUESTED
+  RETURN_REQUESTED
   CANCELLED
   REFUNDED
 }
@@ -424,16 +430,24 @@ model BlogPost {
 }
 
 model HeroSlide {
-  id        String   @id @default(cuid())
-  title     String
-  subtitle  String
-  ctaText   String   @default("Explore Drop")
-  ctaLink   String   @default("/products")
-  image     String
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String
+  subtitle      String
+  ctaText       String   @default("Explore Drop")
+  ctaLink       String   @default("/products")
+  image         String
+  order         Int      @default(0)
+  isActive      Boolean  @default(true)
+  titleFont     String?  @default("font-black")
+  titleSize     String?  @default("text-6xl md:text-[8rem]")
+  textAlign     String?  @default("left")
+  verticalAlign String?  @default("middle")
+  titleStyle    String?  @default("split")
+  slideStyle    String?  @default("01")
+  backgroundBlur Int      @default(0)
+  backgroundOpacity Float @default(0.5)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("hero_slides")
 }

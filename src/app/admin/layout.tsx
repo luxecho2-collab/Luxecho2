@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/server/auth"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
+import { AdminProvider } from "@/contexts/admin-context"
 
 export default async function AdminLayout({
     children,
@@ -15,11 +16,19 @@ export default async function AdminLayout({
     }
 
     return (
-        <div className="flex min-h-screen bg-white">
+        <AdminProvider>
+            <AdminLayoutContent>{children}</AdminLayoutContent>
+        </AdminProvider>
+    )
+}
+
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="flex min-h-screen bg-white overflow-hidden">
             <AdminSidebar />
-            <div className="flex-grow">
+            <main className="flex-grow overflow-y-auto transition-all duration-500 ease-in-out">
                 {children}
-            </div>
+            </main>
         </div>
     )
 }

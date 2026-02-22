@@ -104,7 +104,7 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
             onMouseLeave={() => setIsHovered(false)}
             className={cn("group block relative w-full", className)}
         >
-            <div className="relative aspect-[3/4] overflow-hidden bg-white group-hover:shadow-2xl transition-shadow duration-700">
+            <div className="relative aspect-[3/4] overflow-hidden bg-white border border-transparent group-hover:border-black transition-all duration-700">
                 <Link href={`/product/${product.slug}`} className="absolute inset-0 z-0">
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -140,7 +140,7 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
                 {/* Diagonal Ribbon - Top Right */}
                 {product.status === 'ACTIVE' && (
                     <div className="absolute top-0 right-0 z-10 overflow-hidden w-24 h-24 pointer-events-none">
-                        <div className="bg-[#00B4FF] text-white text-[9px] font-black uppercase tracking-widest py-1.5 w-32 text-center absolute top-7 -right-7 rotate-45 shadow-md">
+                        <div className="bg-black text-white text-[9px] font-black uppercase tracking-widest py-1.5 w-32 text-center absolute top-7 -right-7 rotate-45 shadow-lg border-b border-white/20">
                             New Drop
                         </div>
                     </div>
@@ -165,13 +165,13 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
                 <AnimatePresence>
                     {isHovered && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10, x: "-50%" }}
-                            animate={{ opacity: 1, y: 0, x: "-50%" }}
-                            exit={{ opacity: 0, y: 10, x: "-50%" }}
-                            className="absolute left-1/2 top-1/2 z-20 pointer-events-none"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center"
                         >
-                            <div className="bg-black/80 backdrop-blur-md text-white px-4 py-2 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap shadow-2xl rounded-full border border-white/10">
-                                {product.name}
+                            <div className="bg-white/90 backdrop-blur-md text-black px-4 py-2 text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap shadow-xl border border-black/5">
+                                EXPLORE SOURCE
                             </div>
                         </motion.div>
                     )}

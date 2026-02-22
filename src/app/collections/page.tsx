@@ -28,14 +28,14 @@ const collections = [
         description: "Tactical everyday carry enhancements designed for urban navigation."
     },
     {
-        id: "neon-vibe",
-        title: "Urban Vibe",
+        id: "brown-vibe",
+        title: "Earth Tone",
         subtitle: "STREET SERIES",
         image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200",
-        color: "text-white",
-        bg: "bg-white/10",
+        color: "text-amber-700",
+        bg: "bg-amber-900/20",
         icon: Flame,
-        description: "Bold aesthetic upgrades that dominate the visual landscape of the city."
+        description: "Earthy, grounded tonal upgrades that dominate the visual landscape."
     },
     {
         id: "zenz-core",

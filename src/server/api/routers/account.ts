@@ -22,9 +22,20 @@ export const accountRouter = createTRPCRouter({
         if (!session?.user) throw new TRPCError({ code: "UNAUTHORIZED" })
 
         return ctx.db.order.findMany({
-            where: { userId: session.user.id },
+            where: {
+                userId: session.user.id,
+                paymentStatus: { not: "PENDING" }
+            },
             orderBy: { createdAt: "desc" },
-            include: {
+            select: {
+                id: true,
+                orderNumber: true,
+                createdAt: true,
+                total: true,
+                status: true,
+                trackingNumber: true,
+                trackingUrl: true,
+                shippingAddress: true,
                 items: {
                     include: {
                         product: {

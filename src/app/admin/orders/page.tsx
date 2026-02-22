@@ -10,7 +10,8 @@ import {
     XCircle,
     Eye,
     ArrowLeft,
-    Filter
+    Filter,
+    Download
 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -31,7 +32,29 @@ export default function AdminOrdersPage() {
     const [statusFilter, setStatusFilter] = React.useState<string>("ALL")
     const [selectedOrderId, setSelectedOrderId] = React.useState<string | null>(null)
 
-    const { data: orders, isLoading } = api.admin.getOrders.useQuery({ take: 50 })
+    // Debounce search to avoid too many requests
+    const [debouncedSearch, setDebouncedSearch] = React.useState(search)
+    React.useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 500)
+        return () => clearTimeout(timer)
+    }, [search])
+
+    const [dateRange, setDateRange] = React.useState<string>("ALL")
+
+    const computedDates = React.useMemo(() => {
+        const now = new Date()
+        const start = dateRange === "LAST_7_DAYS" ? new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) :
+            dateRange === "LAST_30_DAYS" ? new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) : undefined
+        const end = dateRange !== "ALL" ? now : undefined
+        return { startDate: start, endDate: end }
+    }, [dateRange])
+
+    const { data: orders, isLoading } = api.admin.getOrders.useQuery({
+        take: 100,
+        search: debouncedSearch.trim() || undefined,
+        startDate: computedDates.startDate,
+        endDate: computedDates.endDate,
+    })
 
     const filteredOrders = React.useMemo(() => {
         if (!orders) return []
@@ -41,21 +64,8 @@ export default function AdminOrdersPage() {
             filtered = filtered.filter((o: any) => o.status === statusFilter)
         }
 
-        if (search.trim()) {
-            const lowerSearch = search.toLowerCase()
-            filtered = filtered.filter((o: any) =>
-                o.orderNumber?.toLowerCase().includes(lowerSearch) ||
-                o.email?.toLowerCase().includes(lowerSearch) ||
-                o.user?.name?.toLowerCase().includes(lowerSearch) ||
-                o.items?.some((item: any) =>
-                    item?.product?.id?.toLowerCase().includes(lowerSearch) ||
-                    item?.product?.name?.toLowerCase().includes(lowerSearch)
-                )
-            )
-        }
-
         return filtered
-    }, [orders, search, statusFilter])
+    }, [orders, statusFilter])
 
     const getStatusIcon = (status: string) => {
         switch (status) {
@@ -64,6 +74,29 @@ export default function AdminOrdersPage() {
             case "PROCESSING": return <Clock className="w-3.5 h-3.5 text-gray-500" />
             case "CANCELLED": return <XCircle className="w-3.5 h-3.5 text-red-600" />
             default: return <Clock className="w-3.5 h-3.5 text-gray-500" />
+        }
+    }
+
+    const { refetch: fetchExportData } = api.admin.exportOrders.useQuery(
+        {
+            startDate: computedDates.startDate,
+            endDate: computedDates.endDate,
+        },
+        { enabled: false }
+    )
+
+    const handleExport = async () => {
+        const { data } = await fetchExportData()
+        if (data) {
+            const blob = new Blob([data], { type: 'text/csv' })
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `orders-export-${format(new Date(), 'yyyy-MM-dd')}.csv`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
         }
     }
 
@@ -83,6 +116,7 @@ export default function AdminOrdersPage() {
                 <div className="relative flex-grow w-full">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
+                        suppressHydrationWarning
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search by order ID, name, or email..."
@@ -107,6 +141,27 @@ export default function AdminOrdersPage() {
                         </SelectContent>
                     </Select>
                 </div>
+                <div className="w-full md:w-64">
+                    <Select value={dateRange} onValueChange={setDateRange}>
+                        <SelectTrigger className="w-full h-12 rounded-none border-gray-300 focus:ring-0 focus:border-black text-xs font-black uppercase tracking-widest">
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                <SelectValue placeholder="Date Range" />
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent className="rounded-none border-black">
+                            <SelectItem value="ALL" className="text-xs font-black uppercase tracking-widest cursor-pointer">All Time</SelectItem>
+                            <SelectItem value="LAST_7_DAYS" className="text-xs font-black uppercase tracking-widest cursor-pointer">Last 7 Days</SelectItem>
+                            <SelectItem value="LAST_30_DAYS" className="text-xs font-black uppercase tracking-widest cursor-pointer">Last 30 Days</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <Button
+                    onClick={handleExport}
+                    className="h-12 rounded-none bg-black text-white hover:bg-gray-900 font-black uppercase text-xs tracking-widest px-6 w-full md:w-auto flex items-center gap-2"
+                >
+                    <Download className="w-4 h-4" /> Export CSV
+                </Button>
             </div>
 
             <div className="border border-gray-200 overflow-hidden bg-white">
