@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button"
 import {
     Chrome,
     Loader2,
-    ChevronRight,
-    Lock,
-    ArrowLeft
+    Lock
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
@@ -25,11 +23,7 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
     const searchParams = useSearchParams()
     const effectiveCallbackUrl = callbackUrl || searchParams.get("callbackUrl") || "/admin"
 
-    const [mode, setMode] = React.useState<"email" | "phone">("phone")
     const [email, setEmail] = React.useState("")
-    const [phoneNumber, setPhoneNumber] = React.useState("")
-    const [otp, setOtp] = React.useState("")
-    const [otpSent, setOtpSent] = React.useState(false)
     const [isLoading, setIsLoading] = React.useState(false)
 
     const handleEmailSignIn = async (e: React.FormEvent) => {
@@ -38,41 +32,6 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
         setIsLoading(true)
         try {
             await signIn("email", { email, callbackUrl: effectiveCallbackUrl, redirect: false })
-        } catch (error) {
-            console.error(error)
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    const handlePhoneSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (phoneNumber.length < 10) return
-        setIsLoading(true)
-        setTimeout(() => {
-            setOtpSent(true)
-            setIsLoading(false)
-        }, 800)
-    }
-
-    const handleOtpVerify = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (otp.length < 6) return
-        setIsLoading(true)
-        try {
-            const result = await signIn("phone", {
-                phone: phoneNumber,
-                otp: otp,
-                callbackUrl: effectiveCallbackUrl,
-                redirect: false
-            })
-            if (result?.ok) {
-                if (isPopup) {
-                    window.location.reload(); // Refresh to update session state in the current page context
-                } else {
-                    router.push(effectiveCallbackUrl)
-                }
-            }
         } catch (error) {
             console.error(error)
         } finally {
@@ -133,147 +92,53 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
                 {/* Right Wing: Interactive Node (White) */}
                 <div className="w-full md:w-[65%] p-10 md:p-14 flex flex-col justify-center bg-white">
                     <AnimatePresence mode="wait">
-                        {otpSent ? (
-                            <motion.form
-                                key="verify"
-                                initial={{ opacity: 0, x: 15 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -15 }}
-                                onSubmit={handleOtpVerify}
-                                className="space-y-10"
-                            >
-                                <button
-                                    type="button"
-                                    onClick={() => setOtpSent(false)}
-                                    className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-700 hover:text-black transition-colors"
-                                >
-                                    <ArrowLeft className="w-3 h-3" />
-                                    BACK
-                                </button>
+                        <motion.div
+                            key="login"
+                            initial={{ opacity: 0, x: 15 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -15 }}
+                            className="space-y-10"
+                        >
+                            <div className="border-b border-gray-100 pb-4 mb-2">
+                                <h1 className="text-xl font-black uppercase tracking-tight text-black leading-none">SIGN IN</h1>
+                            </div>
 
-                                <div className="space-y-4">
-                                    <h1 className="text-4xl font-black uppercase tracking-tighter text-black">VERIFY CODE</h1>
-                                    <p className="text-[10px] font-black text-gray-700 uppercase tracking-widest leading-relaxed">
-                                        SENT TO <span className="text-black">{phoneNumber}</span>
-                                    </p>
-                                </div>
-
-                                <div className="flex gap-2">
-                                    {[...Array(6)].map((_, i) => (
-                                        <div key={i} className="flex-1 h-14 bg-gray-50 border-b-[3px] border-gray-100 focus-within:border-black transition-all flex items-center justify-center">
+                            <div className="space-y-8">
+                                <form onSubmit={handleEmailSignIn} className="space-y-8">
+                                    <div className="space-y-4">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 block italic">EMAIL ADDRESS</label>
+                                        <div className="h-16 border-b-[3px] border-gray-100 focus-within:border-black transition-colors">
                                             <input
-                                                autoFocus={i === 0}
-                                                maxLength={1}
-                                                className="w-full h-full bg-transparent text-center text-2xl font-black focus:outline-none"
-                                                value={otp[i] || ""}
-                                                onChange={(e) => {
-                                                    const val = e.target.value
-                                                    if (val && otp.length < 6) setOtp(prev => prev + val)
-                                                    if (!val) setOtp(prev => prev.slice(0, -1))
-                                                }}
+                                                type="email"
+                                                placeholder="CLIENT@LUXECHO.COM"
+                                                className="w-full h-full px-6 bg-transparent text-sm font-black tracking-[0.1em] focus:outline-none uppercase placeholder:text-gray-200 text-black"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                required
                                             />
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                    <Button type="submit" disabled={isLoading} className="w-full h-16 bg-black text-white font-black uppercase tracking-[0.4em] rounded-none shadow-[10px_10px_0px_rgba(0,0,0,0.05)]">
+                                        {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "SEND LINK"}
+                                    </Button>
+                                </form>
+                            </div>
 
-                                <Button
-                                    type="submit"
-                                    disabled={isLoading || otp.length < 6}
-                                    className="w-full h-16 bg-black text-white font-black uppercase tracking-[0.4em] rounded-none hover:bg-neutral-900 transition-all shadow-[10px_10px_0px_rgba(0,0,0,0.05)]"
+                            <div className="space-y-6">
+                                <div className="relative flex items-center justify-center">
+                                    <div className="absolute inset-x-0 h-[2px] bg-gray-50" />
+                                    <span className="relative bg-white px-6 text-[9px] font-black uppercase tracking-[0.5em] text-gray-700">OR CONTINUE WITH</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => signIn("google", { callbackUrl: effectiveCallbackUrl })}
+                                    className="w-full h-14 bg-white border-2 border-gray-100 flex items-center justify-center gap-4 text-[10px] font-black uppercase tracking-widest text-black hover:border-black transition-all"
                                 >
-                                    {isLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : "VERIFY"}
-                                </Button>
-                            </motion.form>
-                        ) : (
-                            <motion.div
-                                key="login"
-                                initial={{ opacity: 0, x: 15 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -15 }}
-                                className="space-y-10"
-                            >
-                                <div className="border-b border-gray-100 pb-4 mb-2">
-                                    <h1 className="text-xl font-black uppercase tracking-tight text-black leading-none">SIGN IN</h1>
-                                </div>
-
-                                <div className="space-y-8">
-                                    {/* Protocol Toggle */}
-                                    <div className="flex bg-gray-50 p-2 rounded-none relative">
-                                        <motion.div
-                                            animate={{ x: mode === "phone" ? 0 : "100%" }}
-                                            transition={{ type: "spring", damping: 30, stiffness: 250 }}
-                                            className="absolute inset-y-2 left-2 w-[calc(50%-4px)] bg-white shadow-sm z-0"
-                                        />
-                                        <button onClick={() => setMode("phone")} className={cn("relative z-10 flex-1 h-10 text-[9px] font-black uppercase tracking-widest transition-colors", mode === "phone" ? "text-black" : "text-gray-400")}>PHONE</button>
-                                        <button onClick={() => setMode("email")} className={cn("relative z-10 flex-1 h-10 text-[9px] font-black uppercase tracking-widest transition-colors", mode === "email" ? "text-black" : "text-gray-400")}>EMAIL</button>
-                                    </div>
-
-                                    {mode === "phone" ? (
-                                        <form onSubmit={handlePhoneSubmit} className="space-y-8">
-                                            <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 block italic">PHONE NUMBER</label>
-                                                <div className="flex h-16 border-b-[3px] border-gray-100 focus-within:border-black transition-colors group">
-                                                    <div className="flex items-center px-6 bg-gray-50 group-focus-within:bg-black group-focus-within:text-white transition-colors">
-                                                        <span className="text-sm font-black tracking-tighter">+91</span>
-                                                    </div>
-                                                    <input
-                                                        type="tel"
-                                                        placeholder="NUMBER"
-                                                        className="flex-1 px-6 bg-transparent text-sm font-black tracking-[0.2em] focus:outline-none placeholder:text-gray-200 text-black"
-                                                        value={phoneNumber}
-                                                        onChange={(e) => setPhoneNumber(e.target.value)}
-                                                        onKeyPress={(e) => { if (!/[0-9]/.test(e.key)) e.preventDefault(); }}
-                                                        required
-                                                    />
-                                                </div>
-                                            </div>
-                                            <Button type="submit" disabled={isLoading} className="w-full h-16 bg-black text-white font-black uppercase tracking-[0.4em] rounded-none group hover:bg-black transition-all shadow-[10px_10px_0px_rgba(0,0,0,0.05)]">
-                                                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                                                    <div className="flex items-center gap-3">
-                                                        CONTINUE
-                                                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                                    </div>
-                                                )}
-                                            </Button>
-                                        </form>
-                                    ) : (
-                                        <form onSubmit={handleEmailSignIn} className="space-y-8">
-                                            <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 block italic">EMAIL ADDRESS</label>
-                                                <div className="h-16 border-b-[3px] border-gray-100 focus-within:border-black transition-colors">
-                                                    <input
-                                                        type="email"
-                                                        placeholder="CLIENT@LUXECHO.COM"
-                                                        className="w-full h-full px-6 bg-transparent text-sm font-black tracking-[0.1em] focus:outline-none uppercase placeholder:text-gray-200 text-black"
-                                                        value={email}
-                                                        onChange={(e) => setEmail(e.target.value)}
-                                                        required
-                                                    />
-                                                </div>
-                                            </div>
-                                            <Button type="submit" disabled={isLoading} className="w-full h-16 bg-black text-white font-black uppercase tracking-[0.4em] rounded-none shadow-[10px_10px_0px_rgba(0,0,0,0.05)]">
-                                                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "SEND LINK"}
-                                            </Button>
-                                        </form>
-                                    )}
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="relative flex items-center justify-center">
-                                        <div className="absolute inset-x-0 h-[2px] bg-gray-50" />
-                                        <span className="relative bg-white px-6 text-[9px] font-black uppercase tracking-[0.5em] text-gray-700">OR CONTINUE WITH</span>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => signIn("google", { callbackUrl: effectiveCallbackUrl })}
-                                        className="w-full h-14 bg-white border-2 border-gray-100 flex items-center justify-center gap-4 text-[10px] font-black uppercase tracking-widest text-black hover:border-black transition-all"
-                                    >
-                                        <Chrome className="w-4 h-4 text-gray-700" />
-                                        GOOGLE ACCESS
-                                    </button>
-                                </div>
-                            </motion.div>
-                        )}
+                                    <Chrome className="w-4 h-4 text-gray-700" />
+                                    GOOGLE ACCESS
+                                </button>
+                            </div>
+                        </motion.div>
                     </AnimatePresence>
                 </div>
             </motion.div>

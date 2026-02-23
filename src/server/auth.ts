@@ -2,7 +2,6 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { type NextAuthOptions, type DefaultSession } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import EmailProvider from "next-auth/providers/email"
-import CredentialsProvider from "next-auth/providers/credentials"
 import { db } from "@/lib/db"
 
 declare module "next-auth" {
@@ -124,39 +123,6 @@ export const authOptions: NextAuthOptions = {
                 }
             },
             maxAge: 15 * 60, // 15 minutes
-        }),
-        CredentialsProvider({
-            id: "phone",
-            name: "Phone Number",
-            credentials: {
-                phone: { label: "Phone", type: "text" },
-                otp: { label: "OTP", type: "text" },
-            },
-            async authorize(credentials) {
-                if (!credentials?.phone || !credentials?.otp) return null
-
-                // MOCK OTP LOGIC (In production, verify against Redis/DB)
-                if (credentials.otp === "123456") {
-                    const user = await db.user.upsert({
-                        where: { phone: credentials.phone },
-                        update: { phoneVerified: new Date() },
-                        create: {
-                            phone: credentials.phone,
-                            phoneVerified: new Date(),
-                            role: "USER"
-                        }
-                    })
-                    return {
-                        id: user.id,
-                        name: user.name,
-                        email: user.email,
-                        image: user.image,
-                        role: user.role,
-                        phone: user.phone,
-                    }
-                }
-                return null
-            }
         })
     ],
     pages: {
