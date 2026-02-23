@@ -241,13 +241,23 @@ export const checkoutRouter = createTRPCRouter({
 
     getShippingSettings: publicProcedure.query(async ({ ctx }) => {
         const settings = await ctx.db.siteSettings.findMany({
-            where: { key: { in: ["express_shipping_price", "express_shipping_label", "express_shipping_days"] } }
+            where: {
+                key: {
+                    in: [
+                        "express_shipping_price", "express_shipping_label", "express_shipping_days",
+                        "standard_shipping_price", "standard_shipping_label", "standard_shipping_days"
+                    ]
+                }
+            }
         })
         const map = Object.fromEntries(settings.map((s: { key: string; value: string }) => [s.key, s.value]))
         return {
             expressPrice: parseFloat(map["express_shipping_price"] ?? "2000"),
             expressLabel: map["express_shipping_label"] ?? "Express Shipping",
             expressDays: map["express_shipping_days"] ?? "1–2 Business Days",
+            standardPrice: parseFloat(map["standard_shipping_price"] ?? "0"),
+            standardLabel: map["standard_shipping_label"] ?? "Standard Shipping",
+            standardDays: map["standard_shipping_days"] ?? "3–7 Business Days",
         }
     }),
 

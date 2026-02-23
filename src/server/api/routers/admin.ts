@@ -961,13 +961,23 @@ export const adminRouter = createTRPCRouter({
     // ── Shipping Settings ─────────────────────────────────────────────
     getShippingSettings: adminProcedure.query(async ({ ctx }) => {
         const settings = await ctx.db.siteSettings.findMany({
-            where: { key: { in: ["express_shipping_price", "express_shipping_label", "express_shipping_days"] } }
+            where: {
+                key: {
+                    in: [
+                        "express_shipping_price", "express_shipping_label", "express_shipping_days",
+                        "standard_shipping_price", "standard_shipping_label", "standard_shipping_days"
+                    ]
+                }
+            }
         })
         const map = Object.fromEntries(settings.map(s => [s.key, s.value]))
         return {
             expressPrice: parseFloat(map["express_shipping_price"] ?? "2000"),
             expressLabel: map["express_shipping_label"] ?? "Express Shipping",
             expressDays: map["express_shipping_days"] ?? "1–2 Business Days",
+            standardPrice: parseFloat(map["standard_shipping_price"] ?? "0"),
+            standardLabel: map["standard_shipping_label"] ?? "Standard Shipping",
+            standardDays: map["standard_shipping_days"] ?? "3–7 Business Days",
         }
     }),
 
@@ -976,6 +986,9 @@ export const adminRouter = createTRPCRouter({
             expressPrice: z.number().min(0),
             expressLabel: z.string().min(1),
             expressDays: z.string().min(1),
+            standardPrice: z.number().min(0),
+            standardLabel: z.string().min(1),
+            standardDays: z.string().min(1),
         }))
         .mutation(async ({ ctx, input }) => {
             await ctx.db.$transaction([
@@ -993,6 +1006,21 @@ export const adminRouter = createTRPCRouter({
                     where: { key: "express_shipping_days" },
                     create: { key: "express_shipping_days", value: input.expressDays },
                     update: { value: input.expressDays },
+                }),
+                ctx.db.siteSettings.upsert({
+                    where: { key: "standard_shipping_price" },
+                    create: { key: "standard_shipping_price", value: String(input.standardPrice) },
+                    update: { value: String(input.standardPrice) },
+                }),
+                ctx.db.siteSettings.upsert({
+                    where: { key: "standard_shipping_label" },
+                    create: { key: "standard_shipping_label", value: input.standardLabel },
+                    update: { value: input.standardLabel },
+                }),
+                ctx.db.siteSettings.upsert({
+                    where: { key: "standard_shipping_days" },
+                    create: { key: "standard_shipping_days", value: input.standardDays },
+                    update: { value: input.standardDays },
                 }),
             ])
             return { success: true }

@@ -260,9 +260,28 @@ export function OrderDetailsDrawer({
                                                 <SelectItem value="PROCESSING" className="font-bold uppercase text-xs tracking-widest cursor-pointer">Processing</SelectItem>
                                                 <SelectItem value="SHIPPED" className="font-bold uppercase text-xs tracking-widest cursor-pointer">Shipped</SelectItem>
                                                 <SelectItem value="DELIVERED" className="font-bold uppercase text-xs tracking-widest cursor-pointer">Delivered</SelectItem>
+                                                <SelectItem value="CANCEL_REQUESTED" className="font-bold uppercase text-xs tracking-widest text-orange-600 cursor-pointer">Cancel Requested</SelectItem>
+                                                <SelectItem value="RETURN_REQUESTED" className="font-bold uppercase text-xs tracking-widest text-orange-600 cursor-pointer">Return Requested</SelectItem>
                                                 <SelectItem value="CANCELLED" className="font-bold uppercase text-xs tracking-widest text-red-600 cursor-pointer">Cancelled</SelectItem>
+                                                <SelectItem value="REFUNDED" className="font-bold uppercase text-xs tracking-widest text-blue-600 cursor-pointer">Refunded</SelectItem>
                                             </SelectContent>
                                         </Select>
+
+                                        {/* Display Cancellation Reason */}
+                                        {(order.status === "CANCEL_REQUESTED" || order.status === "CANCELLED") && order.cancelReason && (
+                                            <div className="mt-4 p-4 bg-orange-50 border border-orange-200">
+                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-orange-800 mb-1">Cancellation Reason</h4>
+                                                <p className="text-sm font-medium text-orange-900">{order.cancelReason}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Display Return Reason */}
+                                        {(order.status === "RETURN_REQUESTED" || order.status === "REFUNDED") && order.returnReason && (
+                                            <div className="mt-4 p-4 bg-orange-50 border border-orange-200">
+                                                <h4 className="text-[10px] font-black uppercase tracking-widest text-orange-800 mb-1">Return Reason</h4>
+                                                <p className="text-sm font-medium text-orange-900">{order.returnReason}</p>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="border-t border-gray-100 pt-6 space-y-4">

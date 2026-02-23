@@ -19,12 +19,18 @@ export default function AdminShippingPage() {
     const [expressPrice, setExpressPrice] = React.useState("")
     const [expressLabel, setExpressLabel] = React.useState("")
     const [expressDays, setExpressDays] = React.useState("")
+    const [standardPrice, setStandardPrice] = React.useState("")
+    const [standardLabel, setStandardLabel] = React.useState("")
+    const [standardDays, setStandardDays] = React.useState("")
 
     React.useEffect(() => {
         if (settings) {
             setExpressPrice(String(settings.expressPrice))
             setExpressLabel(settings.expressLabel)
             setExpressDays(settings.expressDays)
+            setStandardPrice(String(settings.standardPrice))
+            setStandardLabel(settings.standardLabel)
+            setStandardDays(settings.standardDays)
         }
     }, [settings])
 
@@ -39,12 +45,16 @@ export default function AdminShippingPage() {
     })
 
     const handleSave = () => {
-        const price = parseFloat(expressPrice)
-        if (isNaN(price) || price < 0) {
-            toast({ title: "Invalid price", description: "Enter a valid positive number.", variant: "destructive" })
+        const pExpress = parseFloat(expressPrice)
+        const pStandard = parseFloat(standardPrice)
+        if (isNaN(pExpress) || pExpress < 0 || isNaN(pStandard) || pStandard < 0) {
+            toast({ title: "Invalid price", description: "Enter a valid positive number for prices.", variant: "destructive" })
             return
         }
-        update.mutate({ expressPrice: price, expressLabel, expressDays })
+        update.mutate({
+            expressPrice: pExpress, expressLabel, expressDays,
+            standardPrice: pStandard, standardLabel, standardDays
+        })
     }
 
     return (
@@ -61,19 +71,47 @@ export default function AdminShippingPage() {
                 </div>
             ) : (
                 <div className="space-y-8">
-                    {/* Standard Shipping (Read-only) */}
-                    <div className="border border-black/10 p-6 space-y-6 relative overflow-hidden bg-gray-50">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <Truck className="w-5 h-5 text-black" />
-                                <div>
-                                    <h3 className="font-black uppercase tracking-widest text-sm text-black">Standard Shipping</h3>
-                                    <p className="text-[10px] uppercase font-bold text-black/40">3–7 Business Days</p>
+                    {/* Standard Shipping (Editable) */}
+                    <div className="border border-black p-6 space-y-6">
+                        <div className="flex items-center gap-3 border-b border-black/10 pb-4">
+                            <Truck className="w-5 h-5 text-black" />
+                            <h3 className="font-black uppercase tracking-widest text-sm text-black">Standard Shipping</h3>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-black/50">Display Name</Label>
+                                <Input
+                                    value={standardLabel}
+                                    onChange={e => setStandardLabel(e.target.value)}
+                                    className="rounded-none border-black/20 h-12 focus-visible:ring-0 focus-visible:border-black font-bold"
+                                    placeholder="e.g. Standard Shipping"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-black/50">Delivery Timeline</Label>
+                                <Input
+                                    value={standardDays}
+                                    onChange={e => setStandardDays(e.target.value)}
+                                    className="rounded-none border-black/20 h-12 focus-visible:ring-0 focus-visible:border-black font-bold"
+                                    placeholder="e.g. 3–7 Business Days"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-black/50">Price (₹)</Label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-black/40 text-sm">₹</span>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        value={standardPrice}
+                                        onChange={e => setStandardPrice(e.target.value)}
+                                        className="rounded-none border-black/20 h-12 pl-8 focus-visible:ring-0 focus-visible:border-black font-black"
+                                    />
                                 </div>
                             </div>
-                            <span className="bg-black text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-                                FREE
-                            </span>
                         </div>
                     </div>
 
@@ -120,14 +158,15 @@ export default function AdminShippingPage() {
                             </div>
                         </div>
 
-                        <Button
-                            onClick={handleSave}
-                            disabled={update.isPending}
-                            className="w-full h-12 rounded-none bg-black text-white font-black uppercase tracking-widest text-xs hover:bg-black/90 transition-all disabled:opacity-50 mt-4"
-                        >
-                            {update.isPending ? "Saving..." : "Save Shipping Settings"}
-                        </Button>
                     </div>
+
+                    <Button
+                        onClick={handleSave}
+                        disabled={update.isPending}
+                        className="w-full h-12 rounded-none bg-black text-white font-black uppercase tracking-widest text-xs hover:bg-black/90 transition-all disabled:opacity-50 mt-4"
+                    >
+                        {update.isPending ? "Saving..." : "Save Shipping Settings"}
+                    </Button>
                 </div>
             )}
         </main>

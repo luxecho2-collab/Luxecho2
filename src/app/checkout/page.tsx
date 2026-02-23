@@ -66,6 +66,9 @@ export default function CheckoutPage() {
     const expressPrice = shippingSettings?.expressPrice ?? 2000
     const expressLabel = shippingSettings?.expressLabel ?? "Express Shipping"
     const expressDays = shippingSettings?.expressDays ?? "1–2 Business Days"
+    const standardPrice = shippingSettings?.standardPrice ?? 0
+    const standardLabel = shippingSettings?.standardLabel ?? "Standard Shipping"
+    const standardDays = shippingSettings?.standardDays ?? "3–7 Business Days"
 
     // ── Auto-fill from default/first saved address ──
     React.useEffect(() => {
@@ -149,7 +152,7 @@ export default function CheckoutPage() {
         }
     }
 
-    const shippingCost = shippingMethod === "express" ? expressPrice : 0
+    const shippingCost = shippingMethod === "express" ? expressPrice : standardPrice
     const subtotal = getTotalPrice()
 
     let discount = 0
@@ -418,7 +421,7 @@ export default function CheckoutPage() {
                                         <h2 className="text-xl font-black uppercase tracking-tight border-b border-black/10 pb-3">Shipping Method</h2>
                                         <div className="space-y-3">
                                             {[
-                                                { id: "standard", label: "Standard Shipping", sub: "3–7 Business Days", price: "FREE" },
+                                                { id: "standard", label: standardLabel, sub: standardDays, price: standardPrice === 0 ? "FREE" : `₹${standardPrice.toLocaleString("en-IN")}` },
                                                 { id: "express", label: expressLabel, sub: expressDays, price: `₹${expressPrice.toLocaleString("en-IN")}` },
                                             ].map(opt => (
                                                 <div
@@ -570,8 +573,8 @@ export default function CheckoutPage() {
                                     )}
                                     <div className="flex justify-between text-xs font-bold text-black/60 uppercase">
                                         <span>Shipping</span>
-                                        <span className={shippingMethod === "express" ? "text-black" : "text-green-600"}>
-                                            {shippingMethod === "express" ? `₹${expressPrice.toLocaleString("en-IN")}` : "FREE"}
+                                        <span className={shippingMethod === "express" && expressPrice > 0 || shippingMethod === "standard" && standardPrice > 0 ? "text-black" : "text-green-600"}>
+                                            {shippingCost > 0 ? `₹${shippingCost.toLocaleString("en-IN")}` : "FREE"}
                                         </span>
                                     </div>
                                     <Separator className="bg-black/10" />
