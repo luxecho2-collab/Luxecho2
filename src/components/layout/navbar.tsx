@@ -28,6 +28,7 @@ import { usePathname } from "next/navigation"
 
 const navItems = [
     { name: "Shop", href: "/products" },
+    { name: "Blog", href: "/blogs" },
 ]
 
 export function Navbar() {
@@ -77,13 +78,19 @@ export function Navbar() {
             >
                 <nav className="container h-full mx-auto px-6 lg:px-12 flex items-center justify-between">
                     {/* Desktop Left Menu */}
-                    <div className="hidden md:flex items-center">
-                        <button
-                            onClick={() => setIsMobileMenuOpen(true)}
-                            className={cn("p-2 -ml-2 transition-all duration-300", isTransparent ? "text-white hover:scale-110 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" : "hover:text-brand-copper")}
-                        >
-                            <Menu className={cn(isTransparent ? "w-8 h-8" : "w-7 h-7")} strokeWidth={isTransparent ? 2.5 : 1.5} />
-                        </button>
+                    <div className="hidden md:flex items-center gap-8">
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={cn(
+                                    "text-sm font-bold uppercase tracking-widest transition-colors",
+                                    isTransparent ? "text-white hover:text-white/80 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]" : "text-brand-charcoal hover:text-brand-copper"
+                                )}
+                            >
+                                {item.name}
+                            </Link>
+                        ))}
                     </div>
 
                     {/* Mobile Menu Trigger (Left) */}
@@ -141,9 +148,6 @@ export function Navbar() {
                                         <LuxechoLogo size={32} />
                                         <span className="text-lg font-serif text-brand-charcoal">luxecho</span>
                                     </div>
-                                    <button onClick={() => setIsMobileMenuOpen(false)}>
-                                        <X className="w-6 h-6" strokeWidth={1} />
-                                    </button>
                                 </div>
                                 <ul className="flex flex-col py-4">
                                     {navItems.map((item) => (

@@ -1,27 +1,29 @@
-"use client"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Privacy Policy | Luxecho",
+    description: "Our Privacy Policy.",
+}
 
 export default function PrivacyPage() {
     return (
-        <div className="min-h-screen bg-black text-white p-6 md:p-12 lg:p-24 space-y-16">
-            <header className="space-y-4">
-                <h1 className="text-6xl font-black uppercase italic tracking-tighter text-white">PRIVACY POLICY</h1>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground italic">PROTECTING YOUR DATA // ZENZ SYSTEMS</p>
-            </header>
-
-            <div className="max-w-3xl space-y-12">
-                <section className="space-y-4">
-                    <h2 className="text-2xl font-black uppercase italic tracking-tighter border-b border-white/10 pb-2">01. DATA COLLECTION</h2>
-                    <p className="text-xs font-bold uppercase tracking-widest leading-loose text-muted-foreground">
-                        We collect customer information required for order fulfillment and interface optimization. All data is encrypted at the source.
+        <div className="min-h-screen bg-white pt-32 pb-20">
+            <div className="container mx-auto px-4 max-w-4xl">
+                <h1 className="text-4xl font-black uppercase tracking-widest mb-12">Privacy Policy</h1>
+                <div className="prose prose-lg max-w-none text-gray-600 text-sm">
+                    <p>Last updated: {new Date().toLocaleDateString()}</p>
+                    <p>
+                        At Luxecho, we respect your privacy and are committed to protecting it through our compliance with this policy.
                     </p>
-                </section>
-
-                <section className="space-y-4">
-                    <h2 className="text-2xl font-black uppercase italic tracking-tighter border-b border-white/10 pb-2">02. DATA SECURITY</h2>
-                    <p className="text-xs font-bold uppercase tracking-widest leading-loose text-muted-foreground">
-                        All user data is stored on secure servers. Access is restricted to authorized personnel with valid credentials.
+                    <h2 className="text-black text-xl font-bold mt-6 mb-2">Information We Collect</h2>
+                    <p>
+                        We collect personal information that you provide to us, such as name, address, contact information, passwords and security data, and payment information.
                     </p>
-                </section>
+                    <h2 className="text-black text-xl font-bold mt-6 mb-2">How We Use Your Information</h2>
+                    <p>
+                        We use personal information collected via our Website for a variety of business purposes described below, such as to facilitate account creation and login process, and to manage user accounts.
+                    </p>
+                </div>
             </div>
         </div>
     )

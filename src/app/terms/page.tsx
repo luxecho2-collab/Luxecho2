@@ -1,34 +1,29 @@
-"use client"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Terms & Conditions | Luxecho",
+    description: "Terms and Conditions of Use.",
+}
 
 export default function TermsPage() {
     return (
-        <div className="min-h-screen bg-black text-white p-6 md:p-12 lg:p-24 space-y-16">
-            <header className="space-y-4">
-                <h1 className="text-6xl font-black uppercase italic tracking-tighter text-white">TERMS OF SERVICE</h1>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground italic">VERSION 1.0.4 // ZENZ SYSTEMS</p>
-            </header>
-
-            <div className="max-w-3xl space-y-12">
-                <section className="space-y-4">
-                    <h2 className="text-2xl font-black uppercase italic tracking-tighter border-b border-white/10 pb-2">01. TERMS OF USE</h2>
-                    <p className="text-xs font-bold uppercase tracking-widest leading-loose text-muted-foreground">
-                        By accessing the Zenz website, you agree to comply with all our terms. Any unauthorized use of our services is strictly prohibited.
+        <div className="min-h-screen bg-white pt-32 pb-20">
+            <div className="container mx-auto px-4 max-w-4xl">
+                <h1 className="text-4xl font-black uppercase tracking-widest mb-12">Terms & Conditions</h1>
+                <div className="prose prose-lg max-w-none text-gray-600 text-sm">
+                    <p>Last updated: {new Date().toLocaleDateString()}</p>
+                    <p>
+                        These terms and conditions outline the rules and regulations for the use of Luxecho's Website.
                     </p>
-                </section>
-
-                <section className="space-y-4">
-                    <h2 className="text-2xl font-black uppercase italic tracking-tighter border-b border-white/10 pb-2">02. PURCHASES</h2>
-                    <p className="text-xs font-bold uppercase tracking-widest leading-loose text-muted-foreground">
-                        Purchases are final once payment is confirmed. Shipping follows standard regional laws.
+                    <h2 className="text-black text-xl font-bold mt-6 mb-2">Acceptance of Terms</h2>
+                    <p>
+                        By accessing this website we assume you accept these terms and conditions. Do not continue to use Luxecho if you do not agree to take all of the terms and conditions stated on this page.
                     </p>
-                </section>
-
-                <section className="space-y-4">
-                    <h2 className="text-2xl font-black uppercase italic tracking-tighter border-b border-white/10 pb-2">03. DATA PRIVACY</h2>
-                    <p className="text-xs font-bold uppercase tracking-widest leading-loose text-muted-foreground">
-                        User data is protected under our Privacy Policy. Any loss of account credentials is the responsibility of the user.
+                    <h2 className="text-black text-xl font-bold mt-6 mb-2">Intellectual Property Rights</h2>
+                    <p>
+                        Unless otherwise stated, Luxecho and/or its licensors own the intellectual property rights for all material on our Website. All intellectual property rights are reserved.
                     </p>
-                </section>
+                </div>
             </div>
         </div>
     )

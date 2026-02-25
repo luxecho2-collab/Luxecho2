@@ -1,15 +1,15 @@
 import Link from "next/link"
-import { Facebook, Instagram, Twitter, Youtube } from "lucide-react"
+import { Facebook, Instagram, Twitter, Youtube, Linkedin } from "lucide-react"
 import { LuxechoLogo } from "@/components/layout/luxecho-logo"
 
 const footerLinks = [
     {
         title: "Shop",
         links: [
-            { name: "New Arrivals", href: "/collections/new-arrivals" },
-            { name: "Featured", href: "/collections/featured" },
-            { name: "Accessories", href: "/collections/accessories" },
-            { name: "Sale", href: "/collections/sale" },
+            { name: "New Arrivals", href: "/products" },
+            { name: "Featured", href: "/products" },
+            { name: "Accessories", href: "/products" },
+            { name: "Sale", href: "/products" },
         ],
     },
     {
@@ -26,6 +26,7 @@ const footerLinks = [
         links: [
             { name: "About Us", href: "/about" },
             { name: "Contact", href: "/contact" },
+            { name: "Blog", href: "/blogs" },
             { name: "Store Locator", href: "/stores" },
             { name: "Careers", href: "/careers" },
         ],
@@ -47,14 +48,11 @@ export function Footer() {
                             Premium streetwear and lifestyle brand. Redefining luxury with minimalist aesthetics and exceptional quality.
                         </p>
                         <div className="flex items-center gap-6">
-                            <a href="#" className="text-gray-400 hover:text-black transition-colors">
+                            <a href="https://www.instagram.com/luxecho.official?utm_source=qr&igsh=dHF6Ym5jcXkzOXUz" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-black transition-colors">
                                 <Instagram className="w-5 h-5" strokeWidth={1.5} />
                             </a>
-                            <a href="#" className="text-gray-400 hover:text-black transition-colors">
-                                <Twitter className="w-5 h-5" strokeWidth={1.5} />
-                            </a>
-                            <a href="#" className="text-gray-400 hover:text-black transition-colors">
-                                <Youtube className="w-5 h-5" strokeWidth={1.5} />
+                            <a href="https://www.linkedin.com/company/luxechoclothingspvtltd/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-black transition-colors">
+                                <Linkedin className="w-5 h-5" strokeWidth={1.5} />
                             </a>
                         </div>
                     </div>
