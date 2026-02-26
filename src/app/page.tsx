@@ -65,7 +65,7 @@ function GenderSplit() {
   ]
 
   return (
-    <section className="w-full flex flex-col md:flex-row h-[90vh] bg-black overflow-hidden">
+    <section className="w-full flex flex-col md:flex-row min-h-[100vh] md:h-[90vh] bg-black overflow-hidden">
       {categories.map((cat) => (
         <Link
           key={cat.label}
@@ -77,8 +77,8 @@ function GenderSplit() {
             src={cat.image}
             alt={cat.label}
             fill
-            className="object-cover object-top transition-transform duration-&lsqb;2s&rsqb; ease-out group-hover:scale-[1.04]"
-            sizes="50vw"
+            className="object-cover object-top transition-transform duration-[2s] ease-out group-hover:scale-[1.04]"
+            sizes="(max-width: 768px) 100vw, 50vw"
             unoptimized
           />
           {/* Dark overlay */}
@@ -101,8 +101,8 @@ function GenderSplit() {
           >
             <span className="block text-white/40 text-[9px] font-black uppercase tracking-[0.5em] mb-3">SS 2026</span>
             <h2 className="font-barlow font-black uppercase leading-[0.85] tracking-[-0.02em]">
-              <span className="block text-white text-[12vw] md:text-[7vw] lg:text-[6rem] xl:text-[7rem]">{cat.label}</span>
-              <span className="block text-white/20 text-[8vw] md:text-[4vw] lg:text-[3.5rem] xl:text-[4rem] italic">{cat.sub}</span>
+              <span className="block text-white text-[18vw] md:text-[7vw] lg:text-[6rem] xl:text-[7rem]">{cat.label}</span>
+              <span className="block text-white/20 text-[10vw] md:text-[4vw] lg:text-[3.5rem] xl:text-[4rem] italic">{cat.sub}</span>
             </h2>
             <span className="inline-flex items-center gap-3 mt-6 text-[9px] font-black uppercase tracking-[0.4em] text-white/60 group-hover:text-white transition-colors duration-500">
               Shop Now
@@ -127,17 +127,17 @@ function WaveSection({ wave }: { wave: typeof WAVES[0] }) {
   return (
     <section
       ref={ref}
-      className={`relative w-full h-screen flex bg-black overflow-hidden ${isRight ? "flex-row-reverse" : "flex-row"}`}
+      className={`relative w-full min-h-screen flex flex-col bg-black overflow-hidden ${isRight ? "md:flex-row-reverse" : "md:flex-row"}`}
     >
-      {/* ── Image Panel (60%) ── */}
-      <div ref={imgRef} className="relative w-[60%] h-full overflow-hidden flex-shrink-0">
+      {/* ── Image Panel (100% mobile, 60% desktop) ── */}
+      <div ref={imgRef} className="relative w-full md:w-[60%] h-[60vh] md:h-full overflow-hidden flex-shrink-0">
         <motion.div style={{ y }} className="absolute inset-0 scale-110">
           <NextImage
             src={wave.image}
             alt={wave.title}
             fill
             className="object-cover object-center"
-            sizes="60vw"
+            sizes="(max-width: 768px) 100vw, 60vw"
             priority={wave.id === "wave-01"}
             unoptimized
           />
@@ -152,8 +152,8 @@ function WaveSection({ wave }: { wave: typeof WAVES[0] }) {
         </div>
       </div>
 
-      {/* ── Text Panel (40%) ── */}
-      <div className={`relative w-[40%] flex flex-col justify-center px-12 lg:px-20 z-10 bg-black ${isRight ? "items-end text-right" : "items-start text-left"}`}>
+      {/* ── Text Panel (100% mobile, 40% desktop) ── */}
+      <div className={`relative w-full md:w-[40%] flex flex-col justify-center py-16 px-8 md:px-12 lg:px-20 z-10 bg-black ${isRight ? "md:items-end md:text-right" : "md:items-start md:text-left"}`}>
         {/* Vertical rule line */}
         <div className="absolute top-0 bottom-0 left-0 w-px bg-white/5" />
 
@@ -162,7 +162,7 @@ function WaveSection({ wave }: { wave: typeof WAVES[0] }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, margin: "-15%" }}
           transition={{ duration: 1, ease: [0.19, 1, 0.22, 1] }}
-          className="space-y-8"
+          className={`space-y-8 ${isRight ? "items-end text-right md:items-end md:text-right" : "items-start text-left md:items-start md:text-left"} flex flex-col`}
         >
           <span className="block text-rose-600 text-[9px] font-black uppercase tracking-[0.6em]">
             {wave.label}
@@ -178,13 +178,13 @@ function WaveSection({ wave }: { wave: typeof WAVES[0] }) {
 
           <div className={`w-12 h-px bg-white/20 ${isRight ? "ml-auto" : ""}`} />
 
-          <p className={`text-white/50 text-xs font-semibold uppercase tracking-[0.15em] leading-relaxed max-w-xs ${isRight ? "ml-auto" : ""}`}>
+          <p className={`text-white/50 text-xs font-semibold uppercase tracking-[0.15em] leading-relaxed max-w-xs ${isRight ? "md:ml-auto" : ""}`}>
             {wave.desc}
           </p>
 
           <Link
             href="/products"
-            className={`inline-flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] text-white/60 hover:text-white transition-colors group ${isRight ? "ml-auto" : ""}`}
+            className={`inline-flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] text-white/60 hover:text-white transition-colors group ${isRight ? "md:ml-auto" : ""}`}
           >
             Shop Now
             <span className="w-8 h-px bg-white/30 group-hover:w-12 group-hover:bg-white transition-all duration-500" />
@@ -253,8 +253,8 @@ function FinalCTA() {
             Join the Movement — Luxecho
           </span>
           <h2 className="font-barlow font-black uppercase leading-[0.85] tracking-tighter">
-            <span className="block text-white text-7xl md:text-[10rem] lg:text-[12rem]">UNMASK</span>
-            <span className="block text-7xl md:text-[10rem] lg:text-[12rem] text-transparent" style={{ WebkitTextStroke: "2px #e11d48" }}>THE FUTURE</span>
+            <span className="block text-white text-6xl md:text-[10rem] lg:text-[12rem]">UNMASK</span>
+            <span className="block text-6xl md:text-[10rem] lg:text-[12rem] text-transparent" style={{ WebkitTextStroke: "1px #e11d48" }}>THE FUTURE</span>
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Link href="/products">
@@ -287,12 +287,15 @@ export default function Home() {
     <main className="bg-black min-h-screen cursor-none selection:bg-rose-600 selection:text-white overflow-x-hidden">
       {/* Custom Cursor */}
       <motion.div
-        className="fixed pointer-events-none z-[9999] rounded-full mix-blend-difference bg-white"
+        className="fixed pointer-events-none z-[9999] rounded-full mix-blend-difference bg-white hidden md:block"
         animate={{
           x: mousePos.x - (isHovering ? 20 : 6),
           y: mousePos.y - (isHovering ? 20 : 6),
           width: isHovering ? 40 : 12,
           height: isHovering ? 40 : 12,
+        }}
+        style={{
+          display: 'var(--cursor-display, block)'
         }}
         transition={{ type: "spring", damping: 25, stiffness: 250, mass: 0.4 }}
       />

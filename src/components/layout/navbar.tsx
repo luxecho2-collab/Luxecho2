@@ -104,9 +104,9 @@ export function Navbar() {
                     </div>
 
                     {/* Centralized Logo */}
-                    <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3 group">
-                        <LuxechoLogo size={48} className="group-hover:scale-105 transition-transform duration-700" />
-                        <span className={cn("text-2xl font-serif tracking-tight group-hover:tracking-wider transition-all duration-700 font-black", isTransparent ? "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]" : "text-brand-charcoal")}>
+                    <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 md:gap-3 group">
+                        <LuxechoLogo size={36} className="group-hover:scale-105 transition-transform duration-700" />
+                        <span className={cn("text-lg md:text-xl font-serif tracking-tight group-hover:tracking-wider transition-all duration-700 font-black", isTransparent ? "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]" : "text-brand-charcoal")}>
                             luxecho
                         </span>
                     </Link>

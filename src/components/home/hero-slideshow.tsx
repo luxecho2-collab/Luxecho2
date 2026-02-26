@@ -70,7 +70,7 @@ function TemplateBackground({ image, title, blur = 0, opacity = 0.5 }: { image: 
 // ─── THE SIGNATURE CINEMATIC ─────────────────────
 function SignatureTemplate({ slide }: { slide: any }) {
     return (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-12 text-center overflow-hidden">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 md:p-12 text-center overflow-hidden">
             <TemplateBackground
                 image={slide.image}
                 title={slide.title}
@@ -137,7 +137,7 @@ function EditorialTemplate({ slide }: { slide: any }) {
                 opacity={slide.backgroundOpacity}
             />
 
-            <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-start pr-12 md:pr-48">
+            <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-start pr-0 md:pr-48">
                 {/* Brand Accent */}
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -199,7 +199,7 @@ function MinimalistTemplate({ slide }: { slide: any }) {
                 opacity={slide.backgroundOpacity}
             />
 
-            <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center bg-black/40 backdrop-blur-md p-8 md:p-12 border border-white/10 shadow-2xl rounded-sm">
+            <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center bg-black/40 backdrop-blur-md p-6 md:p-12 border border-white/10 shadow-2xl rounded-sm">
 
                 <motion.h2
                     initial={{ opacity: 0, y: 20 }}
@@ -246,7 +246,7 @@ function AvantGardeTemplate({ slide }: { slide: any }) {
                 opacity={slide.backgroundOpacity}
             />
 
-            <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-end pl-12 md:pl-48">
+            <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-end pl-0 md:pl-48">
                 {/* Brand Accent */}
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
@@ -434,39 +434,36 @@ export function HeroSlideshow() {
             {/* ── Slide navigation arrows */}
             {slides.length > 1 && (
 
-                <div className="absolute right-12 bottom-12 z-30 flex gap-4">
+                <div className="absolute right-6 bottom-6 md:right-12 md:bottom-12 z-30 flex gap-2 md:gap-4">
                     <button
                         onClick={prev}
-                        className="w-14 h-14 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-md"
+                        className="w-10 h-10 md:w-14 md:h-14 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-md"
                     >
-                        <ChevronLeft className="w-5 h-5" />
+                        <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                     <button
                         onClick={next}
-                        className="w-14 h-14 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-md"
+                        className="w-10 h-10 md:w-14 md:h-14 border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-md"
                     >
-                        <ChevronRight className="w-5 h-5" />
+                        <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                 </div>
             )}
 
             {/* ── Slide dots & Progress */}
             {slides.length > 1 && (
-                <div className="absolute left-12 bottom-12 flex flex-col gap-6 z-30">
-                    <div className="scale-75 md:scale-100 origin-center">
-                        <p className="text-white text-base md:text-xl font-black uppercase tracking-[0.4em] mb-4 md:mb-6 drop-shadow-lg">
+                <div className="absolute left-6 bottom-6 md:left-12 md:bottom-12 flex flex-col gap-4 md:gap-6 z-30">
+                    <div className="scale-75 md:scale-100 origin-left">
+                        <p className="text-white text-base md:text-xl font-black uppercase tracking-[0.4em] mb-2 md:mb-6 drop-shadow-lg">
                             LUXECHO®
                         </p>
-                        {/* <p className="text-white text-base md:text-xl font-black uppercase tracking-[0.4em] mb-4 md:mb-6 drop-shadow-lg">
-                            URBAN MONKEY
-                        </p> */}
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 md:gap-3">
                         {slides.map((_: unknown, idx: number) => (
                             <button
                                 key={idx}
                                 onClick={() => goTo(idx)}
-                                className={`group relative h-1 transition-all duration-500 ${idx === current ? "w-16 bg-white" : "w-8 bg-white/20 hover:bg-white/40"}`}
+                                className={`group relative h-1 transition-all duration-500 ${idx === current ? "w-10 md:w-16 bg-white" : "w-6 md:w-8 bg-white/20 hover:bg-white/40"}`}
                             >
                                 <span className={`absolute -top-4 left-0 text-[8px] font-black transition-opacity duration-500 ${idx === current ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                                     0{idx + 1}
