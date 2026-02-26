@@ -7,4 +7,9 @@ const envSchema = z.object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 })
 
-export const env = envSchema.parse(process.env)
+// Skip validation during build for Vercel/CI
+const skipValidation = process.env.SKIP_ENV_VALIDATION === "true" || process.env.NEXT_PHASE === "phase-production-build"
+
+export const env = skipValidation
+    ? (process.env as unknown as z.infer<typeof envSchema>)
+    : envSchema.parse(process.env)
