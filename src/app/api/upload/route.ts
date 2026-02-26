@@ -3,10 +3,12 @@ import { writeFile, mkdir } from "fs/promises"
 import { join } from "path"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/server/auth"
+import { headers } from "next/headers"
 
 export const dynamic = "force-dynamic"
 
 export async function POST(req: Request) {
+    headers() // Force dynamic
     const session = await getServerSession(authOptions)
 
     if (session?.user.role !== "ADMIN") {
