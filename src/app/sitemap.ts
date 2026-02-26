@@ -4,16 +4,23 @@ import { db } from '@/lib/db'
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://funkystore.io'
 
-    // Get all products
-    const products = await db.product.findMany({
-        where: { status: 'ACTIVE' },
-        select: { slug: true, updatedAt: true }
-    })
+    let products: { slug: string; updatedAt: Date }[] = []
+    let categories: { slug: string; updatedAt: Date }[] = []
 
-    // Get all categories
-    const categories = await db.category.findMany({
-        select: { slug: true, updatedAt: true }
-    })
+    try {
+        // Get all products
+        products = await db.product.findMany({
+            where: { status: 'ACTIVE' },
+            select: { slug: true, updatedAt: true }
+        })
+
+        // Get all categories
+        categories = await db.category.findMany({
+            select: { slug: true, updatedAt: true }
+        })
+    } catch (error) {
+        console.warn('Database not available during sitemap generation. Generating basic sitemap.', error)
+    }
 
     const productRoutes = products.map((product) => ({
         url: `${baseUrl}/product/${product.slug}`,

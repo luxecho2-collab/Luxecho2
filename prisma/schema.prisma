@@ -3,7 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -100,7 +101,7 @@ model Product {
   quantity        Int                 @default(0)
   lowStockAlert   Int                 @default(5)
   status          ProductStatus       @default(DRAFT)
-  sizes           String[]            @default([])
+  sizes           Json?               @default("[]")
   vendor          String?
   productType     String?
   categoryId      String?
