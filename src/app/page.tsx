@@ -127,7 +127,7 @@ function WaveSection({ wave }: { wave: typeof WAVES[0] }) {
   return (
     <section
       ref={ref}
-      className={`relative w-full min-h-screen flex flex-col bg-black overflow-hidden ${isRight ? "md:flex-row-reverse" : "md:flex-row"}`}
+      className={`relative w-full min-h-screen md:h-screen flex flex-col bg-black overflow-hidden ${isRight ? "md:flex-row-reverse" : "md:flex-row"}`}
     >
       {/* ── Image Panel (100% mobile, 60% desktop) ── */}
       <div ref={imgRef} className="relative w-full md:w-[60%] h-[60vh] md:h-full overflow-hidden flex-shrink-0">
