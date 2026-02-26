@@ -4,6 +4,8 @@ import { join } from "path"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/server/auth"
 
+export const dynamic = "force-dynamic"
+
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions)
 
