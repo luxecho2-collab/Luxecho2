@@ -20,7 +20,7 @@ export function LuxechoLogo({ className, size = 32, animate = true }: LuxechoLog
             transition={{ duration: 0.8, ease: "easeOut" }}
         >
             <Image
-                src="/Logo.png"
+                src="/logo.png"
                 alt="Luxecho Logo"
                 width={size}
                 height={size}
