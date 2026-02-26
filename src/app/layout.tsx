@@ -27,6 +27,11 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "Luxecho | Ultra-Premium E-Commerce",
   description: "Experience modern luxury with Luxecho.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 import { Navbar } from "@/components/layout/navbar";
