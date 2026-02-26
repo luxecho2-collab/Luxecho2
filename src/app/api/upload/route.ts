@@ -6,6 +6,7 @@ import { authOptions } from "@/server/auth"
 import { headers } from "next/headers"
 
 export const dynamic = "force-dynamic"
+export const revalidate = 0
 
 export async function POST(req: Request) {
     headers() // Force dynamic
