@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/shop',
-        destination: '/product',
+        destination: '/products',
         permanent: true,
       },
     ];
