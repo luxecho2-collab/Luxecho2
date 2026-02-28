@@ -13,6 +13,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import { useToast } from "@/hooks/use-toast"
 
 function SignInContent() {
     const { data: session, status } = useSession()
@@ -26,6 +27,7 @@ function SignInContent() {
     const [otp, setOtp] = React.useState("")
     const [otpSent, setOtpSent] = React.useState(false)
     const [isLoading, setIsLoading] = React.useState(false)
+    const { toast } = useToast()
 
     // Redirect if logged in
     React.useEffect(() => {
@@ -39,9 +41,26 @@ function SignInContent() {
         if (!email) return
         setIsLoading(true)
         try {
-            await signIn("email", { email, callbackUrl, redirect: false })
+            const result = await signIn("email", { email, callbackUrl, redirect: false })
+            if (result?.ok) {
+                toast({
+                    title: "Check your inbox",
+                    description: "A magic link has been sent to your email address.",
+                })
+            } else if (result?.error) {
+                toast({
+                    title: "Error",
+                    description: result.error,
+                    variant: "destructive",
+                })
+            }
         } catch (error) {
             console.error(error)
+            toast({
+                title: "Error",
+                description: "An unexpected error occurred. Please try again.",
+                variant: "destructive",
+            })
         } finally {
             setIsLoading(false)
         }

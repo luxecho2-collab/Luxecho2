@@ -32,6 +32,7 @@ export const metadata: Metadata = {
     shortcut: "/logo.png",
     apple: "/logo.png",
   },
+  manifest: "/manifest.json",
 };
 
 import { Navbar } from "@/components/layout/navbar";
