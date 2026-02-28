@@ -28,8 +28,10 @@ export const metadata: Metadata = {
   title: "Luxecho | Ultra-Premium E-Commerce",
   description: "Experience modern luxury with Luxecho.",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/logo.png", sizes: "96x96", type: "image/png" },
+    ],
     apple: "/logo.png",
   },
   manifest: "/manifest.json",
