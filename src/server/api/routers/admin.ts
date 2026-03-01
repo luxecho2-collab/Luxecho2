@@ -635,7 +635,7 @@ export const adminRouter = createTRPCRouter({
                     quantity,
                     sku,
                     status,
-                    sizes: (input.sizes as any) || [],
+                    sizes: (input.sizes ?? []) as any,
                     metaTitle,
                     metaDescription,
                     productInfo,
@@ -737,8 +737,8 @@ export const adminRouter = createTRPCRouter({
                 updateData.slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
             }
 
-            if (input.sizes) {
-                updateData.sizes = input.sizes
+            if (input.sizes !== undefined) {
+                updateData.sizes = input.sizes as any
             }
 
             // Handle images
