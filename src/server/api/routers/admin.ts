@@ -874,7 +874,7 @@ export const adminRouter = createTRPCRouter({
             <h1 style="text-transform: uppercase; font-style: italic;">New Drop</h1>
             <p>Our classic / new item <strong>${updated.name}</strong> is now available.</p>
             <div style="background: #f9f9f9; padding: 20px; border: 1px solid #eee; margin-top: 20px;">
-                <a href="${process.env.NEXTAUTH_URL}/products/${updated.slug}" style="display: inline-block; background: #000; color: #fff; padding: 10px 20px; text-decoration: none; text-transform: uppercase; font-weight: bold; font-size: 12px;">View Product</a>
+                <a href="${process.env.NEXTAUTH_URL}/product/${updated.slug}" style="display: inline-block; background: #000; color: #fff; padding: 10px 20px; text-decoration: none; text-transform: uppercase; font-weight: bold; font-size: 12px;">View Product</a>
             </div>
         </div>
                             `
