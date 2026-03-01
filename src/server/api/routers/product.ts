@@ -3,6 +3,61 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc"
 import { ProductStatus } from "@prisma/client"
 
 export const productRouter = createTRPCRouter({
+    // Relevance-ranked search — exact name > name contains > description/tag contains
+    search: publicProcedure
+        .input(z.object({ query: z.string().min(2), take: z.number().default(12) }))
+        .query(async ({ ctx, input }) => {
+            const { query, take } = input
+            const q = query.trim()
+
+            const [exactName, containsName, rest] = await Promise.all([
+                // 1. Exact product name match
+                ctx.db.product.findMany({
+                    where: { status: ProductStatus.ACTIVE, name: { equals: q } },
+                    take,
+                    include: { images: { orderBy: { position: "asc" }, take: 1 }, categories: true },
+                }),
+                // 2. Name contains (but not exact)
+                ctx.db.product.findMany({
+                    where: {
+                        status: ProductStatus.ACTIVE,
+                        name: { contains: q },
+                        NOT: { name: { equals: q } },
+                    },
+                    take,
+                    orderBy: { salesCount: "desc" },
+                    include: { images: { orderBy: { position: "asc" }, take: 1 }, categories: true },
+                }),
+                // 3. Description / tags / category / meta (not already matched by name)
+                ctx.db.product.findMany({
+                    where: {
+                        status: ProductStatus.ACTIVE,
+                        NOT: { name: { contains: q } },
+                        OR: [
+                            { description: { contains: q } },
+                            { metaTitle: { contains: q } },
+                            { productInfo: { contains: q } },
+                            { tags: { some: { name: { contains: q } } } },
+                            { categories: { some: { name: { contains: q } } } },
+                        ],
+                    },
+                    take,
+                    orderBy: { salesCount: "desc" },
+                    include: { images: { orderBy: { position: "asc" }, take: 1 }, categories: true },
+                }),
+            ])
+
+            // Deduplicate preserving rank order
+            const seen = new Set<string>()
+            const results = [...exactName, ...containsName, ...rest].filter(p => {
+                if (seen.has(p.id)) return false
+                seen.add(p.id)
+                return true
+            })
+
+            return results.slice(0, take)
+        }),
+
     getFeatured: publicProcedure.query(({ ctx }) => {
         return ctx.db.product.findMany({
             where: {
@@ -112,44 +167,47 @@ export const productRouter = createTRPCRouter({
 
             if (search) {
                 where.OR = [
-                    { name: { contains: search, mode: "insensitive" } },
-                    { description: { contains: search, mode: "insensitive" } },
-                    { sku: { contains: search, mode: "insensitive" } },
-                    { metaTitle: { contains: search, mode: "insensitive" } },
-                    { metaDescription: { contains: search, mode: "insensitive" } },
-                    { productInfo: { contains: search, mode: "insensitive" } },
-                    {
-                        tags: {
-                            some: {
-                                name: { contains: search, mode: "insensitive" }
-                            }
-                        }
-                    },
-                    {
-                        categories: {
-                            some: {
-                                name: { contains: search, mode: "insensitive" }
-                            }
-                        }
-                    }
+                    { name: { contains: search } },
+                    { description: { contains: search } },
+                    { sku: { contains: search } },
+                    { metaTitle: { contains: search } },
+                    { metaDescription: { contains: search } },
+                    { productInfo: { contains: search } },
+                    { tags: { some: { name: { contains: search } } } },
+                    { categories: { some: { name: { contains: search } } } },
                 ]
             }
 
             if (options) {
                 const optionEntries = Object.entries(options as Record<string, string[]>).filter(([_, values]) => values && values.length > 0)
                 if (optionEntries.length > 0) {
-                    where.AND = optionEntries.map(([name, values]) => ({
-                        options: {
-                            some: {
-                                name,
-                                values: {
-                                    some: {
-                                        value: { in: values }
-                                    }
+                    where.AND = optionEntries.map(([name, values]) => {
+                        if (name === "Size") {
+                            // Match via ProductOption variants OR via the JSON sizes field
+                            return {
+                                OR: [
+                                    {
+                                        options: {
+                                            some: {
+                                                name,
+                                                values: { some: { value: { in: values } } }
+                                            }
+                                        }
+                                    },
+                                    // JSON array_contains — matches products using the simple sizes field
+                                    { OR: values.map(size => ({ sizes: { array_contains: size } })) }
+                                ]
+                            }
+                        }
+                        return {
+                            options: {
+                                some: {
+                                    name,
+                                    values: { some: { value: { in: values } } }
                                 }
                             }
                         }
-                    }))
+                    })
                 }
             }
 
@@ -183,23 +241,43 @@ export const productRouter = createTRPCRouter({
         }),
 
     getFilters: publicProcedure.query(async ({ ctx }) => {
-        const options = await ctx.db.productOption.findMany({
-            include: {
-                values: true,
-            },
-        })
+        const [options, productsWithSizes] = await Promise.all([
+            ctx.db.productOption.findMany({
+                include: { values: true },
+            }),
+            ctx.db.product.findMany({
+                where: { status: ProductStatus.ACTIVE },
+                select: { sizes: true },
+            }),
+        ])
 
         const filters: Record<string, string[]> = {}
+
+        // Collect sizes from ProductOption (variants system)
         options.forEach(opt => {
-            if (!filters[opt.name]) {
-                filters[opt.name] = []
-            }
+            if (!filters[opt.name]) filters[opt.name] = []
             opt.values.forEach(val => {
-                if (!filters[opt.name].includes(val.value)) {
-                    filters[opt.name].push(val.value)
+                if (!filters[opt.name]!.includes(val.value)) {
+                    filters[opt.name]!.push(val.value)
                 }
             })
         })
+
+        // Collect sizes from the JSON `sizes` field and merge under "Size"
+        const jsonSizeSet = new Set<string>()
+        productsWithSizes.forEach(p => {
+            if (Array.isArray(p.sizes)) {
+                (p.sizes as string[]).forEach(s => {
+                    if (s && typeof s === "string") jsonSizeSet.add(s.trim())
+                })
+            }
+        })
+
+        if (jsonSizeSet.size > 0) {
+            const existing = filters["Size"] ?? []
+            const merged = [...new Set([...existing, ...jsonSizeSet])]
+            filters["Size"] = merged
+        }
 
         return filters
     }),

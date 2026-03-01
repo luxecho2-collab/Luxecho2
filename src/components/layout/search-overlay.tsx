@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { api } from "@/trpc/react"
-import { Search, X, Loader2 } from "lucide-react"
+import { Search, X, Loader2, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -33,30 +33,38 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         }
     }, [isOpen])
 
-    // Search results
-    const { data: searchResults, isLoading: isSearchLoading } = api.product.list.useQuery(
-        { search: debouncedQuery, take: 10 },
-        { enabled: debouncedQuery.length > 0 }
+    const isQueryReady = debouncedQuery.trim().length >= 2
+
+    // Ranked search results using the dedicated search endpoint
+    const { data: searchResults, isLoading: isSearchLoading } = api.product.search.useQuery(
+        { query: debouncedQuery, take: 10 },
+        { enabled: isQueryReady }
     )
 
-    // Trending products (fallback when no search)
+    // Trending products (shown when no query)
     const { data: trendingProducts, isLoading: isTrendingLoading } = api.product.list.useQuery(
-        { take: 10 },
-        { enabled: isOpen && debouncedQuery.length === 0 }
+        { take: 10, sort: "newest" },
+        { enabled: isOpen && !isQueryReady }
     )
 
-    const products = debouncedQuery.length > 0 ? searchResults?.items : trendingProducts?.items
-    const isLoading = isSearchLoading || isTrendingLoading
+    const products = isQueryReady ? searchResults : trendingProducts?.items
+    const isLoading = isQueryReady ? isSearchLoading : isTrendingLoading
 
     const handleSelect = (slug: string) => {
         onClose()
         router.push(`/product/${slug}`)
     }
 
-    // Handle Escape key & Scroll Lock
+    const handleViewAll = () => {
+        onClose()
+        router.push(`/products?search=${encodeURIComponent(query.trim())}`)
+    }
+
+    // Handle Escape key, Enter key & Scroll Lock
     React.useEffect(() => {
-        const handleEsc = (e: KeyboardEvent) => {
+        const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose()
+            if (e.key === "Enter" && query.trim().length >= 2) handleViewAll()
         }
 
         if (isOpen) {
@@ -65,12 +73,12 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             document.body.style.overflow = "unset"
         }
 
-        window.addEventListener("keydown", handleEsc)
+        window.addEventListener("keydown", handleKeyDown)
         return () => {
-            window.removeEventListener("keydown", handleEsc)
+            window.removeEventListener("keydown", handleKeyDown)
             document.body.style.overflow = "unset"
         }
-    }, [onClose, isOpen])
+    }, [onClose, isOpen, query])
 
     return (
         <AnimatePresence>
@@ -88,11 +96,19 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                                 <Search className="w-5 h-5 text-gray-400 shrink-0" />
                                 <Input
                                     autoFocus
-                                    placeholder="SEARCH"
+                                    placeholder="SEARCH PRODUCTS..."
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
                                     className="flex-1 h-full bg-transparent border-none rounded-none text-xl md:text-2xl font-bold uppercase tracking-widest placeholder:text-gray-200 outline-none ring-0 focus-visible:ring-0 p-0"
                                 />
+                                {query.length > 0 && (
+                                    <button
+                                        onClick={() => { setQuery(""); setDebouncedQuery("") }}
+                                        className="p-2 hover:bg-gray-100 rounded-full transition-colors shrink-0"
+                                    >
+                                        <X className="w-5 h-5 text-gray-300" strokeWidth={1.5} />
+                                    </button>
+                                )}
                                 <button
                                     onClick={onClose}
                                     className="p-2 hover:bg-gray-100 rounded-full transition-colors shrink-0"
@@ -104,11 +120,29 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
                         {/* Content Area */}
                         <div className="container mx-auto px-6 py-12 flex-grow">
-                            <div className="mb-8">
+                            <div className="mb-8 flex items-center justify-between">
                                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">
-                                    {debouncedQuery.length > 0 ? "SEARCH RESULTS" : "TRENDING PRODUCTS"}
+                                    {isQueryReady
+                                        ? `SEARCH RESULTS ${searchResults ? `(${searchResults.length})` : ""}`
+                                        : "TRENDING PRODUCTS"
+                                    }
                                 </h2>
+                                {isQueryReady && (searchResults?.length ?? 0) > 0 && (
+                                    <button
+                                        onClick={handleViewAll}
+                                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-black hover:opacity-60 transition-opacity"
+                                    >
+                                        View All <ArrowRight className="w-3 h-3" />
+                                    </button>
+                                )}
                             </div>
+
+                            {/* Hint when query too short */}
+                            {query.trim().length === 1 && (
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-300 py-4">
+                                    Type at least 2 characters...
+                                </p>
+                            )}
 
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-gray-300">
@@ -142,17 +176,18 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                                                     {item.name}
                                                 </h3>
                                                 <p className="text-[10px] font-bold text-gray-500 uppercase">
-                                                    RS. {item.price.toLocaleString('en-IN')}.00
+                                                    ₹{item.price.toLocaleString('en-IN')}
                                                 </p>
                                             </div>
                                         </motion.div>
                                     ))}
                                 </div>
-                            ) : (
+                            ) : isQueryReady ? (
                                 <div className="py-20 text-center">
                                     <p className="text-sm font-black uppercase tracking-widest text-gray-400">No results found for "{debouncedQuery}"</p>
+                                    <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-3">Try different keywords or browse all products</p>
                                 </div>
-                            )}
+                            ) : null}
                         </div>
                     </div>
                 </motion.div>
