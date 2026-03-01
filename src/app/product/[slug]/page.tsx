@@ -34,6 +34,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     const utils = api.useUtils()
 
     const [selectedOptions, setSelectedOptions] = React.useState<Record<string, string>>({})
+    const [selectedSize, setSelectedSize] = React.useState<string | null>(null)
     const [activeImageIndex, setActiveImageIndex] = React.useState<number>(0)
     const [showSizeChart, setShowSizeChart] = React.useState(false)
     const [lightboxImage, setLightboxImage] = React.useState<string | null>(null)
@@ -91,6 +92,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             toast({
                 title: "Please select all options",
                 description: "Choose color and size before adding to bag.",
+                variant: "destructive"
+            })
+            return
+        }
+        // If product uses the simple sizes JSON field (no variants), require a size
+        const jsonSizes = Array.isArray((product as any).sizes) ? (product as any).sizes as string[] : []
+        if (product.options.length === 0 && jsonSizes.length > 0 && !selectedSize) {
+            toast({
+                title: "Please select a size",
+                description: "Choose your size before adding to bag.",
                 variant: "destructive"
             })
             return
@@ -422,6 +433,39 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                         </div>
                                     </div>
                                 ))}
+
+                                {/* Simple JSON sizes selector — shown when no variant options exist */}
+                                {product.options.length === 0 && Array.isArray((product as any).sizes) && ((product as any).sizes as string[]).length > 0 && (
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-center bg-gray-50/50 px-4 py-2 border-l-2 border-black mb-4">
+                                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-black">Select Size</h3>
+                                            <button
+                                                onClick={() => setShowSizeChart(true)}
+                                                className="flex items-center gap-2 group/sg"
+                                            >
+                                                <div className="w-2 h-2 bg-black rounded-full group-hover:scale-150 transition-transform animate-pulse" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest border-b border-black/10 group-hover:border-black group-hover:text-black transition-all">Sizing Guide</span>
+                                            </button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-3">
+                                            {((product as any).sizes as string[]).map((size: string) => (
+                                                <button
+                                                    key={size}
+                                                    type="button"
+                                                    onClick={() => setSelectedSize(size)}
+                                                    className={cn(
+                                                        "min-w-[44px] h-11 px-3 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                                                        selectedSize === size
+                                                            ? "bg-black text-white rotate-6 scale-110 shadow-lg border-none"
+                                                            : "bg-gray-50 text-gray-400 hover:bg-gray-100 border border-gray-100"
+                                                    )}
+                                                >
+                                                    {size}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Dynamic Dispatch Info */}
