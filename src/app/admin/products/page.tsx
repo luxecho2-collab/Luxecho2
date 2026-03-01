@@ -19,7 +19,8 @@ import {
     FolderPlus,
     Tag as TagIcon,
     AlertCircle,
-    CheckCircle2 as CheckIcon
+    CheckCircle2 as CheckIcon,
+    Megaphone
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -91,6 +92,15 @@ export default function AdminProductsPage() {
         onSuccess: () => {
             toast({ title: "PRODUCT DELETED", description: "Entry has been removed from manifest." })
             utils.admin.getProducts.invalidate()
+        }
+    })
+
+    const sendDrop = api.admin.sendDropNotification.useMutation({
+        onSuccess: (data) => {
+            toast({ title: "DROP SIGNAL SENT", description: `Notified ${data.sentCount} subscriber${data.sentCount !== 1 ? "s" : ""}.` })
+        },
+        onError: (err) => {
+            toast({ title: "SEND FAILED", description: err.message, variant: "destructive" })
         }
     })
 
@@ -369,12 +379,26 @@ export default function AdminProductsPage() {
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-gray-100 transition-all rounded-none"><MoreVertical className="w-4 h-4" /></Button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="rounded-none border-gray-100 min-w-[160px]">
+                                                <DropdownMenuContent align="end" className="rounded-none border-gray-100 min-w-[200px]">
                                                     <Link href={`/product/${product.slug}`} target="_blank">
                                                         <DropdownMenuItem className="p-3 text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-50">
                                                             <ExternalLink className="w-3 h-3 mr-3" /> External View
                                                         </DropdownMenuItem>
                                                     </Link>
+                                                    <DropdownMenuItem
+                                                        onClick={() => sendDrop.mutate({ productId: product.id, type: "back_in_stock" })}
+                                                        disabled={sendDrop.isPending}
+                                                        className="p-3 text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-50"
+                                                    >
+                                                        <Megaphone className="w-3 h-3 mr-3" /> Back in Stock Alert
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem
+                                                        onClick={() => sendDrop.mutate({ productId: product.id, type: "new_drop" })}
+                                                        disabled={sendDrop.isPending}
+                                                        className="p-3 text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-gray-50"
+                                                    >
+                                                        <Megaphone className="w-3 h-3 mr-3" /> New Drop Alert
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         onClick={() => {
                                                             if (confirm("Permanently remove this entry from manifest?")) {

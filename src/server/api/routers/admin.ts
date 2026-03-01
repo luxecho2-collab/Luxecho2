@@ -713,38 +713,129 @@ export const adminRouter = createTRPCRouter({
                 }
             })
 
-            // Notification for Active Product
-            if (status === "ACTIVE") {
-                const subscribers = await ctx.db.user.findMany({
-                    where: { isSubscribed: true, email: { not: null } },
-                    select: { email: true }
-                })
-
-                for (const sub of subscribers) {
-                    if (sub.email) {
-                        await sendEmail({
-                            to: sub.email,
-                            subject: `New Arrival: ${name} `,
-                            html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
-            <h1 style="text-transform: uppercase; font-style: italic;">New Arrival</h1>
-            <p>Exclusively for our subscribers: <strong>${name}</strong> is now live.</p>
-            <div style="background: #f9f9f9; padding: 20px; border: 1px solid #eee; margin-top: 20px;">
-                <h3>${name}</h3>
-                <p>Price: ₹${price.toLocaleString()}</p>
-                <a href="${process.env.NEXTAUTH_URL}/products/${product.slug}" style="display: inline-block; background: #000; color: #fff; padding: 10px 20px; text-decoration: none; text-transform: uppercase; font-weight: bold; font-size: 12px;">Shop Now</a>
-            </div>
-        </div>
-                                    `
-                        })
-                    }
-                }
-            }
-
             return product
         }),
 
+    sendDropNotification: adminProcedure
+        .input(z.object({
+            productId: z.string(),
+            type: z.enum(["back_in_stock", "new_drop"]).default("back_in_stock"),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const product = await ctx.db.product.findUnique({
+                where: { id: input.productId },
+                include: { images: { orderBy: { position: "asc" }, take: 1 } },
+            })
+            if (!product) throw new Error("Product not found")
 
+            const subscribers = await ctx.db.user.findMany({
+                where: { isSubscribed: true, email: { not: null } },
+                select: { email: true },
+            })
+
+            const label = input.type === "back_in_stock" ? "Back in Stock" : "New Drop"
+            const productUrl = `${process.env.NEXTAUTH_URL}/product/${product.slug}`
+            const imageUrl = product.images?.[0]?.url ?? ""
+            const price = `₹${product.price.toLocaleString("en-IN")}`
+
+            const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${label}: ${product.name}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f5f5f5;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:40px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#000000;padding:28px 40px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <span style="color:#ffffff;font-size:22px;font-weight:900;letter-spacing:0.15em;text-transform:uppercase;">LUXECHO</span>
+                </td>
+                <td align="right">
+                  <span style="display:inline-block;background:#ffffff;color:#000000;font-size:9px;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;padding:6px 12px;">${label.toUpperCase()}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Hero Image -->
+        ${imageUrl ? `
+        <tr>
+          <td style="padding:0;line-height:0;">
+            <img src="${imageUrl}" alt="${product.name}" width="600" style="display:block;width:100%;max-height:560px;object-fit:cover;" />
+          </td>
+        </tr>` : ""}
+
+        <!-- Product Info -->
+        <tr>
+          <td style="padding:40px 40px 10px;">
+            <p style="margin:0 0 6px;font-size:10px;font-weight:900;letter-spacing:0.25em;text-transform:uppercase;color:#999999;">${label.toUpperCase()}</p>
+            <h1 style="margin:0 0 12px;font-size:28px;font-weight:900;letter-spacing:-0.02em;text-transform:uppercase;color:#000000;line-height:1.1;">${product.name}</h1>
+            <p style="margin:0;font-size:20px;font-weight:900;color:#000000;letter-spacing:0.02em;">${price}</p>
+          </td>
+        </tr>
+
+        <!-- Body Copy -->
+        <tr>
+          <td style="padding:20px 40px 32px;">
+            <p style="margin:0;font-size:14px;color:#555555;line-height:1.7;">
+              Our ${input.type === "back_in_stock" ? "classic" : "new"} item <strong style="color:#000;">${product.name}</strong> is now available.
+              Don't miss out — limited stock, no restocks guaranteed.
+            </p>
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <tr>
+          <td style="padding:0 40px 48px;">
+            <a href="${productUrl}"
+               style="display:inline-block;background:#000000;color:#ffffff;font-size:11px;font-weight:900;letter-spacing:0.25em;text-transform:uppercase;text-decoration:none;padding:18px 40px;">
+              VIEW PRODUCT
+            </a>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr><td style="padding:0 40px;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:28px 40px;">
+            <p style="margin:0;font-size:9px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#bbbbbb;">
+              &copy; ${new Date().getFullYear()} Luxecho &nbsp;&bull;&nbsp; You're receiving this because you subscribed to Luxecho drops.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+
+            let sentCount = 0
+            for (const sub of subscribers) {
+                if (sub.email) {
+                    await sendEmail({
+                        to: sub.email,
+                        subject: `${label}: LUXECHO "${product.name}"`,
+                        html,
+                    })
+                    sentCount++
+                }
+            }
+
+            return { success: true, sentCount }
+        }),
 
     updateProduct: adminProcedure
         .input(z.object({
@@ -856,32 +947,6 @@ export const adminRouter = createTRPCRouter({
                 where: { id },
                 data: updateData
             })
-
-            // Notification if product becomes ACTIVE
-            if (status === "ACTIVE") {
-                const subscribers = await ctx.db.user.findMany({
-                    where: { isSubscribed: true, email: { not: null } },
-                    select: { email: true }
-                })
-
-                for (const sub of subscribers) {
-                    if (sub.email) {
-                        await sendEmail({
-                            to: sub.email,
-                            subject: `Back in Stock / New Drop: ${updated.name} `,
-                            html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #000;">
-            <h1 style="text-transform: uppercase; font-style: italic;">New Drop</h1>
-            <p>Our classic / new item <strong>${updated.name}</strong> is now available.</p>
-            <div style="background: #f9f9f9; padding: 20px; border: 1px solid #eee; margin-top: 20px;">
-                <a href="${process.env.NEXTAUTH_URL}/product/${updated.slug}" style="display: inline-block; background: #000; color: #fff; padding: 10px 20px; text-decoration: none; text-transform: uppercase; font-weight: bold; font-size: 12px;">View Product</a>
-            </div>
-        </div>
-                            `
-                        })
-                    }
-                }
-            }
 
             return updated
         }),
