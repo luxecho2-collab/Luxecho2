@@ -244,77 +244,103 @@ export const adminRouter = createTRPCRouter({
         .query(async ({ ctx, input }) => {
             const { search, skip, take, categoryId, minPrice, maxPrice, status, lowStock } = input
 
-            const where: any = {}
+            const trimmedSearch = search?.trim()
 
-            // Search Logic
-            if (search) {
-                where.OR = [
-                    { name: { contains: search, mode: 'insensitive' } },
-                    { sku: { contains: search, mode: 'insensitive' } },
-                    { description: { contains: search, mode: 'insensitive' } },
-                    { metaTitle: { contains: search, mode: 'insensitive' } },
-                    { metaDescription: { contains: search, mode: 'insensitive' } },
-                    { productInfo: { contains: search, mode: 'insensitive' } },
-                    {
-                        tags: {
-                            some: {
-                                name: { contains: search, mode: 'insensitive' }
-                            }
-                        }
-                    },
-                    {
-                        categories: {
-                            some: {
-                                name: { contains: search, mode: 'insensitive' }
-                            }
-                        }
-                    }
-                ]
-            }
+            // Build non-search filter conditions (shared across all tiers)
+            const baseWhere: any = {}
 
-            // Category Filter
             if (categoryId) {
-                where.categories = {
-                    some: { id: categoryId }
-                }
+                baseWhere.categories = { some: { id: categoryId } }
             }
-
-            // Price Range Filter
             if (minPrice !== undefined || maxPrice !== undefined) {
-                where.price = {}
-                if (minPrice !== undefined) where.price.gte = minPrice
-                if (maxPrice !== undefined) where.price.lte = maxPrice
+                baseWhere.price = {}
+                if (minPrice !== undefined) baseWhere.price.gte = minPrice
+                if (maxPrice !== undefined) baseWhere.price.lte = maxPrice
             }
-
-            // Status Filter
             if (status) {
-                where.status = status
+                baseWhere.status = status
             }
-
-            // Low Stock Filter
             if (lowStock) {
-                where.OR = [
-                    ...(where.OR || []),
-                    { quantity: { lte: 5 } },
-                    { variants: { some: { quantity: { lte: 5 } } } }
+                baseWhere.AND = [
+                    ...(baseWhere.AND ?? []),
+                    {
+                        OR: [
+                            { quantity: { lte: 5 } },
+                            { variants: { some: { quantity: { lte: 5 } } } }
+                        ]
+                    }
                 ]
             }
 
-            return ctx.db.product.findMany({
-                where,
-                skip,
-                take,
-                orderBy: { createdAt: "desc" },
-                include: {
-                    categories: true,
-                    variants: true,
-                    images: {
-                        take: 1,
-                        orderBy: { position: "asc" }
-                    }
-                }
+            const include = {
+                categories: true,
+                variants: true,
+                images: { orderBy: { position: "asc" as const }, take: 1 },
+                tags: true,
+            }
+
+            // If no search query, just apply filters directly
+            if (!trimmedSearch) {
+                return ctx.db.product.findMany({
+                    where: baseWhere,
+                    skip,
+                    take,
+                    orderBy: { createdAt: "desc" },
+                    include,
+                })
+            }
+
+            // — Same 3-tier ranked search as the global search —
+            const q = trimmedSearch
+            const [exactName, containsName, rest] = await Promise.all([
+                // Tier 1: Exact name match
+                ctx.db.product.findMany({
+                    where: { ...baseWhere, name: { equals: q, mode: 'insensitive' } },
+                    take,
+                    include,
+                }),
+                // Tier 2: Name contains (ordered by sales relevance)
+                ctx.db.product.findMany({
+                    where: {
+                        ...baseWhere,
+                        name: { contains: q, mode: 'insensitive' },
+                        NOT: { name: { equals: q, mode: 'insensitive' } },
+                    },
+                    take,
+                    orderBy: { salesCount: 'desc' },
+                    include,
+                }),
+                // Tier 3: SKU, description, tags, categories, meta (not already matched by name)
+                ctx.db.product.findMany({
+                    where: {
+                        ...baseWhere,
+                        NOT: { name: { contains: q, mode: 'insensitive' } },
+                        OR: [
+                            { sku: { contains: q, mode: 'insensitive' } },
+                            { description: { contains: q, mode: 'insensitive' } },
+                            { metaTitle: { contains: q, mode: 'insensitive' } },
+                            { productInfo: { contains: q, mode: 'insensitive' } },
+                            { tags: { some: { name: { contains: q, mode: 'insensitive' } } } },
+                            { categories: { some: { name: { contains: q, mode: 'insensitive' } } } },
+                        ],
+                    },
+                    take,
+                    orderBy: { salesCount: 'desc' },
+                    include,
+                }),
+            ])
+
+            // Deduplicate preserving rank order
+            const seen = new Set<string>()
+            const merged = [...exactName, ...containsName, ...rest].filter(p => {
+                if (seen.has(p.id)) return false
+                seen.add(p.id)
+                return true
             })
+
+            return merged.slice(skip, skip + take)
         }),
+
     getProductById: adminProcedure
         .input(z.object({ id: z.string() }))
         .query(async ({ ctx, input }) => {
