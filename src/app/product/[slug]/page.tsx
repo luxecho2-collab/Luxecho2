@@ -72,7 +72,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             return
         }
         if (product) {
-            toggleWishlist({ productId: product.id })
+            const optionsToSave = { ...selectedOptions, ...(selectedSize ? { Size: selectedSize } : {}) }
+            toggleWishlist({
+                productId: product.id,
+                variantId: selectedVariant?.id || selectedSize || undefined,
+                options: Object.keys(optionsToSave).length > 0 ? optionsToSave : undefined
+            })
         }
     }
 
@@ -109,13 +114,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         addItem({
             id: product.id,
             productId: product.id,
-            variantId: selectedVariant?.id,
+            variantId: selectedVariant?.id || selectedSize || undefined,
             name: product.name,
             slug: product.slug,
             price: Number(selectedVariant?.price || product.price),
             image: product.images[0]?.url || "/placeholder.jpg",
             quantity: quantity,
-            options: selectedOptions,
+            options: { ...selectedOptions, ...(selectedSize ? { Size: selectedSize } : {}) },
         })
         incrementAddToCart({ id: product.id })
         toast({

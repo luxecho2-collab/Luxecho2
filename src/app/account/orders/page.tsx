@@ -120,26 +120,32 @@ export default function OrdersPage() {
 
                                 {/* Order Items & Action */}
                                 <div className="p-8 flex flex-col lg:flex-row justify-between items-center lg:items-end gap-8">
-                                    <div className="flex -space-x-4 overflow-hidden self-start">
+                                    <div className="flex flex-col gap-4 self-start w-full lg:w-1/2">
                                         {order.items.map((item: any, idx: number) => (
-                                            <div
-                                                key={item.id}
-                                                className="relative w-20 aspect-[3/4] bg-gray-50 border border-white ring-4 ring-white shadow-sm transition-transform group-hover:translate-y-[-4px]"
-                                                style={{ zIndex: 10 - idx }}
-                                            >
-                                                {item.product.images[0] && (
-                                                    <Image
-                                                        src={item.product.images[0].url}
-                                                        alt={item.product.name}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                )}
-                                                {item.quantity > 1 && (
-                                                    <div className="absolute -bottom-1 -right-1 bg-black text-white text-[8px] font-bold px-1.5 py-0.5 z-20">
-                                                        x{item.quantity}
+                                            <div key={item.id} className="flex gap-4 items-center">
+                                                <div className="relative w-16 aspect-[3/4] bg-gray-50 border border-gray-100 flex-shrink-0">
+                                                    {item.product.images[0] && (
+                                                        <Image
+                                                            src={item.product.images[0].url}
+                                                            alt={item.product.name}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    )}
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-xs font-black uppercase tracking-tight line-clamp-1">{item.product.name}</p>
+                                                    <div className="flex items-center gap-3">
+                                                        {(item.variant?.name || (item.options as any)?.Size) && (
+                                                            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 bg-gray-50 px-2 py-0.5 border border-gray-100">
+                                                                Size: {item.variant?.name || (item.options as any)?.Size}
+                                                            </span>
+                                                        )}
+                                                        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                                                            QTY: {item.quantity}
+                                                        </span>
                                                     </div>
-                                                )}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>

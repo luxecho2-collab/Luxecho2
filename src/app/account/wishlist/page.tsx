@@ -52,7 +52,11 @@ export default function WishlistPage() {
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
                         {wishlist.map((item: any) => (
-                            <ProductCard key={item.id} product={item.product as any} />
+                            <ProductCard
+                                key={item.id}
+                                product={item.product as any}
+                                savedSize={(item.options as any)?.Size || null}
+                            />
                         ))}
                     </div>
                 )}

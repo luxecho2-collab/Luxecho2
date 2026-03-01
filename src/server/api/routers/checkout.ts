@@ -36,6 +36,7 @@ export const checkoutRouter = createTRPCRouter({
                 quantity: z.number(),
                 price: z.number(),
                 name: z.string(),
+                options: z.record(z.string(), z.any()).optional(),
             })),
             couponCode: z.string().optional(),
         }))
@@ -107,9 +108,10 @@ export const checkoutRouter = createTRPCRouter({
                         items: {
                             create: input.items.map(item => ({
                                 product: { connect: { id: item.id } },
-                                variant: item.variantId ? { connect: { id: item.variantId } } : undefined,
+                                variant: item.variantId && item.variantId.length > 15 ? { connect: { id: item.variantId } } : undefined,
                                 quantity: item.quantity,
                                 price: item.price,
+                                options: item.options || undefined,
                             }))
                         }
                     }

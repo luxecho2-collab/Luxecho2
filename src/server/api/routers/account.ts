@@ -37,12 +37,17 @@ export const accountRouter = createTRPCRouter({
                 trackingUrl: true,
                 shippingAddress: true,
                 items: {
-                    include: {
+                    select: {
+                        id: true,
+                        quantity: true,
+                        price: true,
+                        options: true,
                         product: {
                             include: {
                                 images: { take: 1 }
                             }
-                        }
+                        },
+                        variant: true,
                     }
                 }
             }
@@ -63,7 +68,11 @@ export const accountRouter = createTRPCRouter({
     }),
 
     toggleWishlist: protectedProcedure
-        .input(z.object({ productId: z.string() }))
+        .input(z.object({
+            productId: z.string(),
+            variantId: z.string().optional(),
+            options: z.record(z.string(), z.any()).optional()
+        }))
         .mutation(async ({ ctx, input }) => {
             const userId = ctx.session.user.id;
 
@@ -86,6 +95,8 @@ export const accountRouter = createTRPCRouter({
                     data: {
                         userId: userId,
                         productId: input.productId,
+                        variantId: input.variantId && input.variantId.length > 15 ? input.variantId : undefined,
+                        options: input.options || undefined,
                     }
                 })
                 return { added: true }

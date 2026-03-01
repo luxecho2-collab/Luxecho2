@@ -25,9 +25,10 @@ interface ProductCardProps {
     }
     className?: string
     priority?: boolean
+    savedSize?: string | null
 }
 
-export function ProductCard({ product, className, priority }: ProductCardProps) {
+export function ProductCard({ product, className, priority, savedSize }: ProductCardProps) {
     const { data: session } = useSession()
     const { toast } = useToast()
     const router = useRouter()
@@ -85,6 +86,7 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
             price: Number(product.price),
             image: product.images[0]?.url || "/placeholder.jpg",
             quantity: 1,
+            ...(savedSize ? { options: { Size: savedSize } } : {})
         })
         toast({ title: "Added to Bag", description: `${product.name} added.` })
     }
@@ -190,26 +192,33 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
             </div>
 
             {/* Visual Footer (The "Unique Of Yourself" Part) */}
-            <div className="mt-4 flex justify-between items-end">
-                <div className="space-y-1">
-                    {product.category && (
-                        <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest leading-none">
-                            {product.category.name}
-                        </p>
-                    )}
-                    <h3 className="text-xs font-black uppercase tracking-tighter leading-none line-clamp-1">
-                        {product.name}
-                    </h3>
+            <div className="mt-4 flex flex-col gap-2">
+                <div className="flex justify-between items-end">
+                    <div className="space-y-1">
+                        {product.category && (
+                            <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest leading-none">
+                                {product.category.name}
+                            </p>
+                        )}
+                        <h3 className="text-xs font-black uppercase tracking-tighter leading-none line-clamp-1">
+                            {product.name}
+                        </h3>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                        <span className="text-sm font-black text-black leading-none">₹{price.toLocaleString('en-IN')}</span>
+                        {hasDiscount && (
+                            <div className="flex flex-col items-end gap-1">
+                                <span className="text-[10px] text-gray-400 line-through font-bold leading-none">₹{comparePrice?.toLocaleString('en-IN')}</span>
+                                <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">-{discount}% OFF</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                    <span className="text-sm font-black text-black leading-none">₹{price.toLocaleString('en-IN')}</span>
-                    {hasDiscount && (
-                        <div className="flex flex-col items-end gap-1">
-                            <span className="text-[10px] text-gray-400 line-through font-bold leading-none">₹{comparePrice?.toLocaleString('en-IN')}</span>
-                            <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">-{discount}% OFF</span>
-                        </div>
-                    )}
-                </div>
+                {savedSize && (
+                    <div className="inline-block bg-gray-50 border border-black/10 text-gray-500 font-bold uppercase tracking-widest text-[9px] px-2 py-1 w-fit mt-1">
+                        Saved Size: {savedSize}
+                    </div>
+                )}
             </div>
             {/* Immersive bottom border decoration */}
             <div className="h-[1px] w-full bg-gray-100 mt-4 group-hover:bg-black transition-colors duration-500" />
