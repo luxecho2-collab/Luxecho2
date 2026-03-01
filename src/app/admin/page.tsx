@@ -23,7 +23,8 @@ import { LuxechoLogo } from "@/components/layout/luxecho-logo"
 
 export default function AdminDashboard() {
     const { data: stats, isLoading } = api.admin.getStats.useQuery(undefined)
-    const { data: orders, isLoading: ordersLoading } = api.admin.getOrders.useQuery({ take: 5 })
+    const { data: ordersData, isLoading: ordersLoading } = api.admin.getOrders.useQuery({ take: 5 })
+    const orders = ordersData?.orders ?? []
 
     const cards = [
         { name: "NET REVENUE", value: `₹${stats?.totalRevenue.toLocaleString('en-IN') ?? "0.00"}`, icon: TrendingUp, positive: true },

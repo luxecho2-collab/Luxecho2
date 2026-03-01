@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { useSession } from "next-auth/react"
+import { useSession, signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 const checkoutSchema = z.object({
     email: z.string().email("Valid email required"),
@@ -33,7 +34,15 @@ const STEPS = ["Information", "Shipping", "Payment"]
 
 export default function CheckoutPage() {
     const { items, getTotalPrice } = useCart()
-    const { data: session } = useSession()
+    const router = useRouter()
+
+    // ── Auth Guard: redirect unauthenticated users to sign-in ──
+    const { data: session, status } = useSession({
+        required: true,
+        onUnauthenticated() {
+            router.push("/auth/signin?callbackUrl=/checkout")
+        },
+    })
 
     // RADIX UI BUG FIX: Clean up any lingering body locks from the Cart Sheet
     React.useEffect(() => {
@@ -135,6 +144,15 @@ export default function CheckoutPage() {
         setValue("city", addr.city)
         setValue("state", addr.state)
         setValue("postalCode", addr.zip)
+    }
+
+    // Show nothing while auth is loading or redirecting
+    if (status === "loading") {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+            </div>
+        )
     }
 
     if (items.length === 0) {

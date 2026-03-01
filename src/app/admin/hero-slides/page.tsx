@@ -449,18 +449,57 @@ export default function HeroSlidesAdminPage() {
                             <div className="p-5 flex-grow">
                                 {editingSlideId === slide.id ? (
                                     <div className="space-y-3">
-                                        <input
-                                            placeholder="Title"
-                                            value={editSlideForm.title ?? ""}
-                                            onChange={e => setEditSlideForm(p => ({ ...p, title: e.target.value }))}
-                                            className="w-full border border-gray-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-gray-900 bg-white"
-                                        />
-                                        <input
-                                            placeholder="Subtitle"
-                                            value={editSlideForm.subtitle ?? ""}
-                                            onChange={e => setEditSlideForm(p => ({ ...p, subtitle: e.target.value }))}
-                                            className="w-full border border-gray-200 px-3 py-2 text-[10px] uppercase tracking-[0.2em] focus:outline-none focus:border-gray-900 bg-white"
-                                        />
+                                        <div className="flex gap-2">
+                                            <input
+                                                placeholder="Title"
+                                                value={editSlideForm.title ?? ""}
+                                                onChange={e => setEditSlideForm(p => ({ ...p, title: e.target.value }))}
+                                                className="w-full border border-gray-200 px-3 py-2 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:border-gray-900 bg-white"
+                                            />
+                                            <input
+                                                placeholder="Subtitle"
+                                                value={editSlideForm.subtitle ?? ""}
+                                                onChange={e => setEditSlideForm(p => ({ ...p, subtitle: e.target.value }))}
+                                                className="w-full border border-gray-200 px-3 py-2 text-[10px] uppercase tracking-[0.2em] focus:outline-none focus:border-gray-900 bg-white"
+                                            />
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <input
+                                                placeholder="CTA Text"
+                                                value={editSlideForm.ctaText ?? ""}
+                                                onChange={e => setEditSlideForm(p => ({ ...p, ctaText: e.target.value }))}
+                                                className="w-full border border-gray-200 px-3 py-2 text-[10px] uppercase tracking-widest focus:outline-none focus:border-gray-900 bg-white"
+                                            />
+                                            <input
+                                                placeholder="CTA Link"
+                                                value={editSlideForm.ctaLink ?? ""}
+                                                onChange={e => setEditSlideForm(p => ({ ...p, ctaLink: e.target.value }))}
+                                                className="w-full border border-gray-200 px-3 py-2 text-[10px] focus:outline-none focus:border-gray-900 bg-white"
+                                            />
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <input
+                                                placeholder="Image URL"
+                                                value={editSlideForm.image ?? ""}
+                                                onChange={e => setEditSlideForm(p => ({ ...p, image: e.target.value }))}
+                                                className="w-full border border-gray-200 px-3 py-2 text-[10px] focus:outline-none focus:border-gray-900 bg-white"
+                                            />
+                                            <div className="relative flex-shrink-0 w-12">
+                                                <input
+                                                    type="file"
+                                                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                                    accept="image/*"
+                                                    onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], true)}
+                                                    disabled={isUploading}
+                                                />
+                                                <Button variant="outline" className="w-full h-full rounded-none border-gray-200 p-0 bg-white absolute inset-0 text-gray-600">
+                                                    <Upload className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </div>
+                                        </div>
+
 
                                         <div className="flex gap-2">
                                             <div className="flex-1 min-w-[120px]">

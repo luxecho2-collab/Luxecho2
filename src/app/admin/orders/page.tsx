@@ -49,12 +49,15 @@ export default function AdminOrdersPage() {
         return { startDate: start, endDate: end }
     }, [dateRange])
 
-    const { data: orders, isLoading } = api.admin.getOrders.useQuery({
+    const { data, isLoading } = api.admin.getOrders.useQuery({
         take: 100,
         search: debouncedSearch.trim() || undefined,
         startDate: computedDates.startDate,
         endDate: computedDates.endDate,
     })
+
+    const orders = data?.orders ?? []
+    const totalCount = data?.total ?? 0
 
     const filteredOrders = React.useMemo(() => {
         if (!orders) return []
@@ -119,9 +122,14 @@ export default function AdminOrdersPage() {
                         suppressHydrationWarning
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search by order ID, name, or email..."
+                        placeholder="Search by order #, name, email, product, phone..."
                         className="rounded-none border-gray-300 focus-visible:ring-0 focus:border-black h-12 pl-12 font-medium"
                     />
+                    {debouncedSearch && !isLoading && (
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                            {filteredOrders.length} result{filteredOrders.length !== 1 ? 's' : ''}
+                        </span>
+                    )}
                 </div>
                 <div className="w-full md:w-64">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>

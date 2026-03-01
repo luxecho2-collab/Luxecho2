@@ -80,48 +80,63 @@ export const adminRouter = createTRPCRouter({
     getOrders: adminProcedure
         .input(z.object({
             skip: z.number().default(0),
-            take: z.number().default(50),
+            take: z.number().default(100),
             search: z.string().optional(),
             startDate: z.date().optional(),
             endDate: z.date().optional(),
         }))
         .query(async ({ ctx, input }) => {
-            const searchFilter = input.search ? {
-                OR: [
-                    { orderNumber: { contains: input.search, mode: 'insensitive' as const } },
-                    { email: { contains: input.search, mode: 'insensitive' as const } },
-                    { phone: { contains: input.search, mode: 'insensitive' as const } },
-                    { trackingNumber: { contains: input.search, mode: 'insensitive' as const } },
-                    { user: { name: { contains: input.search, mode: 'insensitive' as const } } },
-                    { user: { email: { contains: input.search, mode: 'insensitive' as const } } },
-                ]
-            } : {}
+            const s = input.search?.trim()
 
-            const dateFilter = input.startDate || input.endDate ? {
-                createdAt: {
-                    ...(input.startDate ? { gte: input.startDate } : {}),
-                    ...(input.endDate ? { lte: input.endDate } : {}),
-                }
-            } : {}
+            // Build all conditions as an AND array so nothing overrides another
+            const andConditions: any[] = [
+                { paymentStatus: "PAID" },
+            ]
 
-            return ctx.db.order.findMany({
-                where: {
-                    paymentStatus: "PAID",
-                    ...searchFilter,
-                    ...dateFilter
-                },
-                skip: input.skip,
-                take: input.take,
-                orderBy: { createdAt: "desc" },
-                include: {
-                    user: { select: { name: true, email: true } },
-                    items: {
-                        include: {
-                            product: { select: { id: true, name: true } }
+            if (s) {
+                andConditions.push({
+                    OR: [
+                        { orderNumber: { contains: s } },
+                        { email: { contains: s } },
+                        { phone: { contains: s } },
+                        { trackingNumber: { contains: s } },
+                        { couponCode: { contains: s } },
+                        { notes: { contains: s } },
+                        { user: { name: { contains: s } } },
+                        { user: { email: { contains: s } } },
+                        { items: { some: { product: { name: { contains: s } } } } },
+                    ]
+                })
+            }
+
+            if (input.startDate || input.endDate) {
+                andConditions.push({
+                    createdAt: {
+                        ...(input.startDate ? { gte: input.startDate } : {}),
+                        ...(input.endDate ? { lte: input.endDate } : {}),
+                    }
+                })
+            }
+
+            const [orders, total] = await Promise.all([
+                ctx.db.order.findMany({
+                    where: { AND: andConditions },
+                    skip: input.skip,
+                    take: input.take,
+                    orderBy: { createdAt: "desc" },
+                    include: {
+                        user: { select: { name: true, email: true } },
+                        items: {
+                            include: {
+                                product: { select: { id: true, name: true } }
+                            }
                         }
                     }
-                }
-            })
+                }),
+                ctx.db.order.count({ where: { AND: andConditions } }),
+            ])
+
+            return { orders, total }
         }),
 
     getOrderDetails: adminProcedure

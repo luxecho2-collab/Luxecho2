@@ -26,7 +26,7 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "Luxecho | Ultra-Premium E-Commerce",
-  description: "Experience modern luxury with Luxecho.",
+  description: "Luxecho is a premium Indian streetwear brand crafted for confidence. Built on superior fabrics, clean silhouettes, and bold minimal design, Luxecho delivers modern luxury for the new generation. Elevated essentials. Defined presence.",
   icons: {
     icon: [
       { url: "/favicon.ico" },

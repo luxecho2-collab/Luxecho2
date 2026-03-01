@@ -19,6 +19,7 @@ const WAVES = [
     accent: "DROP.",
     image: "/assets/images/brand/mens_emerald_varsity_poolside_1771586994342.png",
     align: "left" as const,
+    category: "varsity",  // ← change to your actual category slug
     desc: "Emerald canvas meets structured silhouette — worn by those who lead, never follow."
   },
   {
@@ -30,6 +31,7 @@ const WAVES = [
     accent: "EVOLVED.",
     image: "/assets/images/brand/womens_navy_varsity_rooftop_1771587018168.png",
     align: "right" as const,
+    category: "urban",  // ← change to your actual category slug
     desc: "Navy precision. Rooftop aesthetic. Where architecture meets apparel."
   },
   {
@@ -41,6 +43,7 @@ const WAVES = [
     accent: "CORE.",
     image: "/assets/images/brand/mens_beige_utility_urban_1771587038435.png",
     align: "left" as const,
+    category: "utility",  // ← change to your actual category slug
     desc: "Beige raw — the architecture of the streets translated into fabric and form."
   }
 ]
@@ -183,7 +186,7 @@ function WaveSection({ wave }: { wave: typeof WAVES[0] }) {
           </p>
 
           <Link
-            href="/products"
+            href={wave.category ? `/products?category=${wave.category}` : "/products"}
             className={`inline-flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] text-white/60 hover:text-white transition-colors group ${isRight ? "md:ml-auto" : ""}`}
           >
             Shop Now
@@ -257,7 +260,7 @@ function FinalCTA() {
             <span className="block text-6xl md:text-[10rem] lg:text-[12rem] text-transparent" style={{ WebkitTextStroke: "1px #e11d48" }}>THE FUTURE</span>
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Link href="/products">
+            <Link href="/products?category=new-drop">
               <button className="px-14 py-6 bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] hover:bg-rose-600 hover:text-white transition-all duration-300 shadow-2xl">
                 Shop the Drop
               </button>

@@ -11,10 +11,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 export function CartDrawer({ isTransparent = false }: { isTransparent?: boolean }) {
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems } = useCart()
     const [mounted, setMounted] = React.useState(false)
+    const router = useRouter()
+    const { status } = useSession()
 
     React.useEffect(() => {
         setMounted(true)
@@ -154,12 +158,20 @@ export function CartDrawer({ isTransparent = false }: { isTransparent?: boolean 
                         </div>
 
                         <SheetClose asChild>
-                            <Link href="/checkout" className="block w-full">
-                                <Button className="h-14 w-full bg-black text-white border-2 border-black hover:bg-white hover:text-black font-black uppercase tracking-[0.2em] rounded-none text-xs transition-all duration-300 group shadow-md flex items-center justify-between px-6">
-                                    <span>Proceed to Checkout</span>
-                                    <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
-                                </Button>
-                            </Link>
+                            <Button
+                                onClick={(e) => {
+                                    if (status === "unauthenticated") {
+                                        e.preventDefault()
+                                        router.push("/auth/signin?callbackUrl=/checkout")
+                                    } else {
+                                        router.push("/checkout")
+                                    }
+                                }}
+                                className="h-14 w-full bg-black text-white border-2 border-black hover:bg-white hover:text-black font-black uppercase tracking-[0.2em] rounded-none text-xs transition-all duration-300 group shadow-md flex items-center justify-between px-6"
+                            >
+                                <span>Proceed to Checkout</span>
+                                <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
+                            </Button>
                         </SheetClose>
                     </div>
                 )}
