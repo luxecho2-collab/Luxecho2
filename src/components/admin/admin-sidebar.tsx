@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { LuxechoLogo } from "@/components/layout/luxecho-logo"
 import { useAdmin } from "@/contexts/admin-context"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 
 const navItems = [
     { name: "Dashboard Overview", icon: LayoutDashboard, href: "/admin" },
@@ -97,6 +97,9 @@ export function AdminSidebar() {
                         </Button>
                     </SheetTrigger>
                     <SheetContent side="left" className="p-0 w-[85vw] max-w-sm border-r-0 rounded-none hide-close-button bg-white flex flex-col">
+                        <SheetHeader className="sr-only">
+                            <SheetTitle>Admin Navigation</SheetTitle>
+                        </SheetHeader>
                         <div className="p-6 border-b border-gray-50 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <LuxechoLogo size={28} />
