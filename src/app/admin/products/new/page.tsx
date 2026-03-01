@@ -47,7 +47,6 @@ interface ProductFormData {
     price: string
     compareAtPrice: string
     sku: string
-    quantity: string
     status: "ACTIVE" | "DRAFT" | "ARCHIVED"
     tags: string
     metaTitle: string
@@ -57,7 +56,7 @@ interface ProductFormData {
     additionalInfo: string
     imageUrls: string[]
     selectedCategoryIds: string[]
-    sizes: string[]
+    sizes: { size: string, quantity: string }[]
     attributes: { key: string; value: string }[]
 }
 
@@ -67,7 +66,6 @@ const INITIAL_FORM_STATE: ProductFormData = {
     price: "",
     compareAtPrice: "",
     sku: "",
-    quantity: "0",
     status: "ACTIVE",
     tags: "",
     metaTitle: "",
@@ -235,33 +233,43 @@ export default function AdminNewProductPage() {
         )
 
         createProduct.mutate({
-            ...formData,
+            name: formData.name,
+            description: formData.description,
             price: Number(formData.price),
             compareAtPrice: formData.compareAtPrice ? Number(formData.compareAtPrice) : undefined,
-            quantity: Number(formData.quantity),
+            sku: formData.sku,
+            status: formData.status,
+            tags: formData.tags,
+            metaTitle: formData.metaTitle,
+            metaDescription: formData.metaDescription,
+            productInfo: formData.productInfo,
+            shippingReturns: formData.shippingReturns,
+            additionalInfo: formData.additionalInfo,
+            attributes: formData.attributes,
             imageUrls: finalImageUrls,
             categoryIds: formData.selectedCategoryIds,
+            sizes: formData.sizes.map(s => ({ size: s.size, quantity: Number(s.quantity) })),
         })
     }
 
     return (
         <div className="flex min-h-screen bg-white text-black">
-            <main className="flex-grow p-10 lg:p-16 space-y-16 max-w-7xl mx-auto">
-                <header className="space-y-6">
+            <main className="flex-grow p-6 md:p-10 lg:p-16 space-y-10 md:space-y-16 max-w-7xl mx-auto w-full overflow-x-hidden">
+                <header className="space-y-4 md:space-y-6">
                     <Link href="/admin/products" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-all group">
                         <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
                         Back to Ledger
                     </Link>
-                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
-                        <div className="space-y-4">
-                            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-10">
+                        <div className="space-y-3 md:space-y-4">
+                            <h1 className="text-4xl md:text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none">
                                 INITIAL <span className="text-gray-200">ENTRY</span>
                             </h1>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">
+                            <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] text-gray-400">
                                 Deploying New Asset to Storefront Manifest
                             </p>
                         </div>
-                        <div className="flex items-center gap-4 p-5 border border-gray-100 bg-white">
+                        <div className="flex items-center gap-4 p-4 md:p-5 border border-gray-100 bg-white self-start md:self-auto">
                             <LuxechoLogo size={24} />
                             <p className="text-[9px] font-black uppercase tracking-widest text-black">
                                 Entry Serial: LX-{Date.now().toString().slice(-6)}
@@ -270,9 +278,9 @@ export default function AdminNewProductPage() {
                     </div>
                 </header>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                    <div className="lg:col-span-8 space-y-16">
-                        <section className="space-y-10 p-10 border border-gray-50 bg-white relative overflow-hidden group hover:border-black transition-all duration-500">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16">
+                    <div className="lg:col-span-8 space-y-8 md:space-y-16">
+                        <section className="space-y-8 md:space-y-10 p-6 md:p-10 border border-gray-50 bg-white relative overflow-hidden group hover:border-black transition-all duration-500">
                             <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
                                 <Package className="w-48 h-48" />
                             </div>
@@ -483,16 +491,10 @@ export default function AdminNewProductPage() {
                                     </div>
 
                                     <div className="space-y-3">
-                                        <Label htmlFor="quantity" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Stock Reserve</Label>
-                                        <Input
-                                            id="quantity"
-                                            type="number"
-                                            required
-                                            value={formData.quantity}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
-                                            placeholder="0"
-                                            className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black transition-all tabular-nums placeholder:text-gray-200"
-                                        />
+                                        <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Stock Reserve</Label>
+                                        <div className="bg-gray-50 border-none h-16 flex items-center px-6 transition-all">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Inventory is handled under Size Matrix below.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
@@ -502,36 +504,61 @@ export default function AdminNewProductPage() {
                                     <h2 className="text-xl font-black uppercase tracking-tight">Size Matrix</h2>
                                 </div>
                                 <div className="space-y-4">
-                                    <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1 block mb-2">Available Dimensions</Label>
-                                    <div className="grid grid-cols-4 gap-3">
+                                    <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1 block mb-2">Available Dimensions & Stock</Label>
+                                    <div className="grid grid-cols-1 gap-3">
                                         {["S", "M", "L", "XL"].map((size) => {
-                                            const isSelected = formData.sizes.includes(size);
+                                            const selectedSizeObj = formData.sizes.find(s => s.size === size);
+                                            const isSelected = !!selectedSizeObj;
+
                                             return (
-                                                <button
-                                                    key={size}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            sizes: prev.sizes.includes(size)
-                                                                ? prev.sizes.filter(s => s !== size)
-                                                                : [...prev.sizes, size]
-                                                        }))
-                                                    }}
-                                                    className={cn(
-                                                        "h-14 border text-[10px] font-black uppercase tracking-widest transition-all",
-                                                        isSelected
-                                                            ? "bg-black text-white border-black"
-                                                            : "bg-gray-50 text-gray-400 border-gray-50 hover:border-gray-200"
+                                                <div key={size} className={cn(
+                                                    "flex items-center gap-4 p-3 border transition-all",
+                                                    isSelected ? "border-black" : "border-gray-50"
+                                                )}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                sizes: isSelected
+                                                                    ? prev.sizes.filter(s => s.size !== size)
+                                                                    : [...prev.sizes, { size, quantity: "0" }]
+                                                            }))
+                                                        }}
+                                                        className={cn(
+                                                            "w-16 h-12 flex items-center justify-center text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer",
+                                                            isSelected
+                                                                ? "bg-black text-white"
+                                                                : "bg-gray-50 text-gray-400 hover:bg-gray-100"
+                                                        )}
+                                                    >
+                                                        {size}
+                                                    </button>
+
+                                                    {isSelected && (
+                                                        <div className="flex-grow flex items-center gap-3 animate-in fade-in slide-in-from-left-2">
+                                                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Stock:</span>
+                                                            <Input
+                                                                type="number"
+                                                                value={selectedSizeObj.quantity}
+                                                                onChange={(e) => {
+                                                                    const qty = e.target.value;
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        sizes: prev.sizes.map(s => s.size === size ? { ...s, quantity: qty } : s)
+                                                                    }))
+                                                                }}
+                                                                placeholder="0"
+                                                                className="h-12 bg-gray-50 border-none rounded-none focus-visible:ring-1 focus-visible:ring-black font-black tabular-nums transition-all w-full"
+                                                            />
+                                                        </div>
                                                     )}
-                                                >
-                                                    {size}
-                                                </button>
+                                                </div>
                                             );
                                         })}
                                     </div>
                                     <p className="text-[8px] font-bold text-gray-300 uppercase tracking-widest mt-4">
-                                        Refined standard: S, M, L, XL configuration.
+                                        Select size variants to assign specific inventory reserves to them.
                                     </p>
                                 </div>
                             </section>

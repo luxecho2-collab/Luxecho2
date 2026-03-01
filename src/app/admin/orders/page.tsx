@@ -101,14 +101,14 @@ export default function AdminOrdersPage() {
     }
 
     return (
-        <main className="p-8 md:p-12 space-y-10">
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-gray-100 pb-8">
-                <div className="space-y-3">
+        <main className="p-6 md:p-8 lg:p-12 space-y-8 md:space-y-10 w-full overflow-x-hidden">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-6 border-b border-gray-100 pb-6 md:pb-8">
+                <div className="space-y-2 md:space-y-3">
                     <Link href="/admin" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors">
                         <ArrowLeft className="w-3 h-3" />
                         Back to Dashboard
                     </Link>
-                    <h1 className="text-5xl font-black uppercase tracking-tight text-black">Order History</h1>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tight text-black">Order History</h1>
                 </div>
             </header>
 

@@ -97,7 +97,7 @@ export default function AdminProductsPage() {
     return (
         <div className="flex min-h-screen bg-white text-black">
             <main className={cn(
-                "flex-grow p-10 lg:p-16 space-y-16 mx-auto transition-all duration-500",
+                "flex-grow p-6 md:p-10 lg:p-16 space-y-10 md:space-y-16 mx-auto transition-all duration-500 w-full overflow-x-hidden",
                 isSidebarCollapsed ? "max-w-[1600px]" : "max-w-7xl"
             )}>
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
@@ -108,32 +108,32 @@ export default function AdminProductsPage() {
                         </Link>
                         <h1 className={cn(
                             "font-black uppercase tracking-tighter leading-none text-black transition-all duration-500",
-                            isSidebarCollapsed ? "text-6xl md:text-8xl" : "text-5xl md:text-7xl"
+                            isSidebarCollapsed ? "text-4xl md:text-6xl lg:text-8xl" : "text-4xl md:text-5xl lg:text-7xl"
                         )}>
                             PRODUCT <span className="text-gray-200">LEDGER</span>
                         </h1>
                     </div>
-                    <Link href="/admin/products/new">
-                        <Button className="bg-black text-white font-black uppercase rounded-none h-16 px-12 text-[11px] tracking-widest hover:translate-x-1 hover:-translate-y-1 transition-all shadow-[8px_8px_0px_#f3f4f6] hover:shadow-none">
+                    <Link href="/admin/products/new" className="w-full md:w-auto">
+                        <Button className="w-full md:w-auto bg-black text-white font-black uppercase rounded-none h-14 md:h-16 px-8 md:px-12 text-[10px] md:text-[11px] tracking-widest hover:translate-x-1 hover:-translate-y-1 transition-all shadow-[8px_8px_0px_#f3f4f6] hover:shadow-none">
                             <Plus className="w-4 h-4 mr-3" /> Initial Entry
                         </Button>
                     </Link>
                 </header>
 
                 <div className="flex flex-col md:flex-row gap-6">
-                    <div className="relative flex-grow">
+                    <div className="relative flex-grow w-full">
                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                         <Input
                             placeholder="SEARCH BY DESIGNATION, SKU, TAGS..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 pl-14 text-[10px] font-black uppercase tracking-widest"
+                            className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-14 md:h-16 pl-14 text-[9px] md:text-[10px] font-black uppercase tracking-widest"
                         />
                     </div>
                     <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                         <SheetTrigger asChild>
-                            <Button variant="outline" className="border border-gray-100 rounded-none h-16 px-10 gap-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">
-                                <Filter className="w-4 h-4" /> Filter Stream
+                            <Button variant="outline" className="w-full md:w-auto border border-gray-100 rounded-none h-14 md:h-16 px-8 md:px-10 gap-3 text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">
+                                <Filter className="w-4 h-4 -ml-2 sm:ml-0" /> Filter Stream
                                 {(statusFilter || categoryFilter || minPrice || maxPrice || lowStockOnly) && (
                                     <span className="w-2 h-2 bg-black rounded-full" />
                                 )}
@@ -254,16 +254,16 @@ export default function AdminProductsPage() {
                     </Sheet>
                 </div>
 
-                <div className="border border-gray-50">
-                    <table className="w-full text-left border-collapse">
+                <div className="border border-gray-50 overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[1000px]">
                         <thead>
                             <tr className="bg-gray-50/50 text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 border-b border-gray-50">
-                                <th className="p-8">Designation</th>
-                                <th className="p-8">Class</th>
-                                <th className="p-8">Valuation</th>
-                                <th className="p-8">Reserve</th>
-                                <th className="p-8">Insights</th>
-                                <th className="p-8 text-right">Actions</th>
+                                <th className="p-4 md:p-8">Designation</th>
+                                <th className="p-4 md:p-8">Class</th>
+                                <th className="p-4 md:p-8">Valuation</th>
+                                <th className="p-4 md:p-8">Reserve</th>
+                                <th className="p-4 md:p-8">Insights</th>
+                                <th className="p-4 md:p-8 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -271,9 +271,9 @@ export default function AdminProductsPage() {
                                 <tr><td colSpan={5} className="p-32 text-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 animate-pulse">Syncing Neural Manifest...</td></tr>
                             ) : products?.map((product: any) => (
                                 <tr key={product.id} className="border-b border-gray-50 hover:bg-gray-50/30 transition-all group">
-                                    <td className="p-8">
-                                        <div className="flex items-center gap-6">
-                                            <div className="w-16 h-20 bg-gray-50 border border-gray-100 flex-shrink-0 relative overflow-hidden">
+                                    <td className="p-4 md:p-8">
+                                        <div className="flex items-center gap-4 md:gap-6">
+                                            <div className="w-12 h-16 md:w-16 md:h-20 bg-gray-50 border border-gray-100 flex-shrink-0 relative overflow-hidden">
                                                 {product.images?.[0] && (
                                                     <Image
                                                         src={product.images[0].url}
@@ -286,55 +286,82 @@ export default function AdminProductsPage() {
                                                 )}
                                             </div>
                                             <div>
-                                                <p className="font-black uppercase text-xs tracking-tight group-hover:translate-x-1 transition-transform">{product.name}</p>
-                                                <p className="text-[8px] font-black text-gray-300 uppercase tracking-widest mt-1 italic">SKU: {product.sku}</p>
+                                                <p className="font-black uppercase text-[10px] md:text-xs tracking-tight group-hover:translate-x-1 transition-transform max-w-[200px] truncate">{product.name}</p>
+                                                <p className="text-[7px] md:text-[8px] font-black text-gray-300 uppercase tracking-widest mt-1 italic break-words">SKU: {product.sku}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="p-8">
-                                        <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-gray-100 text-gray-500">
+                                    <td className="p-4 md:p-8">
+                                        <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest px-2 py-1 md:px-3 lg:py-1 bg-gray-100 text-gray-500 whitespace-nowrap">
                                             {product.categories?.[0]?.name || "Unclassed"}
                                         </span>
                                     </td>
-                                    <td className="p-8 font-black tabular-nums tracking-tighter">₹{product.price.toLocaleString('en-IN')}</td>
-                                    <td className="p-8">
-                                        <div className="flex items-center gap-3">
-                                            <div className={cn(
-                                                "w-1.5 h-1.5 rounded-full",
-                                                product.quantity <= 5 ? "bg-red-500" : "bg-black"
-                                            )} />
-                                            <span className={cn(
-                                                "text-[10px] font-black tabular-nums",
-                                                product.quantity <= 5 ? "text-red-500" : "text-black"
-                                            )}>
-                                                {product.quantity} Units
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td className="p-8">
-                                        <div className="flex flex-col gap-2">
-                                            <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-blue-600 border-b-2 border-r-2 border-blue-800 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                                                <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-white">
-                                                    <Eye className="w-3 h-3" /> VIEWS
+                                    <td className="p-4 md:p-8 font-black tabular-nums tracking-tighter text-sm">₹{product.price.toLocaleString('en-IN')}</td>
+                                    <td className="p-4 md:p-8">
+                                        {(product.variants && product.variants.length > 0) ? (
+                                            <div className="flex flex-col gap-1.5">
+                                                {product.variants.map((v: any) => (
+                                                    <div key={v.id} className="flex items-center gap-3">
+                                                        <div className={cn(
+                                                            "w-1.5 h-1.5 rounded-full",
+                                                            v.quantity <= 5 ? "bg-red-500" : "bg-black"
+                                                        )} />
+                                                        <span className={cn(
+                                                            "text-[10px] font-black tabular-nums flex min-w-[60px] gap-2",
+                                                            v.quantity <= 5 ? "text-red-500" : "text-black"
+                                                        )}>
+                                                            <span className="opacity-50 w-4">{v.name}:</span>
+                                                            <span>{v.quantity} Units</span>
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                                <div className="mt-1 pt-1.5 border-t border-gray-100 flex items-center gap-3">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-transparent" />
+                                                    <span className="text-[9px] font-black tabular-nums text-gray-400 flex min-w-[60px] gap-2">
+                                                        <span className="w-4">TOT:</span>
+                                                        <span>{product.quantity}</span>
+                                                    </span>
                                                 </div>
-                                                <span className="text-[11px] font-black tabular-nums text-white leading-none">{product.viewCount}</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-3">
+                                                <div className={cn(
+                                                    "w-1.5 h-1.5 rounded-full",
+                                                    product.quantity <= 5 ? "bg-red-500" : "bg-black"
+                                                )} />
+                                                <span className={cn(
+                                                    "text-[10px] font-black tabular-nums",
+                                                    product.quantity <= 5 ? "text-red-500" : "text-black"
+                                                )}>
+                                                    {product.quantity} Units
+                                                </span>
+                                            </div>
+                                        )}
+                                    </td>
+                                    <td className="p-4 md:p-8">
+                                        <div className="flex flex-col gap-2 min-w-[120px]">
+                                            <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-blue-600 border-b-2 border-r-2 border-blue-800 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                                                <div className="flex items-center gap-2 text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white">
+                                                    <Eye className="w-2.5 h-2.5 md:w-3 md:h-3" /> VIEWS
+                                                </div>
+                                                <span className="text-[9px] md:text-[11px] font-black tabular-nums text-white leading-none">{product.viewCount}</span>
                                             </div>
                                             <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-amber-500 border-b-2 border-r-2 border-amber-700 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                                                <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-white">
-                                                    <ShoppingBag className="w-3 h-3" /> ADDED
+                                                <div className="flex items-center gap-2 text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white">
+                                                    <ShoppingBag className="w-2.5 h-2.5 md:w-3 md:h-3" /> ADDED
                                                 </div>
-                                                <span className="text-[11px] font-black tabular-nums text-white leading-none">{product.addToCartCount}</span>
+                                                <span className="text-[9px] md:text-[11px] font-black tabular-nums text-white leading-none">{product.addToCartCount}</span>
                                             </div>
                                             <div className="flex items-center justify-between gap-3 px-3 py-1.5 bg-emerald-500 border-b-2 border-r-2 border-emerald-700 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                                                <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest text-white">
-                                                    <CheckIcon className="w-3 h-3" /> SOLD
+                                                <div className="flex items-center gap-2 text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white">
+                                                    <CheckIcon className="w-2.5 h-2.5 md:w-3 md:h-3" /> SOLD
                                                 </div>
-                                                <span className="text-[11px] font-black tabular-nums text-white leading-none">{product.salesCount}</span>
+                                                <span className="text-[9px] md:text-[11px] font-black tabular-nums text-white leading-none">{product.salesCount}</span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="p-8 text-right">
-                                        <div className="flex justify-end gap-2">
+                                    <td className="p-4 md:p-8 text-right">
+                                        <div className="flex justify-end gap-1 md:gap-2">
                                             <Link href={`/admin/products/${product.id}`}>
                                                 <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-black hover:text-white transition-all rounded-none"><Edit3 className="w-4 h-4" /></Button>
                                             </Link>

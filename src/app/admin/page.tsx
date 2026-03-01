@@ -35,25 +35,25 @@ export default function AdminDashboard() {
     return (
         <div className="flex min-h-screen bg-white text-black">
             {/* Main Content Area */}
-            <main className="flex-grow p-10 lg:p-16 space-y-16 max-w-7xl mx-auto">
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-                    <div className="space-y-3">
-                        <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
+            <main className="flex-grow p-6 md:p-10 lg:p-16 space-y-10 md:space-y-16 max-w-7xl mx-auto w-full overflow-x-hidden">
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8">
+                    <div className="space-y-2 md:space-y-3">
+                        <h1 className="text-4xl md:text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none">
                             DASHBOARD <span className="text-gray-200">OVERVIEW</span>
                         </h1>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">
+                        <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] text-gray-400">
                             Real-time Store Performance Metrics
                         </p>
                     </div>
-                    <div className="flex gap-3">
-                        <Button variant="outline" className="rounded-none border-gray-100 h-12 w-12 p-0 hover:bg-black hover:text-white transition-all">
-                            <Search className="w-4 h-4" />
+                    <div className="flex flex-wrap gap-2 md:gap-3 w-full md:w-auto">
+                        <Button variant="outline" className="rounded-none border-gray-100 h-10 w-10 md:h-12 md:w-12 p-0 hover:bg-black hover:text-white transition-all">
+                            <Search className="w-4 h-4 md:w-4 md:h-4" />
                         </Button>
-                        <Button variant="outline" className="rounded-none border-gray-100 h-12 w-12 p-0 hover:bg-black hover:text-white transition-all">
-                            <Bell className="w-4 h-4" />
+                        <Button variant="outline" className="rounded-none border-gray-100 h-10 w-10 md:h-12 md:w-12 p-0 hover:bg-black hover:text-white transition-all">
+                            <Bell className="w-4 h-4 md:w-4 md:h-4" />
                         </Button>
-                        <Link href="/admin/products/new">
-                            <Button className="rounded-none bg-black text-white h-12 px-8 text-[10px] font-black uppercase tracking-widest hover:bg-gray-900 transition-all shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:shadow-none border border-black">
+                        <Link href="/admin/products/new" className="flex-grow md:flex-grow-0">
+                            <Button className="w-full md:w-auto rounded-none bg-black text-white h-10 md:h-12 px-6 md:px-8 text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:bg-gray-900 transition-all shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:shadow-none border border-black">
                                 New Item
                             </Button>
                         </Link>
@@ -108,9 +108,9 @@ export default function AdminDashboard() {
                             ) : orders?.length === 0 ? (
                                 <div className="py-24 text-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-300">No active orders found.</div>
                             ) : orders?.slice(0, 5).map((order) => (
-                                <div key={order.id} className="flex items-center justify-between p-6 hover:bg-gray-50 transition-all group">
-                                    <div className="flex items-center gap-6">
-                                        <div className="text-[10px] font-black text-gray-300 tabular-nums">
+                                <div key={order.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 md:p-6 gap-4 hover:bg-gray-50 transition-all group">
+                                    <div className="flex items-start sm:items-center gap-4 md:gap-6">
+                                        <div className="text-[10px] font-black text-gray-300 tabular-nums pt-0.5 sm:pt-0">
                                             #{order.orderNumber.slice(-4)}
                                         </div>
                                         <div>
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-left sm:text-right ml-10 sm:ml-0">
                                         <p className="font-black text-sm tabular-nums tracking-tighter">₹{order.total.toLocaleString('en-IN')}</p>
                                         <p className="text-[8px] font-black text-gray-300 uppercase tracking-widest italic mt-0.5">Verified</p>
                                     </div>

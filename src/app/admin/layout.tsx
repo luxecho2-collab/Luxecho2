@@ -26,7 +26,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex min-h-screen bg-white overflow-hidden">
             <AdminSidebar />
-            <main className="flex-grow overflow-y-auto transition-all duration-500 ease-in-out">
+            <main className="flex-grow overflow-y-auto transition-all duration-500 ease-in-out pt-16 lg:pt-0">
                 {children}
             </main>
         </div>

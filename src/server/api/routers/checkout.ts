@@ -75,7 +75,33 @@ export const checkoutRouter = createTRPCRouter({
                 })
             }
 
-            // 3. Create Razorpay order
+            // 3. Validate Inventory & Variants
+            for (const item of input.items) {
+                const dbProduct = await ctx.db.product.findUnique({
+                    where: { id: item.id },
+                    include: { variants: true }
+                })
+
+                if (!dbProduct) {
+                    throw new TRPCError({ code: "NOT_FOUND", message: `Product ${item.name} no longer exists.` })
+                }
+
+                if (item.variantId && item.variantId.length > 15) {
+                    const dbVariant = dbProduct.variants.find((v: any) => v.id === item.variantId)
+                    if (!dbVariant) {
+                        throw new TRPCError({ code: "NOT_FOUND", message: `The selected size or variant for ${item.name} is no longer available.` })
+                    }
+                    if (dbVariant.quantity < item.quantity) {
+                        throw new TRPCError({ code: "BAD_REQUEST", message: `Not enough stock for ${item.name} (${dbVariant.name}). Only ${dbVariant.quantity} left.` })
+                    }
+                } else {
+                    if (dbProduct.quantity < item.quantity) {
+                        throw new TRPCError({ code: "BAD_REQUEST", message: `Not enough stock for ${item.name}. Only ${dbProduct.quantity} left.` })
+                    }
+                }
+            }
+
+            // 4. Create Razorpay order
             const options = {
                 amount: amountInPaise,
                 currency: input.currency,

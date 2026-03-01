@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils"
 function ProductsContent() {
     const searchParams = useSearchParams()
     const initialSearch = searchParams.get("search") || ""
+    const initialCategorySlug = searchParams.get("category") || ""
 
     const [search, setSearch] = React.useState(initialSearch)
     const [categoryId, setCategoryId] = React.useState<string | undefined>(undefined)
@@ -56,6 +57,15 @@ function ProductsContent() {
     // Fetch data
     const { data: categories } = api.product.getCategories.useQuery()
     const { data: dynamicFilters } = api.product.getFilters.useQuery()
+
+    // Set category from URL ?category=slug param once categories are loaded
+    React.useEffect(() => {
+        if (!categories || !initialCategorySlug) return
+        const match = categories.find(
+            (c) => c.slug === initialCategorySlug || c.name.toLowerCase() === initialCategorySlug.toLowerCase()
+        )
+        if (match) setCategoryId(match.id)
+    }, [categories, initialCategorySlug])
 
     const { data, isLoading } = api.product.list.useQuery({
         categoryId,

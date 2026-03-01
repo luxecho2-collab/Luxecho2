@@ -71,20 +71,20 @@ export default function AdminCategoriesPage() {
 
     return (
         <div className="flex min-h-screen bg-white text-black">
-            <main className="flex-grow p-10 lg:p-16 space-y-16 max-w-7xl mx-auto">
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
-                    <div className="space-y-4">
+            <main className="flex-grow p-6 md:p-10 lg:p-16 space-y-10 md:space-y-16 max-w-7xl mx-auto w-full overflow-x-hidden">
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-10">
+                    <div className="space-y-3 md:space-y-4">
                         <Link href="/admin" className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-all group">
                             <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
                             Back to Center
                         </Link>
-                        <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none text-black">
+                        <h1 className="text-4xl md:text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none text-black">
                             CLASS <span className="text-gray-200">MATRIX</span>
                         </h1>
                     </div>
                     <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                         <DialogTrigger asChild>
-                            <Button className="bg-black text-white font-black uppercase rounded-none h-16 px-12 text-[11px] tracking-widest hover:translate-x-1 hover:-translate-y-1 transition-all shadow-[8px_8px_0px_#f3f4f6] hover:shadow-none">
+                            <Button className="w-full md:w-auto bg-black text-white font-black uppercase rounded-none h-14 md:h-16 px-8 md:px-12 text-[10px] md:text-[11px] tracking-widest hover:translate-x-1 hover:-translate-y-1 transition-all shadow-[8px_8px_0px_#f3f4f6] hover:shadow-none">
                                 <Plus className="w-4 h-4 mr-3" /> New Class
                             </Button>
                         </DialogTrigger>

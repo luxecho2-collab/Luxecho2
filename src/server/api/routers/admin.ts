@@ -293,7 +293,11 @@ export const adminRouter = createTRPCRouter({
 
             // Low Stock Filter
             if (lowStock) {
-                where.quantity = { lte: 5 } // Using the default low stock alert threshold
+                where.OR = [
+                    ...(where.OR || []),
+                    { quantity: { lte: 5 } },
+                    { variants: { some: { quantity: { lte: 5 } } } }
+                ]
             }
 
             return ctx.db.product.findMany({
@@ -303,6 +307,7 @@ export const adminRouter = createTRPCRouter({
                 orderBy: { createdAt: "desc" },
                 include: {
                     categories: true,
+                    variants: true,
                     images: {
                         take: 1,
                         orderBy: { position: "asc" }
@@ -319,6 +324,7 @@ export const adminRouter = createTRPCRouter({
                     images: { orderBy: { position: "asc" } },
                     categories: true,
                     tags: true,
+                    variants: true,
                 }
             })
         }),
@@ -538,7 +544,7 @@ export const adminRouter = createTRPCRouter({
     createCategory: adminProcedure
         .input(z.object({
             name: z.string().min(1),
-            description: z.string().optional(),
+            description: z.string().nullish(),
         }))
         .mutation(async ({ ctx, input }) => {
             const slug = input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
@@ -607,12 +613,11 @@ export const adminRouter = createTRPCRouter({
             description: z.string().min(1),
             price: z.number().positive(),
             compareAtPrice: z.number().positive().optional(),
-            quantity: z.number().int().min(0),
             sku: z.string(),
             categoryIds: z.array(z.string()).optional(),
             imageUrls: z.array(z.string()).optional(),
             status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).default("DRAFT"),
-            sizes: z.array(z.string()).optional(),
+            sizes: z.any().optional(),
             tags: z.string().optional(),
             metaTitle: z.string().optional(),
             metaDescription: z.string().optional(),
@@ -622,8 +627,21 @@ export const adminRouter = createTRPCRouter({
             additionalInfo: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
-            const { name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, attributes, shippingReturns, additionalInfo } = input
+            const { name, description, price, compareAtPrice, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, attributes, shippingReturns, additionalInfo } = input
+
+            // Handle potentially mangled sizes array from form submission
+            let sizes: { size: string, quantity: number }[] = []
+            if (Array.isArray(input.sizes)) {
+                sizes = input.sizes.map((s: any) => ({
+                    size: String(s?.size || ""),
+                    quantity: Number(s?.quantity || 0)
+                })).filter(s => s.size && !isNaN(s.quantity))
+            }
+
             const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+
+            // Calculate total quantity from sizes
+            const quantity = sizes.reduce((sum, s) => sum + s.quantity, 0)
 
             const product = await ctx.db.product.create({
                 data: {
@@ -635,7 +653,7 @@ export const adminRouter = createTRPCRouter({
                     quantity,
                     sku,
                     status,
-                    sizes: (input.sizes ?? []) as any,
+                    sizes: sizes.map(s => s.size),
                     metaTitle,
                     metaDescription,
                     productInfo,
@@ -655,6 +673,15 @@ export const adminRouter = createTRPCRouter({
                         connectOrCreate: tags?.split(",").map(tag => ({
                             where: { name: tag.trim() },
                             create: { name: tag.trim() }
+                        })) || []
+                    },
+                    variants: {
+                        create: sizes.map(s => ({
+                            name: s.size,
+                            sku: `${sku}-${s.size}`,
+                            price,
+                            compareAtPrice,
+                            quantity: s.quantity,
                         })) || []
                     }
                 }
@@ -700,12 +727,11 @@ export const adminRouter = createTRPCRouter({
             description: z.string().min(1).optional(),
             price: z.number().positive().optional(),
             compareAtPrice: z.number().positive().optional(),
-            quantity: z.number().int().min(0).optional(),
             sku: z.string().optional(),
             categoryIds: z.array(z.string()).optional(),
             imageUrls: z.array(z.string()).optional(),
             status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
-            sizes: z.array(z.string()).optional(),
+            sizes: z.any().optional(),
             tags: z.string().optional(),
             metaTitle: z.string().optional(),
             metaDescription: z.string().optional(),
@@ -715,30 +741,59 @@ export const adminRouter = createTRPCRouter({
             additionalInfo: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
-            const { id, name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, attributes, shippingReturns, additionalInfo } = input
+            const { id, name, description, price, compareAtPrice, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, attributes, shippingReturns, additionalInfo } = input
+
+            const existingProduct = await ctx.db.product.findUnique({ where: { id } })
+            if (!existingProduct) throw new Error("Product not found")
 
             const updateData: any = {
                 name,
                 description,
                 price,
-                compareAtPrice,
-                quantity,
+                compareAtPrice: compareAtPrice === undefined ? null : compareAtPrice,
                 sku,
                 status,
-                metaTitle,
-                metaDescription,
-                productInfo,
-                attributes: attributes !== undefined ? attributes : undefined,
-                shippingReturns,
-                additionalInfo,
+                tags: tags || undefined,
+                metaTitle: metaTitle || undefined,
+                metaDescription: metaDescription || undefined,
+                productInfo: productInfo || undefined,
+                attributes: attributes || undefined,
+                shippingReturns: shippingReturns || undefined,
+                additionalInfo: additionalInfo || undefined,
+            }
+
+            // Handle potentially mangled sizes array from form
+            let parsedSizes: { size: string, quantity: number }[] | undefined = undefined;
+            if (input.sizes) {
+                if (Array.isArray(input.sizes)) {
+                    parsedSizes = input.sizes.map((s: any) => ({
+                        size: String(s?.size || ""),
+                        quantity: Number(s?.quantity || 0)
+                    })).filter(s => s.size && !isNaN(s.quantity));
+                } else {
+                    parsedSizes = [];
+                }
+                updateData.quantity = parsedSizes.reduce((sum, s) => sum + s.quantity, 0);
+                updateData.sizes = parsedSizes.map(s => s.size);
+
+                const variantSkuBase = sku || existingProduct.sku
+                const variantPrice = price ?? existingProduct.price
+                const variantCompareAt = compareAtPrice !== undefined ? compareAtPrice : existingProduct.compareAtPrice
+
+                updateData.variants = {
+                    deleteMany: {},
+                    create: parsedSizes.map(s => ({
+                        name: s.size,
+                        sku: `${variantSkuBase}-${s.size}`,
+                        price: variantPrice,
+                        compareAtPrice: variantCompareAt,
+                        quantity: s.quantity
+                    }))
+                }
             }
 
             if (name) {
                 updateData.slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-            }
-
-            if (input.sizes !== undefined) {
-                updateData.sizes = input.sizes as any
             }
 
             // Handle images
@@ -809,7 +864,7 @@ export const adminRouter = createTRPCRouter({
         .input(z.object({
             id: z.string(),
             name: z.string().min(1).optional(),
-            description: z.string().optional(),
+            description: z.string().nullish(),
         }))
         .mutation(async ({ ctx, input }) => {
             const { id, name, description } = input

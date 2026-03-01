@@ -84,9 +84,15 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     if (isLoading) return <PDPLoading />
     if (!product) return notFound()
 
-    const selectedVariant = product.variants.find((variant: any) =>
-        variant.optionValues.every((ov: any) => selectedOptions[ov.option.name] === ov.value)
-    )
+    const selectedVariant = product.variants?.find((variant: any) => {
+        if (product.options && product.options.length > 0) {
+            return variant.optionValues?.every((ov: any) => selectedOptions[ov.option.name] === ov.value)
+        }
+        if (selectedSize) {
+            return variant.name === selectedSize
+        }
+        return false
+    })
 
     const handleOptionSelect = (optionName: string, value: string) => {
         setSelectedOptions(prev => ({ ...prev, [optionName]: value }))
