@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { useCart } from "@/store/use-cart"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -153,14 +153,14 @@ export function CartDrawer({ isTransparent = false }: { isTransparent?: boolean 
                             </p>
                         </div>
 
-                        <SheetTrigger asChild>
-                            <a href="/checkout" className="block w-full">
+                        <SheetClose asChild>
+                            <Link href="/checkout" className="block w-full">
                                 <Button className="h-14 w-full bg-black text-white border-2 border-black hover:bg-white hover:text-black font-black uppercase tracking-[0.2em] rounded-none text-xs transition-all duration-300 group shadow-md flex items-center justify-between px-6">
                                     <span>Proceed to Checkout</span>
                                     <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
                                 </Button>
-                            </a>
-                        </SheetTrigger>
+                            </Link>
+                        </SheetClose>
                     </div>
                 )}
             </SheetContent>

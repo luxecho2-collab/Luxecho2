@@ -34,6 +34,18 @@ const STEPS = ["Information", "Shipping", "Payment"]
 export default function CheckoutPage() {
     const { items, getTotalPrice } = useCart()
     const { data: session } = useSession()
+
+    // RADIX UI BUG FIX: Clean up any lingering body locks from the Cart Sheet
+    React.useEffect(() => {
+        document.body.style.pointerEvents = "auto"
+        document.body.style.overflow = "auto"
+
+        return () => {
+            document.body.removeAttribute("data-rzp-open")
+            document.body.style.pointerEvents = "auto"
+        }
+    }, [])
+
     const [step, setStep] = React.useState(1)
     const [shippingMethod, setShippingMethod] = React.useState<"standard" | "express">("standard")
     const [saveAddress, setSaveAddress] = React.useState(true)
@@ -231,11 +243,6 @@ export default function CheckoutPage() {
                 alert("Razorpay SDK failed to load. Please check your connection or refresh the page.")
                 return
             }
-
-            // Fix: Force unlock document body clicking ability
-            // If the user arrived here from a Cart Sheet, the body might still have pointer-events: none.
-            document.body.style.pointerEvents = "auto"
-            document.body.style.overflow = "auto"
 
             const rzp = new (window as any).Razorpay(options)
 
