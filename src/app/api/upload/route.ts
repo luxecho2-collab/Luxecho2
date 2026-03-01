@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server"
-import { writeFile, mkdir } from "fs/promises"
-import { join } from "path"
+import { v2 as cloudinary } from "cloudinary"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/server/auth"
 import { headers } from "next/headers"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 export async function POST(req: Request) {
     headers() // Force dynamic
@@ -24,25 +29,28 @@ export async function POST(req: Request) {
             return new NextResponse("No files uploaded", { status: 400 })
         }
 
-        const uploadDir = join(process.cwd(), "public", "uploads")
-
-        // Create directory if it doesn't exist
-        try {
-            await mkdir(uploadDir, { recursive: true })
-        } catch (e) { }
-
-        const urls = []
+        const urls: string[] = []
 
         for (const file of files) {
             const bytes = await file.arrayBuffer()
             const buffer = Buffer.from(bytes)
 
-            // Create a unique filename
-            const filename = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`
-            const path = join(uploadDir, filename)
+            // Upload to Cloudinary via buffer
+            const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: "luxecho/products",
+                        resource_type: "image",
+                    },
+                    (error, result) => {
+                        if (error || !result) return reject(error)
+                        resolve(result as { secure_url: string })
+                    }
+                )
+                uploadStream.end(buffer)
+            })
 
-            await writeFile(path, buffer)
-            urls.push(`/uploads/${filename}`)
+            urls.push(result.secure_url)
         }
 
         return NextResponse.json({ urls })
