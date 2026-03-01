@@ -73,6 +73,8 @@
   transition-duration: 0s !important;
 }
 
+/* Razorpay CSS fixes removed since hard-reloads fix the pointer-events bug natively */
+
 [style*="--animation-disabled: 1"] *::before {
   animation-duration: 0s !important;
   transition-duration: 0s !important;

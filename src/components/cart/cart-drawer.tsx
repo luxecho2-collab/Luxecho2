@@ -154,12 +154,12 @@ export function CartDrawer({ isTransparent = false }: { isTransparent?: boolean 
                         </div>
 
                         <SheetTrigger asChild>
-                            <Link href="/checkout" className="block w-full">
+                            <a href="/checkout" className="block w-full">
                                 <Button className="h-14 w-full bg-black text-white border-2 border-black hover:bg-white hover:text-black font-black uppercase tracking-[0.2em] rounded-none text-xs transition-all duration-300 group shadow-md flex items-center justify-between px-6">
                                     <span>Proceed to Checkout</span>
                                     <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
                                 </Button>
-                            </Link>
+                            </a>
                         </SheetTrigger>
                     </div>
                 )}

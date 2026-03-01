@@ -46,8 +46,6 @@ export default function CheckoutPage() {
         discountValue: number
     } | null>(null)
     const [couponError, setCouponError] = React.useState<string | null>(null)
-    // Stores Razorpay config after order creation — opened on direct user click
-    const [pendingRzpOptions, setPendingRzpOptions] = React.useState<any>(null)
 
     const form = useForm<CheckoutFormData>({
         resolver: zodResolver(checkoutSchema),
@@ -181,7 +179,7 @@ export default function CheckoutPage() {
             }
 
             const resp = await createOrder.mutateAsync({
-                amount: total,
+                amount: subtotal + shippingCost, // pre-discount; server applies coupon once
                 customerInfo: {
                     email: data.email,
                     phone: data.phone,
@@ -205,18 +203,15 @@ export default function CheckoutPage() {
                 couponCode: appliedCoupon?.code,
             })
 
-            // Store options — DO NOT call rzp.open() here (breaks gesture chain)
-            // The browser blocks popups triggered after async network calls.
-            // Instead, we update state and the user clicks the button below which
-            // directly calls rzp.open() preserving the user-gesture requirement.
-            setPendingRzpOptions({
+            // 4. Create and Initialize Razorpay Options
+            const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "",
                 amount: resp.amount,
                 currency: resp.currency,
                 name: "Luxecho",
                 description: "Secure Checkout",
                 order_id: resp.id,
-                handler: async (response: any) => {
+                handler: async function (response: any) {
                     const verifyResp = await verifyPayment.mutateAsync({
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
@@ -227,20 +222,34 @@ export default function CheckoutPage() {
                         window.location.href = `/order-success?id=${resp.orderId}`
                     }
                 },
-                prefill: { name: `${data.firstName} ${data.lastName}`, email: data.email },
+                prefill: { name: `${data.firstName} ${data.lastName}`, email: data.email, contact: data.phone },
                 theme: { color: "#000000" },
+            }
+
+            // 5. Instaniate and Open Razorpay (Single flow)
+            if (typeof (window as any).Razorpay === "undefined") {
+                alert("Razorpay SDK failed to load. Please check your connection or refresh the page.")
+                return
+            }
+
+            // Fix: Force unlock document body clicking ability
+            // If the user arrived here from a Cart Sheet, the body might still have pointer-events: none.
+            document.body.style.pointerEvents = "auto"
+            document.body.style.overflow = "auto"
+
+            const rzp = new (window as any).Razorpay(options)
+
+            // Handle popup close explicitly
+            rzp.on('payment.failed', function (response: any) {
+                console.error("Payment Failed", response.error)
+                alert(response.error.description || "Payment failed. Please try again.")
             })
+
+            rzp.open()
         } catch (error) {
             console.error("Payment failed", error)
             alert("Payment initialization failed. Please try again.")
         }
-    }
-
-    // Direct click handler — must be called synchronously from a click event
-    const openRazorpay = () => {
-        if (!pendingRzpOptions) return
-        const rzp = new (window as any).Razorpay(pendingRzpOptions)
-        rzp.open()
     }
 
     const inputCls = (hasError?: boolean) =>
@@ -477,22 +486,13 @@ export default function CheckoutPage() {
                                     </div>
                                     <div className="flex gap-4">
                                         <Button variant="outline" onClick={() => setStep(2)} className="h-14 flex-1 rounded-none border border-black/20 text-black uppercase font-black text-xs hover:bg-black/5" disabled={createOrder.isPending}>Back</Button>
-                                        {pendingRzpOptions ? (
-                                            <Button
-                                                onClick={openRazorpay}
-                                                className="h-14 flex-[3] bg-black text-white font-black uppercase tracking-widest rounded-none text-sm hover:bg-black/90 transition-all animate-pulse"
-                                            >
-                                                ✓ Order Ready — Open Payment
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                onClick={handleSubmit(handlePayment)}
-                                                disabled={createOrder.isPending}
-                                                className="h-14 flex-[3] bg-black text-white font-black uppercase tracking-widest rounded-none text-sm hover:bg-black/90 transition-all disabled:opacity-60"
-                                            >
-                                                {createOrder.isPending ? "Creating Order..." : `Pay ₹${total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
-                                            </Button>
-                                        )}
+                                        <Button
+                                            className="h-14 flex-[3] bg-black text-white font-black uppercase tracking-widest rounded-none text-sm hover:bg-black/90 transition-all disabled:opacity-60"
+                                            onClick={handleSubmit(handlePayment)}
+                                            disabled={createOrder.isPending}
+                                        >
+                                            {createOrder.isPending ? "Creating Order..." : `Pay ₹${total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`}
+                                        </Button>
                                     </div>
                                     <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-black/30 uppercase">
                                         <Lock className="w-3 h-3" />

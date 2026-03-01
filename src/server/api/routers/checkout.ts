@@ -65,9 +65,18 @@ export const checkoutRouter = createTRPCRouter({
                 }
             }
 
-            // 2. Create Razorpay order
+            // 2. Enforce Razorpay minimum order amount (₹1 = 100 paise)
+            const amountInPaise = Math.round(finalAmount * 100)
+            if (amountInPaise < 100) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Order total must be at least ₹1 to process payment.",
+                })
+            }
+
+            // 3. Create Razorpay order
             const options = {
-                amount: Math.round(finalAmount * 100),
+                amount: amountInPaise,
                 currency: input.currency,
                 receipt: `receipt_${nanoid()}`,
             }
