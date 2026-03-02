@@ -465,7 +465,6 @@ export const adminRouter = createTRPCRouter({
         <div style="padding: 20px 0; line-height: 1.6;">
             ${input.body.replace(/\n/g, '<br/>')}
             <br/><br/>
-            offer of summer use cuopon code summer20
         </div>
         <footer style="border-top: 1px solid #eee; padding-top: 20px; font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px;">
             &copy; ${new Date().getFullYear()} Luxecho. All rights reserved.
