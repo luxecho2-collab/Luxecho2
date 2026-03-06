@@ -11,7 +11,7 @@ interface LuxechoLogoProps {
 
 import Image from "next/image"
 
-export function LuxechoLogo({ className, size = 96, animate = true }: LuxechoLogoProps) {
+export function LuxechoLogo({ className, size = 42, animate = true }: LuxechoLogoProps) {
     return (
         <motion.div
             className={cn("relative flex items-center justify-center", className)}
@@ -20,10 +20,10 @@ export function LuxechoLogo({ className, size = 96, animate = true }: LuxechoLog
             transition={{ duration: 0.8, ease: "easeOut" }}
         >
             <Image
-                src="/logo.svg"
+                src="/logo3.png"
                 alt="Luxecho Logo"
-                width={size}
-                height={size}
+                width={42}
+                height={42}
                 className="object-contain"
                 priority
             />
