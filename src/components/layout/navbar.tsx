@@ -145,7 +145,7 @@ export function Navbar() {
                             <div className="flex flex-col h-full">
                                 <div className="p-6 border-b flex justify-between items-center">
                                     <div className="flex items-center gap-3">
-                                        <LuxechoLogo size={32} />
+                                        <LuxechoLogo size={96} />
                                         <span className="text-lg font-serif text-brand-charcoal">luxecho</span>
                                     </div>
                                 </div>
